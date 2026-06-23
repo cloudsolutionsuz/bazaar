@@ -1,0 +1,48 @@
+{
+  "common": {
+    "search": "Qidirish",
+    "all": "Barchasi",
+    "loading": "Yuklanmoqda…",
+    "noData": "Tovarlar topilmadi",
+    "back": "Orqaga",
+    "close": "Yopish"
+  },
+  "catalog": {
+    "searchPlaceholder": "Nimani qidirmoqdasiz?",
+    "outOfStock": "Qolmagan",
+    "addToCart": "Savatga"
+  },
+  "product": {
+    "description": "Tavsifi",
+    "variant": "Variant",
+    "quantity": "Miqdori",
+    "addToCart": "Savatga",
+    "added": "Savatga qo'shildi"
+  },
+  "cart": {
+    "title": "Savat",
+    "empty": "Savat bo'sh",
+    "total": "Jami",
+    "checkout": "Buyurtma berish",
+    "remove": "O'chirish"
+  },
+  "checkout": {
+    "title": "Buyurtmani rasmiylashtirish",
+    "name": "Ismingiz",
+    "phone": "Telefon",
+    "address": "Yetkazib berish manzili",
+    "paymentMethod": "To'lov usuli",
+    "paymentCash": "Yetkazib berishda naqd",
+    "paymentCard": "Yetkazib berishda karta",
+    "submit": "Buyurtmani tasdiqlash",
+    "errorInsufficientStock": "Afsuski, tovarning bir qismi allaqachon sotilgan — savatni yangilang",
+    "errorLimitReached": "Do'kon hozircha buyurtma qabul qilmayapti, keyinroq urinib ko'ring"
+  },
+  "confirmation": {
+    "title": "Buyurtma qabul qilindi!",
+    "message": "Sotuvchi tasdiqlash uchun siz bilan telefon orqali bog'lanadi",
+    "orderNumber": "Buyurtma raqami",
+    "total": "Summa",
+    "backToShop": "Do'konga qaytish"
+  }
+}

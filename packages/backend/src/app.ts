@@ -10,6 +10,7 @@ import { categoriesRouter } from "./modules/categories/categories.routes";
 import { productsRouter } from "./modules/products/products.routes";
 import { inventoryRouter } from "./modules/inventory/inventory.routes";
 import { ordersRouter } from "./modules/orders/orders.routes";
+import { storefrontRouter } from "./modules/storefront/storefront.routes";
 
 export function createApp(): Express {
   const app = express();
@@ -30,6 +31,7 @@ export function createApp(): Express {
   app.use("/api/products", productsRouter);
   app.use("/api/inventory", inventoryRouter);
   app.use("/api/orders", ordersRouter);
+  app.use("/api/storefront", storefrontRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

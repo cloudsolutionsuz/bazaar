@@ -213,7 +213,7 @@ model InventoryMovement {
   note          String?
   orderId       String?
   order         Order?                @relation(fields: [orderId], references: [id])
-  createdByUserId String
+  createdByUserId String?
   createdAt     DateTime              @default(now())
 
   @@index([tenantId])

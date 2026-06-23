@@ -63,7 +63,9 @@ export async function listOrders(tenantId: string, query: ListOrdersQuery) {
   return { items, total, page, pageSize };
 }
 
-export async function createOrder(tenantId: string, userId: string, input: CreateOrderInput) {
+// userId is null for storefront-originated orders (no staff member involved) -
+// propagated to OrderStatusHistory/InventoryMovement, both of which allow null.
+export async function createOrder(tenantId: string, userId: string | null, input: CreateOrderInput) {
   await assertWithinPlanLimit(tenantId, "orders");
 
   const variantIds = input.items.map((i) => i.variantId);

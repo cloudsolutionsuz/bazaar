@@ -1,0 +1,16 @@
+import { Router } from "express";
+import { asyncHandler } from "../../utils/asyncHandler";
+import { requireActiveTenant, requireResolvedTenant } from "../../middleware/requireTenant";
+import { validateBody, validateQuery } from "../../middleware/validate";
+import { listStorefrontProductsQuerySchema } from "./storefront.schema";
+import { createOrderSchema } from "../orders/orders.schema";
+import * as storefrontController from "./storefront.controller";
+
+export const storefrontRouter = Router();
+
+storefrontRouter.use(requireResolvedTenant, requireActiveTenant);
+
+storefrontRouter.get("/categories", asyncHandler(storefrontController.listCategories));
+storefrontRouter.get("/products", validateQuery(listStorefrontProductsQuerySchema), asyncHandler(storefrontController.listProducts));
+storefrontRouter.get("/products/:id", asyncHandler(storefrontController.getProduct));
+storefrontRouter.post("/orders", validateBody(createOrderSchema), asyncHandler(storefrontController.createOrder));
