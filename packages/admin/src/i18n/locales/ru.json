@@ -21,6 +21,7 @@
     "products": "Товары",
     "inventory": "Склад",
     "orders": "Заказы",
+    "billing": "Биллинг",
     "logout": "Выйти"
   },
   "login": {
@@ -94,5 +95,32 @@
     "statusCancelled": "Отменён",
     "statusRefunded": "Возврат",
     "noTransitions": "Это финальный статус"
+  },
+  "billing": {
+    "title": "Биллинг",
+    "currentPlan": "Текущий тариф",
+    "shopStatus": "Статус магазина",
+    "statusTrial": "Пробный период",
+    "statusActive": "Активен",
+    "statusPastDue": "Просрочен платёж",
+    "statusBlocked": "Заблокирован",
+    "nextCharge": "Следующее списание",
+    "amount": "Сумма",
+    "dueDate": "Срок оплаты",
+    "noNextCharge": "Нет предстоящих счетов",
+    "history": "История счетов",
+    "period": "Период",
+    "status": "Статус",
+    "paidAt": "Дата оплаты",
+    "invoiceStatusPending": "Ожидает оплаты",
+    "invoiceStatusPaid": "Оплачен",
+    "invoiceStatusOverdue": "Просрочен",
+    "invoiceStatusCancelled": "Отменён",
+    "pay": "Оплатить",
+    "bannerPastDue": "Платёж за подписку просрочен. Пожалуйста, оплатите счёт, чтобы избежать блокировки магазина.",
+    "bannerBlocked": "Магазин заблокирован за неоплату. Оплатите счёт, чтобы восстановить доступ.",
+    "sandboxNotice": "Это тестовый платёж (sandbox) — реальная интеграция с Payme/Click появится позже",
+    "payConfirm": "Подтвердить тестовый платёж",
+    "paySuccess": "Оплата прошла успешно"
   }
 }

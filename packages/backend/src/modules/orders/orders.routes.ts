@@ -8,7 +8,7 @@ import * as ordersController from "./orders.controller";
 
 export const ordersRouter = Router();
 
-ordersRouter.use(requireAuth, requireRole("OWNER", "MANAGER", "CASHIER"));
+ordersRouter.use(requireAuth(), requireRole("OWNER", "MANAGER", "CASHIER"));
 
 ordersRouter.get("/export", asyncHandler(ordersController.exportOrders));
 

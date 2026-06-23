@@ -8,7 +8,7 @@ import * as categoriesController from "./categories.controller";
 
 export const categoriesRouter = Router();
 
-categoriesRouter.use(requireAuth, requireRole("OWNER", "MANAGER"));
+categoriesRouter.use(requireAuth(), requireRole("OWNER", "MANAGER"));
 
 categoriesRouter.get("/", asyncHandler(categoriesController.list));
 categoriesRouter.post("/", validateBody(createCategorySchema), asyncHandler(categoriesController.create));

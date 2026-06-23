@@ -9,6 +9,7 @@ import { ProductFormPage } from "./pages/products/ProductFormPage";
 import { InventoryPage } from "./pages/inventory/InventoryPage";
 import { OrdersListPage } from "./pages/orders/OrdersListPage";
 import { OrderDetailPage } from "./pages/orders/OrderDetailPage";
+import { BillingPage } from "./pages/billing/BillingPage";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ export function App() {
                 <Route path="/inventory" element={<InventoryPage />} />
                 <Route path="/orders" element={<OrdersListPage />} />
                 <Route path="/orders/:id" element={<OrderDetailPage />} />
+                <Route path="/billing" element={<BillingPage />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

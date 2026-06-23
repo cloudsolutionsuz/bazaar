@@ -120,3 +120,35 @@ export interface Paginated<T> {
 export interface ApiErrorBody {
   error: { code: string; message: string };
 }
+
+export type InvoiceStatus = "PENDING" | "PAID" | "OVERDUE" | "CANCELLED";
+
+export interface Plan {
+  id: string;
+  code: string;
+  name: string;
+  priceSum: number;
+  maxProducts: number | null;
+  maxOrdersPerMonth: number | null;
+  maxEmployees: number | null;
+}
+
+export interface BillingInvoice {
+  id: string;
+  tenantId: string;
+  planId: string;
+  planCode: string;
+  amount: number;
+  status: InvoiceStatus;
+  periodStart: string;
+  periodEnd: string;
+  dueDate: string;
+  paidAt: string | null;
+  provider: "PAYME" | "CLICK" | "MANUAL" | null;
+}
+
+export interface BillingSummary {
+  tenant: Tenant & { plan: Plan };
+  invoices: BillingInvoice[];
+  nextInvoice: BillingInvoice | null;
+}

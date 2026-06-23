@@ -20,5 +20,6 @@ export async function deleteTenantCompletely(tenantId: string): Promise<void> {
   await prisma.refreshToken.deleteMany({ where: { userId: { in: userIds } } });
   await prisma.verificationToken.deleteMany({ where: { userId: { in: userIds } } });
   await prisma.user.deleteMany({ where: { tenantId } });
+  await prisma.billingInvoice.deleteMany({ where: { tenantId } });
   await prisma.tenant.delete({ where: { id: tenantId } });
 }

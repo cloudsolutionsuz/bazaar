@@ -12,4 +12,4 @@ authRouter.get("/verify-email", asyncHandler(authController.verifyEmail));
 authRouter.post("/login", validateBody(loginSchema), asyncHandler(authController.login));
 authRouter.post("/refresh", validateBody(refreshSchema), asyncHandler(authController.refresh));
 authRouter.post("/logout", validateBody(refreshSchema), asyncHandler(authController.logout));
-authRouter.get("/me", requireAuth, asyncHandler(authController.me));
+authRouter.get("/me", requireAuth({ allowBlocked: true }), asyncHandler(authController.me));

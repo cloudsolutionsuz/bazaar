@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
 import { changeLanguage } from "../i18n/i18n";
@@ -10,6 +10,7 @@ function navItemClass({ isActive }: { isActive: boolean }): string {
 export function Layout() {
   const { t, i18n } = useTranslation();
   const { tenant, logout } = useAuth();
+  const needsBillingAttention = tenant?.status === "PAST_DUE" || tenant?.status === "BLOCKED";
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -24,6 +25,9 @@ export function Layout() {
           </NavLink>
           <NavLink to="/orders" className={navItemClass}>
             {t("nav.orders")}
+          </NavLink>
+          <NavLink to="/billing" className={navItemClass}>
+            {t("nav.billing")}
           </NavLink>
         </nav>
       </aside>
@@ -45,6 +49,16 @@ export function Layout() {
             </button>
           </div>
         </header>
+
+        {needsBillingAttention && (
+          <div className="flex items-center justify-between bg-red-50 px-6 py-2 text-sm text-red-800">
+            <span>{tenant?.status === "BLOCKED" ? t("billing.bannerBlocked") : t("billing.bannerPastDue")}</span>
+            <Link to="/billing" className="font-medium underline">
+              {t("nav.billing")}
+            </Link>
+          </div>
+        )}
+
         <main className="p-6">
           <Outlet />
         </main>

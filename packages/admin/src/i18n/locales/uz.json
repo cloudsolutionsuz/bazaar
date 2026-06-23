@@ -21,6 +21,7 @@
     "products": "Tovarlar",
     "inventory": "Ombor",
     "orders": "Buyurtmalar",
+    "billing": "Billing",
     "logout": "Chiqish"
   },
   "login": {
@@ -94,5 +95,32 @@
     "statusCancelled": "Bekor qilindi",
     "statusRefunded": "Qaytarildi",
     "noTransitions": "Bu yakuniy holat"
+  },
+  "billing": {
+    "title": "Billing",
+    "currentPlan": "Joriy tarif",
+    "shopStatus": "Do'kon holati",
+    "statusTrial": "Sinov muddati",
+    "statusActive": "Faol",
+    "statusPastDue": "To'lov muddati o'tgan",
+    "statusBlocked": "Bloklangan",
+    "nextCharge": "Keyingi to'lov",
+    "amount": "Summa",
+    "dueDate": "To'lov muddati",
+    "noNextCharge": "Kelayotgan hisob-fakturalar yo'q",
+    "history": "Hisob-fakturalar tarixi",
+    "period": "Davr",
+    "status": "Holati",
+    "paidAt": "To'langan sana",
+    "invoiceStatusPending": "To'lov kutilmoqda",
+    "invoiceStatusPaid": "To'langan",
+    "invoiceStatusOverdue": "Muddati o'tgan",
+    "invoiceStatusCancelled": "Bekor qilingan",
+    "pay": "To'lash",
+    "bannerPastDue": "Obuna to'lovi muddati o'tgan. Do'konning bloklanishining oldini olish uchun hisobni to'lang.",
+    "bannerBlocked": "Do'kon to'lanmaganligi sababli bloklangan. Kirishni qayta tiklash uchun hisobni to'lang.",
+    "sandboxNotice": "Bu test to'lovi (sandbox) — Payme/Click bilan haqiqiy integratsiya keyinroq qo'shiladi",
+    "payConfirm": "Test to'lovini tasdiqlash",
+    "paySuccess": "To'lov muvaffaqiyatli amalga oshirildi"
   }
 }

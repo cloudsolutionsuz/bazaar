@@ -8,7 +8,7 @@ import * as inventoryController from "./inventory.controller";
 
 export const inventoryRouter = Router();
 
-inventoryRouter.use(requireAuth, requireRole("OWNER", "MANAGER"));
+inventoryRouter.use(requireAuth(), requireRole("OWNER", "MANAGER"));
 
 inventoryRouter.post("/receipts", validateBody(createReceiptSchema), asyncHandler(inventoryController.createReceipt));
 inventoryRouter.get("/movements", validateQuery(listMovementsQuerySchema), asyncHandler(inventoryController.listMovements));

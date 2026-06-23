@@ -16,7 +16,7 @@ import * as productsController from "./products.controller";
 
 export const productsRouter = Router();
 
-productsRouter.use(requireAuth, requireRole("OWNER", "MANAGER"));
+productsRouter.use(requireAuth(), requireRole("OWNER", "MANAGER"));
 
 productsRouter.get("/export", asyncHandler(productsController.exportProducts));
 productsRouter.post("/import", uploadSpreadsheet, asyncHandler(productsController.importProducts));
