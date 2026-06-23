@@ -25,6 +25,28 @@ enum VerificationTokenType {
   EMAIL_VERIFY
 }
 
+enum ProductStatus {
+  ACTIVE
+  HIDDEN
+  OUT_OF_STOCK
+}
+
+enum InventoryMovementType {
+  RECEIPT
+  SALE
+  RETURN
+  ADJUSTMENT
+}
+
+enum OrderStatus {
+  NEW
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
 model Plan {
   id                 String   @id @default(uuid())
   code               String   @unique
@@ -52,7 +74,12 @@ model Tenant {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
-  users User[]
+  users              User[]
+  categories         Category[]
+  products           Product[]
+  productVariants    ProductVariant[]
+  inventoryMovements InventoryMovement[]
+  orders             Order[]
 
   @@map("tenants")
 }
@@ -101,4 +128,145 @@ model RefreshToken {
 
   @@index([userId])
   @@map("refresh_tokens")
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  name      String
+  slug      String
+  createdAt DateTime @default(now())
+
+  products Product[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+  @@map("categories")
+}
+
+model Product {
+  id          String        @id @default(uuid())
+  tenantId    String
+  tenant      Tenant        @relation(fields: [tenantId], references: [id])
+  categoryId  String?
+  category    Category?     @relation(fields: [categoryId], references: [id])
+  name        String
+  description String?
+  price       Int
+  status      ProductStatus @default(ACTIVE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  variants ProductVariant[]
+  images   ProductImage[]
+
+  @@index([tenantId])
+  @@index([tenantId, categoryId])
+  @@map("products")
+}
+
+model ProductVariant {
+  id                String   @id @default(uuid())
+  tenantId          String
+  tenant            Tenant   @relation(fields: [tenantId], references: [id])
+  productId         String
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name              String?
+  sku               String
+  priceOverride     Int?
+  stockQuantity     Int      @default(0)
+  lowStockThreshold Int?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  orderItems         OrderItem[]
+  inventoryMovements InventoryMovement[]
+
+  @@unique([tenantId, sku])
+  @@index([tenantId])
+  @@index([productId])
+  @@map("product_variants")
+}
+
+model ProductImage {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  position  Int
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+model InventoryMovement {
+  id            String                @id @default(uuid())
+  tenantId      String
+  tenant        Tenant                @relation(fields: [tenantId], references: [id])
+  variantId     String
+  variant       ProductVariant        @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  type          InventoryMovementType
+  quantity      Int
+  purchasePrice Int?
+  note          String?
+  orderId       String?
+  order         Order?                @relation(fields: [orderId], references: [id])
+  createdByUserId String
+  createdAt     DateTime              @default(now())
+
+  @@index([tenantId])
+  @@index([variantId])
+  @@map("inventory_movements")
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  tenantId        String
+  tenant          Tenant      @relation(fields: [tenantId], references: [id])
+  customerName    String
+  customerPhone   String
+  customerAddress String?
+  status          OrderStatus @default(NEW)
+  paymentMethod   String?
+  totalAmount     Int
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  items             OrderItem[]
+  statusHistory     OrderStatusHistory[]
+  inventoryMovements InventoryMovement[]
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String         @id @default(uuid())
+  orderId    String
+  order      Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variantId  String
+  variant    ProductVariant @relation(fields: [variantId], references: [id])
+  quantity   Int
+  unitPrice  Int
+  totalPrice Int
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model OrderStatusHistory {
+  id            String       @id @default(uuid())
+  orderId       String
+  order         Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fromStatus    OrderStatus?
+  toStatus      OrderStatus
+  changedByUserId String?
+  createdAt     DateTime     @default(now())
+
+  @@index([orderId])
+  @@map("order_status_history")
 }

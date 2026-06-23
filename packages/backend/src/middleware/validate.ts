@@ -13,3 +13,15 @@ export function validateBody(schema: ZodSchema) {
     next();
   };
 }
+
+export function validateQuery(schema: ZodSchema) {
+  return (req: Request, _res: Response, next: NextFunction): void => {
+    const result = schema.safeParse(req.query);
+    if (!result.success) {
+      next(new AppError(400, "VALIDATION_ERROR", result.error.issues.map((i) => i.message).join("; ")));
+      return;
+    }
+    req.query = result.data as typeof req.query;
+    next();
+  };
+}
