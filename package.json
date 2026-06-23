@@ -9,6 +9,7 @@
     "dev": "npm run dev --workspace=@bazaar/backend",
     "dev:admin": "npm run dev --workspace=@bazaar/admin",
     "dev:storefront": "npm run dev --workspace=@bazaar/storefront",
+    "dev:landing": "npm run dev --workspace=@bazaar/landing",
     "build": "npm run build --workspace=@bazaar/backend",
     "test": "npm test --workspace=@bazaar/backend",
     "prisma:migrate": "npm run prisma:migrate --workspace=@bazaar/backend",

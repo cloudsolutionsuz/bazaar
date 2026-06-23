@@ -19,6 +19,7 @@ export const env = {
   jwtRefreshTtlDays: Number(process.env.JWT_REFRESH_TTL_DAYS ?? 30),
 
   trialDays: Number(process.env.TRIAL_DAYS ?? 7),
+  landingUrl: process.env.LANDING_URL ?? "http://localhost:5175",
 
   superadminEmail: process.env.SUPERADMIN_EMAIL ?? "superadmin@bazaar.uz",
   superadminPassword: process.env.SUPERADMIN_PASSWORD ?? "change-me-super-secret",

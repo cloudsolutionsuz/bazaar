@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "login": "Kirish",
+    "getStarted": "Bepul boshlash"
+  },
+  "hero": {
+    "title": "Biznesingiz uchun shaxsiy onlayn-do'kon 5 daqiqada",
+    "subtitle": "Tovarlar, ombor, buyurtmalar va savdo — O'zbekiston sotuvchilari uchun yagona platformada",
+    "cta": "Bepul boshlash",
+    "trialNote": "7 kun bepul, kartasiz"
+  },
+  "features": {
+    "title": "Do'koningizni boshqarish uchun hamma narsa",
+    "products": { "title": "Tovarlar", "description": "Variantlar, rasmlar va Excel orqali ommaviy import bilan katalog" },
+    "inventory": { "title": "Ombor", "description": "Qoldiqlar, kirim, harakat tarixi va past qoldiq haqida xabarlar" },
+    "orders": { "title": "Buyurtmalar", "description": "Yangi buyurtmadan yetkazib berishgacha to'liq sikl, holat tarixi bilan" },
+    "storefront": { "title": "Vitrina", "description": "Xaridorlaringiz uchun o'z subdomeningizda mobil vitrina" },
+    "analytics": { "title": "Tahlil", "description": "Daromad, o'rtacha chek va savdo dinamikasi" },
+    "finance": { "title": "Kassa va P&L", "description": "Daromad/xarajatlar hisobi va sof foyda hisoblash" }
+  },
+  "pricing": {
+    "title": "Tariflar",
+    "perMonth": "so'm/oy",
+    "products": "tovar",
+    "ordersPerMonth": "buyurtma/oy",
+    "employees": "xodim",
+    "unlimited": "cheklovsiz",
+    "choosePlan": "Tanlash"
+  },
+  "register": {
+    "title": "Sotuvchini ro'yxatdan o'tkazish",
+    "step": "Qadam",
+    "of": "dan",
+    "step1Title": "Ma'lumotlaringiz",
+    "name": "Ism",
+    "email": "Email",
+    "phone": "Telefon",
+    "password": "Parol",
+    "step2Title": "Do'kon nomi",
+    "shopName": "Do'kon nomi",
+    "step3Title": "Do'kon manzili",
+    "subdomain": "Subdomen",
+    "subdomainHint": "Do'koningiz quyidagi manzilda mavjud bo'ladi",
+    "subdomainAvailable": "Subdomen bo'sh",
+    "subdomainTaken": "Bu subdomen allaqachon band",
+    "subdomainInvalid": "Subdomen faqat lotin harflari, raqamlar va chiziqchadan iborat bo'lishi mumkin",
+    "step4Title": "Tarifni tanlang",
+    "trialNotice": "Birinchi 7 kun — tanlangan tarifdan qat'i nazar, bepul sinov muddati",
+    "back": "Orqaga",
+    "next": "Keyingisi",
+    "submit": "Ro'yxatdan o'tish",
+    "successTitle": "Deyarli tayyor!",
+    "successMessage": "{{email}} manziliga tasdiqlash xati yubordik. Do'konni faollashtirish uchun xatdagi havolani bosing.",
+    "errorEmailTaken": "Bu email bilan hisob allaqachon mavjud",
+    "errorSubdomainTaken": "Bu subdomen allaqachon band"
+  },
+  "verify": {
+    "verifying": "Email tasdiqlanmoqda…",
+    "successTitle": "Email tasdiqlandi!",
+    "successMessage": "Endi do'kon boshqaruv paneliga kirishingiz mumkin",
+    "loginButton": "Kirish",
+    "errorTitle": "Emailni tasdiqlab bo'lmadi",
+    "errorMessage": "Havola yaroqsiz yoki allaqachon ishlatilgan"
+  }
+}
