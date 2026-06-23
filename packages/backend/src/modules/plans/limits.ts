@@ -1,7 +1,7 @@
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
 
-type LimitedResource = "products" | "orders";
+type LimitedResource = "products" | "orders" | "employees";
 
 function startOfCurrentMonth(): Date {
   const now = new Date();
@@ -23,11 +23,22 @@ export async function assertWithinPlanLimit(tenantId: string, resource: LimitedR
     return;
   }
 
-  if (tenant.plan.maxOrdersPerMonth == null) return;
-  const count = await prisma.order.count({
-    where: { tenantId, createdAt: { gte: startOfCurrentMonth() } },
-  });
-  if (count >= tenant.plan.maxOrdersPerMonth) {
-    throw new AppError(403, "PLAN_LIMIT_REACHED", `Plan limit reached: max ${tenant.plan.maxOrdersPerMonth} orders per month`);
+  if (resource === "orders") {
+    if (tenant.plan.maxOrdersPerMonth == null) return;
+    const count = await prisma.order.count({
+      where: { tenantId, createdAt: { gte: startOfCurrentMonth() } },
+    });
+    if (count >= tenant.plan.maxOrdersPerMonth) {
+      throw new AppError(403, "PLAN_LIMIT_REACHED", `Plan limit reached: max ${tenant.plan.maxOrdersPerMonth} orders per month`);
+    }
+    return;
+  }
+
+  // "employees" counts every User on the tenant, including the OWNER -
+  // the Start plan's "1 employee" limit is the owner themselves.
+  if (tenant.plan.maxEmployees == null) return;
+  const count = await prisma.user.count({ where: { tenantId } });
+  if (count >= tenant.plan.maxEmployees) {
+    throw new AppError(403, "PLAN_LIMIT_REACHED", `Plan limit reached: max ${tenant.plan.maxEmployees} employees`);
   }
 }

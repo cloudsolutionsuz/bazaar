@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
-import type { LoginInput, RefreshInput, RegisterInput } from "./auth.schema";
+import type { AcceptInviteInput, LoginInput, RefreshInput, RegisterInput } from "./auth.schema";
 import * as authService from "./auth.service";
 
 export async function register(req: Request, res: Response): Promise<void> {
@@ -16,6 +16,12 @@ export async function verifyEmail(req: Request, res: Response): Promise<void> {
   }
   await authService.verifyEmail(token);
   res.json({ verified: true });
+}
+
+export async function acceptInvite(req: Request, res: Response): Promise<void> {
+  const { token, password } = req.body as AcceptInviteInput;
+  await authService.acceptInvite(token, password);
+  res.json({ accepted: true });
 }
 
 export async function login(req: Request, res: Response): Promise<void> {

@@ -100,6 +100,21 @@ export async function verifyEmail(token: string): Promise<void> {
   ]);
 }
 
+export async function acceptInvite(token: string, password: string): Promise<void> {
+  const record = await prisma.verificationToken.findUnique({ where: { token } });
+
+  if (!record || record.type !== "EMPLOYEE_INVITE" || record.expiresAt < new Date()) {
+    throw new AppError(400, "INVALID_INVITE_TOKEN", "Invite link is invalid or expired");
+  }
+
+  const passwordHash = await hashPassword(password);
+
+  await prisma.$transaction([
+    prisma.user.update({ where: { id: record.userId }, data: { passwordHash, emailVerifiedAt: new Date() } }),
+    prisma.verificationToken.delete({ where: { id: record.id } }),
+  ]);
+}
+
 interface AuthTokens {
   accessToken: string;
   refreshToken: string;

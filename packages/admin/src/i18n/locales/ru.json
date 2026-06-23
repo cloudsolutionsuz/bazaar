@@ -22,6 +22,7 @@
     "inventory": "Склад",
     "orders": "Заказы",
     "billing": "Биллинг",
+    "employees": "Сотрудники",
     "logout": "Выйти"
   },
   "login": {
@@ -30,6 +31,28 @@
     "password": "Пароль",
     "submit": "Войти",
     "error": "Неверный email или пароль"
+  },
+  "acceptInvite": {
+    "title": "Примите приглашение",
+    "submit": "Установить пароль",
+    "successTitle": "Пароль установлен, теперь можно войти",
+    "missingToken": "Ссылка-приглашение недействительна"
+  },
+  "employees": {
+    "title": "Сотрудники",
+    "invite": "Пригласить",
+    "sendInvite": "Отправить приглашение",
+    "name": "Имя",
+    "email": "Email",
+    "role": "Роль",
+    "roleOwner": "Владелец",
+    "roleManager": "Менеджер",
+    "roleCashier": "Кассир",
+    "statusActive": "Активен",
+    "statusInvited": "Приглашён",
+    "confirmRemove": "Удалить этого сотрудника?",
+    "errorLimitReached": "Достигнут лимит сотрудников по тарифу",
+    "errorEmailTaken": "Аккаунт с этим email уже существует"
   },
   "products": {
     "title": "Товары",

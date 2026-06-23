@@ -12,6 +12,7 @@ import { inventoryRouter } from "./modules/inventory/inventory.routes";
 import { ordersRouter } from "./modules/orders/orders.routes";
 import { storefrontRouter } from "./modules/storefront/storefront.routes";
 import { billingRouter } from "./modules/billing/billing.routes";
+import { employeesRouter } from "./modules/employees/employees.routes";
 
 export function createApp(): Express {
   const app = express();
@@ -34,6 +35,7 @@ export function createApp(): Express {
   app.use("/api/orders", ordersRouter);
   app.use("/api/storefront", storefrontRouter);
   app.use("/api/billing", billingRouter);
+  app.use("/api/employees", employeesRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

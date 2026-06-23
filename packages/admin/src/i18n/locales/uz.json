@@ -22,6 +22,7 @@
     "inventory": "Ombor",
     "orders": "Buyurtmalar",
     "billing": "Billing",
+    "employees": "Xodimlar",
     "logout": "Chiqish"
   },
   "login": {
@@ -30,6 +31,28 @@
     "password": "Parol",
     "submit": "Kirish",
     "error": "Email yoki parol noto'g'ri"
+  },
+  "acceptInvite": {
+    "title": "Taklifni qabul qiling",
+    "submit": "Parolni o'rnatish",
+    "successTitle": "Parol o'rnatildi, endi kirishingiz mumkin",
+    "missingToken": "Taklif havolasi yaroqsiz"
+  },
+  "employees": {
+    "title": "Xodimlar",
+    "invite": "Taklif qilish",
+    "sendInvite": "Taklif yuborish",
+    "name": "Ism",
+    "email": "Email",
+    "role": "Roli",
+    "roleOwner": "Egasi",
+    "roleManager": "Menejer",
+    "roleCashier": "Kassir",
+    "statusActive": "Faol",
+    "statusInvited": "Taklif qilingan",
+    "confirmRemove": "Bu xodimni o'chirishni tasdiqlaysizmi?",
+    "errorLimitReached": "Tarif bo'yicha xodimlar chegarasiga yetildi",
+    "errorEmailTaken": "Bu email bilan hisob allaqachon mavjud"
   },
   "products": {
     "title": "Tovarlar",

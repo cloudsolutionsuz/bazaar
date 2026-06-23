@@ -23,6 +23,7 @@ enum UserRole {
 
 enum VerificationTokenType {
   EMAIL_VERIFY
+  EMPLOYEE_INVITE
 }
 
 enum ProductStatus {
