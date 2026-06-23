@@ -152,3 +152,52 @@ export interface BillingSummary {
   invoices: BillingInvoice[];
   nextInvoice: BillingInvoice | null;
 }
+
+export type TransactionType = "INCOME" | "EXPENSE";
+
+export interface FinanceTransaction {
+  id: string;
+  type: TransactionType;
+  category: string;
+  amount: number;
+  description: string | null;
+  orderId: string | null;
+  createdAt: string;
+}
+
+export interface ProductBreakdown {
+  productId: string;
+  productName: string;
+  revenue: number;
+  cogs: number;
+  margin: number;
+}
+
+export interface PnLResult {
+  revenue: number;
+  cogs: number;
+  expenses: number;
+  netProfit: number;
+  byProduct: ProductBreakdown[];
+}
+
+export interface SalesBucket {
+  bucket: string;
+  revenue: number;
+  orderCount: number;
+}
+
+export interface TopProduct {
+  productId: string;
+  productName: string;
+  revenue: number;
+  quantity: number;
+}
+
+export interface AnalyticsResult {
+  revenue: number;
+  orderCount: number;
+  averageOrderValue: number;
+  salesOverTime: SalesBucket[];
+  topProducts: TopProduct[];
+}

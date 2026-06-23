@@ -23,6 +23,8 @@
     "orders": "Buyurtmalar",
     "billing": "Billing",
     "employees": "Xodimlar",
+    "kassa": "Kassa",
+    "reports": "Hisobotlar",
     "logout": "Chiqish"
   },
   "login": {
@@ -145,5 +147,37 @@
     "sandboxNotice": "Bu test to'lovi (sandbox) — Payme/Click bilan haqiqiy integratsiya keyinroq qo'shiladi",
     "payConfirm": "Test to'lovini tasdiqlash",
     "paySuccess": "To'lov muvaffaqiyatli amalga oshirildi"
+  },
+  "kassa": {
+    "title": "Kassa",
+    "balance": "Joriy balans",
+    "addTransaction": "Operatsiya qo'shish",
+    "income": "Kirim",
+    "expense": "Chiqim",
+    "category": "Kategoriya",
+    "amount": "Summa",
+    "description": "Tavsifi",
+    "type": "Turi"
+  },
+  "reports": {
+    "title": "Hisobotlar",
+    "analytics": "Analitika",
+    "pnl": "P&L",
+    "from": "Dan",
+    "to": "Gacha",
+    "granularity": "Guruhlash",
+    "granularityDay": "Kunlar bo'yicha",
+    "granularityWeek": "Haftalar bo'yicha",
+    "granularityMonth": "Oylar bo'yicha",
+    "revenue": "Tushum",
+    "cogs": "Tannarx",
+    "expenses": "Xarajatlar",
+    "netProfit": "Sof foyda",
+    "marginByProduct": "Tovarlar bo'yicha marja",
+    "margin": "Marja",
+    "orderCount": "Buyurtmalar",
+    "averageOrderValue": "O'rtacha chek",
+    "salesOverTime": "Sotuvlar dinamikasi",
+    "topProducts": "Top tovarlar"
   }
 }

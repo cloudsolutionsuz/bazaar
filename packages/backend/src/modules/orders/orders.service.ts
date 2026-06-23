@@ -131,6 +131,17 @@ export async function createOrder(tenantId: string, userId: string | null, input
       });
     }
 
+    await tx.transaction.create({
+      data: {
+        tenantId,
+        type: "INCOME",
+        category: "Продажа",
+        amount: totalAmount,
+        orderId: order.id,
+        createdByUserId: userId,
+      },
+    });
+
     return order.id;
   });
 
@@ -170,6 +181,19 @@ export async function updateOrderStatus(tenantId: string, userId: string, orderI
           },
         });
       }
+
+      // Reverses the INCOME transaction created at order time - the
+      // balance is always a sum over the ledger, never an edited field.
+      await tx.transaction.create({
+        data: {
+          tenantId,
+          type: "EXPENSE",
+          category: "Возврат",
+          amount: order.totalAmount,
+          orderId,
+          createdByUserId: userId,
+        },
+      });
     }
   });
 

@@ -61,6 +61,11 @@ enum PaymentProviderType {
   MANUAL
 }
 
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
 model Plan {
   id                 String   @id @default(uuid())
   code               String   @unique
@@ -95,6 +100,7 @@ model Tenant {
   inventoryMovements InventoryMovement[]
   orders             Order[]
   invoices           BillingInvoice[]
+  transactions       Transaction[]
 
   @@map("tenants")
 }
@@ -119,6 +125,24 @@ model BillingInvoice {
   @@index([tenantId])
   @@index([status])
   @@map("billing_invoices")
+}
+
+model Transaction {
+  id              String          @id @default(uuid())
+  tenantId        String
+  tenant          Tenant          @relation(fields: [tenantId], references: [id])
+  type            TransactionType
+  category        String
+  amount          Int
+  description     String?
+  orderId         String?
+  order           Order?          @relation(fields: [orderId], references: [id])
+  createdByUserId String?
+  createdAt       DateTime        @default(now())
+
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+  @@map("transactions")
 }
 
 model User {
@@ -274,6 +298,7 @@ model Order {
   items             OrderItem[]
   statusHistory     OrderStatusHistory[]
   inventoryMovements InventoryMovement[]
+  transactions      Transaction[]
 
   @@index([tenantId])
   @@index([tenantId, status])

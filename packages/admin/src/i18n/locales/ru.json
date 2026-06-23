@@ -23,6 +23,8 @@
     "orders": "Заказы",
     "billing": "Биллинг",
     "employees": "Сотрудники",
+    "kassa": "Касса",
+    "reports": "Отчёты",
     "logout": "Выйти"
   },
   "login": {
@@ -145,5 +147,37 @@
     "sandboxNotice": "Это тестовый платёж (sandbox) — реальная интеграция с Payme/Click появится позже",
     "payConfirm": "Подтвердить тестовый платёж",
     "paySuccess": "Оплата прошла успешно"
+  },
+  "kassa": {
+    "title": "Касса",
+    "balance": "Текущий баланс",
+    "addTransaction": "Добавить операцию",
+    "income": "Приход",
+    "expense": "Расход",
+    "category": "Категория",
+    "amount": "Сумма",
+    "description": "Описание",
+    "type": "Тип"
+  },
+  "reports": {
+    "title": "Отчёты",
+    "analytics": "Аналитика",
+    "pnl": "P&L",
+    "from": "С",
+    "to": "По",
+    "granularity": "Группировка",
+    "granularityDay": "По дням",
+    "granularityWeek": "По неделям",
+    "granularityMonth": "По месяцам",
+    "revenue": "Выручка",
+    "cogs": "Себестоимость",
+    "expenses": "Расходы",
+    "netProfit": "Чистая прибыль",
+    "marginByProduct": "Маржинальность по товарам",
+    "margin": "Маржа",
+    "orderCount": "Заказов",
+    "averageOrderValue": "Средний чек",
+    "salesOverTime": "Динамика продаж",
+    "topProducts": "Топ товаров"
   }
 }

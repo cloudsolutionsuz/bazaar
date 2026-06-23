@@ -40,9 +40,17 @@ export function Layout() {
             </NavLink>
           )}
           {STAFF_AND_MANAGEMENT_ROLES.has(role) && (
-            <NavLink to="/billing" className={navItemClass}>
-              {t("nav.billing")}
-            </NavLink>
+            <>
+              <NavLink to="/kassa" className={navItemClass}>
+                {t("nav.kassa")}
+              </NavLink>
+              <NavLink to="/reports" className={navItemClass}>
+                {t("nav.reports")}
+              </NavLink>
+              <NavLink to="/billing" className={navItemClass}>
+                {t("nav.billing")}
+              </NavLink>
+            </>
           )}
           {role === "OWNER" && (
             <NavLink to="/employees" className={navItemClass}>
