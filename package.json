@@ -7,6 +7,7 @@
   ],
   "scripts": {
     "dev": "npm run dev --workspace=@bazaar/backend",
+    "dev:admin": "npm run dev --workspace=@bazaar/admin",
     "build": "npm run build --workspace=@bazaar/backend",
     "test": "npm test --workspace=@bazaar/backend",
     "prisma:migrate": "npm run prisma:migrate --workspace=@bazaar/backend",
