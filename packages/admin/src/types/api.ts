@@ -2,13 +2,16 @@ export type ProductStatus = "ACTIVE" | "HIDDEN" | "OUT_OF_STOCK";
 export type InventoryMovementType = "RECEIPT" | "SALE" | "RETURN" | "ADJUSTMENT";
 export type OrderStatus = "NEW" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "REFUNDED";
 
+export type TenantStatus = "TRIAL" | "ACTIVE" | "PAST_DUE" | "BLOCKED";
+
 export interface Tenant {
   id: string;
   name: string;
   subdomain: string;
-  status: "TRIAL" | "ACTIVE" | "PAST_DUE" | "BLOCKED";
+  status: TenantStatus;
   planId: string;
   trialEndsAt: string | null;
+  createdAt: string;
 }
 
 export interface User {
@@ -200,4 +203,16 @@ export interface AnalyticsResult {
   averageOrderValue: number;
   salesOverTime: SalesBucket[];
   topProducts: TopProduct[];
+}
+
+export interface TenantWithRelations extends Tenant {
+  plan: Plan;
+  users: User[];
+  invoices: BillingInvoice[];
+}
+
+export interface PlatformStats {
+  totalTenants: number;
+  byStatus: Record<TenantStatus, number>;
+  mrr: number;
 }

@@ -14,6 +14,7 @@ import { storefrontRouter } from "./modules/storefront/storefront.routes";
 import { billingRouter } from "./modules/billing/billing.routes";
 import { employeesRouter } from "./modules/employees/employees.routes";
 import { financeRouter } from "./modules/finance/finance.routes";
+import { platformRouter } from "./modules/platform/platform.routes";
 
 export function createApp(): Express {
   const app = express();
@@ -38,6 +39,7 @@ export function createApp(): Express {
   app.use("/api/billing", billingRouter);
   app.use("/api/employees", employeesRouter);
   app.use("/api/finance", financeRouter);
+  app.use("/api/platform", platformRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

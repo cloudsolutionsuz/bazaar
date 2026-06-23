@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { AuthProvider } from "./auth/AuthContext";
+import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { Layout } from "./components/Layout";
 import { LoginPage } from "./pages/LoginPage";
@@ -14,8 +14,18 @@ import { BillingPage } from "./pages/billing/BillingPage";
 import { EmployeesPage } from "./pages/employees/EmployeesPage";
 import { KassaPage } from "./pages/finance/KassaPage";
 import { ReportsPage } from "./pages/finance/ReportsPage";
+import { TenantsListPage } from "./pages/platform/TenantsListPage";
+import { TenantDetailPage } from "./pages/platform/TenantDetailPage";
+import { PlansPage } from "./pages/platform/PlansPage";
 
 const queryClient = new QueryClient();
+
+// SUPER_ADMIN has no tenant, so the tenant-scoped pages (/products etc.)
+// would error out for them - send each role to its own home page instead.
+function RoleHome() {
+  const { user } = useAuth();
+  return <Navigate to={user?.role === "SUPER_ADMIN" ? "/platform/tenants" : "/products"} replace />;
+}
 
 export function App() {
   return (
@@ -27,7 +37,7 @@ export function App() {
             <Route path="/accept-invite" element={<AcceptInvitePage />} />
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
-                <Route path="/" element={<Navigate to="/products" replace />} />
+                <Route path="/" element={<RoleHome />} />
                 <Route path="/products" element={<ProductsListPage />} />
                 <Route path="/products/:id" element={<ProductFormPage />} />
                 <Route path="/inventory" element={<InventoryPage />} />
@@ -37,6 +47,9 @@ export function App() {
                 <Route path="/employees" element={<EmployeesPage />} />
                 <Route path="/kassa" element={<KassaPage />} />
                 <Route path="/reports" element={<ReportsPage />} />
+                <Route path="/platform/tenants" element={<TenantsListPage />} />
+                <Route path="/platform/tenants/:id" element={<TenantDetailPage />} />
+                <Route path="/platform/plans" element={<PlansPage />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

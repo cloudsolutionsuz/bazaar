@@ -25,6 +25,8 @@
     "employees": "Сотрудники",
     "kassa": "Касса",
     "reports": "Отчёты",
+    "tenants": "Магазины",
+    "plans": "Тарифы",
     "logout": "Выйти"
   },
   "login": {
@@ -179,5 +181,25 @@
     "averageOrderValue": "Средний чек",
     "salesOverTime": "Динамика продаж",
     "topProducts": "Топ товаров"
+  },
+  "platform": {
+    "tenantsTitle": "Магазины",
+    "totalTenants": "Всего магазинов",
+    "mrr": "MRR",
+    "searchPlaceholder": "Название или поддомен",
+    "shopName": "Магазин",
+    "subdomain": "Поддомен",
+    "owner": "Владелец",
+    "registeredAt": "Дата регистрации",
+    "changePlan": "Сменить тариф",
+    "plansTitle": "Тарифы",
+    "addPlan": "Добавить тариф",
+    "planCode": "Код",
+    "planName": "Название",
+    "priceSum": "Цена",
+    "maxProducts": "Лимит товаров",
+    "maxOrdersPerMonth": "Лимит заказов/мес",
+    "maxEmployees": "Лимит сотрудников",
+    "unlimited": "Без лимита"
   }
 }

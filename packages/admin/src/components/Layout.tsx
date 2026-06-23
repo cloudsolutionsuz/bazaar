@@ -57,6 +57,16 @@ export function Layout() {
               {t("nav.employees")}
             </NavLink>
           )}
+          {role === "SUPER_ADMIN" && (
+            <>
+              <NavLink to="/platform/tenants" className={navItemClass}>
+                {t("nav.tenants")}
+              </NavLink>
+              <NavLink to="/platform/plans" className={navItemClass}>
+                {t("nav.plans")}
+              </NavLink>
+            </>
+          )}
         </nav>
       </aside>
 

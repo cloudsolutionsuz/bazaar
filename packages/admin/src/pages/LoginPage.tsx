@@ -19,7 +19,7 @@ export function LoginPage() {
     setSubmitting(true);
     try {
       await login(email, password);
-      navigate("/products", { replace: true });
+      navigate("/", { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t("login.error"));
     } finally {

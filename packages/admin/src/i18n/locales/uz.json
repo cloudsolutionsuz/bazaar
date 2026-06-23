@@ -25,6 +25,8 @@
     "employees": "Xodimlar",
     "kassa": "Kassa",
     "reports": "Hisobotlar",
+    "tenants": "Do'konlar",
+    "plans": "Tariflar",
     "logout": "Chiqish"
   },
   "login": {
@@ -179,5 +181,25 @@
     "averageOrderValue": "O'rtacha chek",
     "salesOverTime": "Sotuvlar dinamikasi",
     "topProducts": "Top tovarlar"
+  },
+  "platform": {
+    "tenantsTitle": "Do'konlar",
+    "totalTenants": "Jami do'konlar",
+    "mrr": "MRR",
+    "searchPlaceholder": "Nomi yoki subdomen",
+    "shopName": "Do'kon",
+    "subdomain": "Subdomen",
+    "owner": "Egasi",
+    "registeredAt": "Ro'yxatdan o'tgan sana",
+    "changePlan": "Tarifni o'zgartirish",
+    "plansTitle": "Tariflar",
+    "addPlan": "Tarif qo'shish",
+    "planCode": "Kod",
+    "planName": "Nomi",
+    "priceSum": "Narxi",
+    "maxProducts": "Tovarlar chegarasi",
+    "maxOrdersPerMonth": "Oylik buyurtmalar chegarasi",
+    "maxEmployees": "Xodimlar chegarasi",
+    "unlimited": "Cheklanmagan"
   }
 }
