@@ -1,0 +1,16 @@
+{
+  "name": "bazaar",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@bazaar/backend",
+    "build": "npm run build --workspace=@bazaar/backend",
+    "test": "npm test --workspace=@bazaar/backend",
+    "prisma:migrate": "npm run prisma:migrate --workspace=@bazaar/backend",
+    "prisma:generate": "npm run prisma:generate --workspace=@bazaar/backend",
+    "prisma:seed": "npm run prisma:seed --workspace=@bazaar/backend"
+  }
+}
