@@ -206,6 +206,8 @@ interface AnalyticsResult {
   revenue: number;
   orderCount: number;
   averageOrderValue: number;
+  visits: number;
+  conversionRate: number;
   salesOverTime: { bucket: string; revenue: number; orderCount: number }[];
   topProducts: { productId: string; productName: string; revenue: number; quantity: number }[];
 }
@@ -247,5 +249,15 @@ export async function getAnalytics(tenantId: string, from: Date, to: Date, granu
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 5);
 
-  return { revenue, orderCount, averageOrderValue, salesOverTime, topProducts };
+  // A visit is a unique session in the period, not a raw page-view count -
+  // one shopper browsing 5 pages is still one visit.
+  const visitSessions = await prisma.pageView.findMany({
+    where: { tenantId, createdAt: { gte: from, lte: to } },
+    distinct: ["sessionId"],
+    select: { sessionId: true },
+  });
+  const visits = visitSessions.length;
+  const conversionRate = visits > 0 ? Math.round((orderCount / visits) * 1000) / 10 : 0;
+
+  return { revenue, orderCount, averageOrderValue, visits, conversionRate, salesOverTime, topProducts };
 }

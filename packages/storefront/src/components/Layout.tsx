@@ -1,14 +1,20 @@
-import { useState } from "react";
-import { Link, Outlet } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useCart } from "../cart/CartContext";
 import { CartDrawer } from "./CartDrawer";
 import { changeLanguage } from "../i18n/i18n";
+import { trackPageView } from "../api/storefront";
 
 export function Layout() {
   const { t, i18n } = useTranslation();
   const { count } = useCart();
   const [cartOpen, setCartOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen bg-sand-50">

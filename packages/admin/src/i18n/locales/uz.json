@@ -180,6 +180,8 @@
     "margin": "Marja",
     "orderCount": "Buyurtmalar",
     "averageOrderValue": "O'rtacha chek",
+    "visits": "Tashriflar",
+    "conversionRate": "Konversiya",
     "salesOverTime": "Sotuvlar dinamikasi",
     "topProducts": "Top tovarlar"
   },

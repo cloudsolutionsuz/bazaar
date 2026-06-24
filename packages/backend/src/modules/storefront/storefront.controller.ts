@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import * as storefrontService from "./storefront.service";
 import * as ordersService from "../orders/orders.service";
-import type { ListStorefrontProductsQuery } from "./storefront.schema";
+import type { ListStorefrontProductsQuery, TrackPageViewInput } from "./storefront.schema";
 import type { CreateOrderInput } from "../orders/orders.schema";
 
 export async function listCategories(req: Request, res: Response): Promise<void> {
@@ -22,4 +22,9 @@ export async function getProduct(req: Request, res: Response): Promise<void> {
 export async function createOrder(req: Request, res: Response): Promise<void> {
   const order = await ordersService.createOrder(req.tenant!.id, null, req.body as CreateOrderInput);
   res.status(201).json({ order });
+}
+
+export async function trackPageView(req: Request, res: Response): Promise<void> {
+  await storefrontService.trackPageView(req.tenant!.id, req.body as TrackPageViewInput);
+  res.status(204).send();
 }

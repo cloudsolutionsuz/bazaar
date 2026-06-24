@@ -164,4 +164,26 @@ describeWithDb("finance (integration)", () => {
     expect(fifoBreakdown.cogs).toBe(5 * 1000 + 2 * 2000 + 2 * 2000);
     expect(fifoBreakdown.revenue).toBe(fifoPrice * (7 + 2));
   });
+
+  it("computes visits as distinct sessions and conversion rate as orders/visits", async () => {
+    const host = `${seller.subdomain}.localhost`;
+
+    // 2 page views from the same session (counts as 1 visit) + 1 from a
+    // second session = 2 visits total.
+    await request(app).post("/api/storefront/analytics/track").set("Host", host).send({ sessionId: "conv-session-a", path: "/" });
+    await request(app)
+      .post("/api/storefront/analytics/track")
+      .set("Host", host)
+      .send({ sessionId: "conv-session-a", path: "/products/1" });
+    await request(app).post("/api/storefront/analytics/track").set("Host", host).send({ sessionId: "conv-session-b", path: "/" });
+
+    const from = isoDate(new Date(Date.now() - 60 * 60 * 1000));
+    const to = isoDate(new Date(Date.now() + 60 * 60 * 1000));
+    const analytics = await request(app).get("/api/finance/analytics").set(auth()).query({ from, to, granularity: "day" });
+    expect(analytics.status).toBe(200);
+    expect(analytics.body.visits).toBe(2);
+
+    const expectedRate = Math.round((analytics.body.orderCount / 2) * 1000) / 10;
+    expect(analytics.body.conversionRate).toBe(expectedRate);
+  });
 });

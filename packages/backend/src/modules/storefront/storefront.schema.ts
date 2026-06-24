@@ -8,3 +8,10 @@ export const listStorefrontProductsQuerySchema = z.object({
 });
 
 export type ListStorefrontProductsQuery = z.infer<typeof listStorefrontProductsQuerySchema>;
+
+export const trackPageViewSchema = z.object({
+  sessionId: z.string().min(1).max(100),
+  path: z.string().min(1).max(300),
+});
+
+export type TrackPageViewInput = z.infer<typeof trackPageViewSchema>;

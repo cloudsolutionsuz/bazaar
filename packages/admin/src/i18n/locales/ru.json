@@ -180,6 +180,8 @@
     "margin": "Маржа",
     "orderCount": "Заказов",
     "averageOrderValue": "Средний чек",
+    "visits": "Визиты",
+    "conversionRate": "Конверсия",
     "salesOverTime": "Динамика продаж",
     "topProducts": "Топ товаров"
   },

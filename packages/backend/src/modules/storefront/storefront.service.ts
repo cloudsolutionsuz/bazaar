@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
-import type { ListStorefrontProductsQuery } from "./storefront.schema";
+import type { ListStorefrontProductsQuery, TrackPageViewInput } from "./storefront.schema";
 
 const productInclude = {
   variants: true,
@@ -54,4 +54,10 @@ export async function getProduct(tenantId: string, productId: string) {
     throw new AppError(404, "NOT_FOUND", "Product not found");
   }
   return product;
+}
+
+export function trackPageView(tenantId: string, input: TrackPageViewInput) {
+  return prisma.pageView.create({
+    data: { tenantId, sessionId: input.sessionId, path: input.path },
+  });
 }

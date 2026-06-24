@@ -202,6 +202,8 @@ export interface AnalyticsResult {
   revenue: number;
   orderCount: number;
   averageOrderValue: number;
+  visits: number;
+  conversionRate: number;
   salesOverTime: SalesBucket[];
   topProducts: TopProduct[];
 }

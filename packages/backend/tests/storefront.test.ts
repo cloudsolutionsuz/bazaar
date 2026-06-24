@@ -88,12 +88,30 @@ describeWithDb("storefront (integration)", () => {
     expect(movement.createdByUserId).toBeNull();
   });
 
+  it("tracks a page view without authentication", async () => {
+    const res = await request(app)
+      .post("/api/storefront/analytics/track")
+      .set("Host", host)
+      .send({ sessionId: "test-session-1", path: "/products/123" });
+    expect(res.status).toBe(204);
+
+    const pageView = await prisma.pageView.findFirstOrThrow({ where: { tenantId: seller.tenantId } });
+    expect(pageView.sessionId).toBe("test-session-1");
+    expect(pageView.path).toBe("/products/123");
+  });
+
   it("blocks storefront access once the tenant is BLOCKED", async () => {
     await prisma.tenant.update({ where: { id: seller.tenantId }, data: { status: "BLOCKED" } });
 
     const res = await request(app).get("/api/storefront/products").set("Host", host);
     expect(res.status).toBe(403);
     expect(res.body.error.code).toBe("SHOP_BLOCKED");
+
+    const track = await request(app)
+      .post("/api/storefront/analytics/track")
+      .set("Host", host)
+      .send({ sessionId: "test-session-2", path: "/" });
+    expect(track.status).toBe(403);
 
     await prisma.tenant.update({ where: { id: seller.tenantId }, data: { status: "ACTIVE" } });
   });

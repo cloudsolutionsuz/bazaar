@@ -13,6 +13,7 @@ export async function deleteTenantCompletely(tenantId: string): Promise<void> {
   await prisma.orderStatusHistory.deleteMany({ where: { orderId: { in: orderIds } } });
   await prisma.inventoryMovement.deleteMany({ where: { tenantId } });
   await prisma.transaction.deleteMany({ where: { tenantId } });
+  await prisma.pageView.deleteMany({ where: { tenantId } });
   await prisma.order.deleteMany({ where: { tenantId } });
   await prisma.productImage.deleteMany({ where: { productId: { in: productIds } } });
   await prisma.productVariant.deleteMany({ where: { tenantId } });

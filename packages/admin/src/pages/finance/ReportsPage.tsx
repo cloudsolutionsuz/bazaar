@@ -89,17 +89,20 @@ function StatCard({
   value,
   highlight = false,
   isCount = false,
+  suffix = "",
 }: {
   label: string;
   value: number;
   highlight?: boolean;
   isCount?: boolean;
+  suffix?: string;
 }) {
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4">
       <div className="text-sm text-gray-500">{label}</div>
       <div className={`text-xl font-semibold ${highlight ? (value >= 0 ? "text-green-600" : "text-red-600") : "text-gray-900"}`}>
         {isCount ? value : value.toLocaleString()}
+        {suffix}
       </div>
     </div>
   );
@@ -165,10 +168,12 @@ function AnalyticsTab({ from, to, granularity }: { from: string; to: string; gra
 
   return (
     <div>
-      <div className="mb-6 grid grid-cols-3 gap-4">
+      <div className="mb-6 grid grid-cols-3 gap-4 sm:grid-cols-5">
         <StatCard label={t("reports.revenue")} value={data.revenue} />
         <StatCard label={t("reports.orderCount")} value={data.orderCount} isCount />
         <StatCard label={t("reports.averageOrderValue")} value={data.averageOrderValue} />
+        <StatCard label={t("reports.visits")} value={data.visits} isCount />
+        <StatCard label={t("reports.conversionRate")} value={data.conversionRate} isCount suffix="%" />
       </div>
 
       <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("reports.salesOverTime")}</h2>
