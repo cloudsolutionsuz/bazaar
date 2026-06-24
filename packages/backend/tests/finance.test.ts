@@ -89,7 +89,7 @@ describeWithDb("finance (integration)", () => {
     expect(categories).toContain("Возврат");
   });
 
-  it("computes P&L using the latest purchase price as cost basis, excluding cancelled orders", async () => {
+  it("computes P&L cost basis from the purchase price, excluding cancelled orders", async () => {
     const activeOrder = await request(app).post("/api/orders").set(auth()).send({
       customerName: "PnL Buyer",
       customerPhone: "+998900000222",
@@ -121,5 +121,47 @@ describeWithDb("finance (integration)", () => {
     expect(analytics.body.revenue).toBe(salePrice * 3);
     expect(analytics.body.averageOrderValue).toBe(salePrice * 3);
     expect(analytics.body.topProducts[0].productName).toBe("Finance Test Product");
+  });
+
+  it("computes P&L cost of goods sold by FIFO across receipts at different prices", async () => {
+    const fifoPrice = 12000;
+    const product = await request(app).post("/api/products").set(auth()).send({
+      name: "FIFO Test Product",
+      price: fifoPrice,
+      variants: [{ sku: `FIFO-${Date.now()}`, stockQuantity: 0 }],
+    });
+    const fifoVariantId = product.body.product.variants[0].id;
+
+    // Two lots at different purchase prices: 5 units @ 1000, then 5 @ 2000.
+    await request(app).post("/api/inventory/receipts").set(auth()).send({ variantId: fifoVariantId, quantity: 5, purchasePrice: 1000 });
+    await request(app).post("/api/inventory/receipts").set(auth()).send({ variantId: fifoVariantId, quantity: 5, purchasePrice: 2000 });
+
+    // Selling 7 should consume all 5 units of the first lot (5*1000) plus 2
+    // units of the second lot (2*2000) = 9000, not 7*2000 = 14000 (what the
+    // old "latest receipt price" logic would have produced).
+    const firstSale = await request(app).post("/api/orders").set(auth()).send({
+      customerName: "FIFO Buyer 1",
+      customerPhone: "+998900000333",
+      items: [{ variantId: fifoVariantId, quantity: 7 }],
+    });
+    expect(firstSale.status).toBe(201);
+
+    // The remaining 3 units of the second lot are still there; selling 2
+    // more draws only from that lot, @ 2000 each = 4000.
+    const secondSale = await request(app).post("/api/orders").set(auth()).send({
+      customerName: "FIFO Buyer 2",
+      customerPhone: "+998900000444",
+      items: [{ variantId: fifoVariantId, quantity: 2 }],
+    });
+    expect(secondSale.status).toBe(201);
+
+    const from = isoDate(new Date(Date.now() - 60 * 60 * 1000));
+    const to = isoDate(new Date(Date.now() + 60 * 60 * 1000));
+    const pnl = await request(app).get("/api/finance/pnl").set(auth()).query({ from, to });
+    expect(pnl.status).toBe(200);
+
+    const fifoBreakdown = pnl.body.byProduct.find((p: { productName: string }) => p.productName === "FIFO Test Product");
+    expect(fifoBreakdown.cogs).toBe(5 * 1000 + 2 * 2000 + 2 * 2000);
+    expect(fifoBreakdown.revenue).toBe(fifoPrice * (7 + 2));
   });
 });
