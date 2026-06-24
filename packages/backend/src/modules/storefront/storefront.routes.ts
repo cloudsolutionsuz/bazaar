@@ -2,7 +2,7 @@ import { Router } from "express";
 import { asyncHandler } from "../../utils/asyncHandler";
 import { requireActiveTenant, requireResolvedTenant } from "../../middleware/requireTenant";
 import { validateBody, validateQuery } from "../../middleware/validate";
-import { listStorefrontProductsQuerySchema, trackPageViewSchema } from "./storefront.schema";
+import { listStorefrontProductsQuerySchema, myOrdersQuerySchema, trackPageViewSchema } from "./storefront.schema";
 import { createOrderSchema } from "../orders/orders.schema";
 import * as storefrontController from "./storefront.controller";
 
@@ -14,6 +14,8 @@ storefrontRouter.get("/categories", asyncHandler(storefrontController.listCatego
 storefrontRouter.get("/products", validateQuery(listStorefrontProductsQuerySchema), asyncHandler(storefrontController.listProducts));
 storefrontRouter.get("/products/:id", asyncHandler(storefrontController.getProduct));
 storefrontRouter.post("/orders", validateBody(createOrderSchema), asyncHandler(storefrontController.createOrder));
+storefrontRouter.get("/orders/by-phone", validateQuery(myOrdersQuerySchema), asyncHandler(storefrontController.getMyOrders));
+storefrontRouter.get("/banners", asyncHandler(storefrontController.listBanners));
 storefrontRouter.post(
   "/analytics/track",
   validateBody(trackPageViewSchema),

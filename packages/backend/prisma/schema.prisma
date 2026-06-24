@@ -103,6 +103,8 @@ model Tenant {
   invoices           BillingInvoice[]
   transactions       Transaction[]
   pageViews          PageView[]
+  customers          Customer[]
+  banners            Banner[]
 
   @@map("tenants")
 }
@@ -298,17 +300,26 @@ model InventoryMovement {
 }
 
 model Order {
-  id              String      @id @default(uuid())
-  tenantId        String
-  tenant          Tenant      @relation(fields: [tenantId], references: [id])
-  customerName    String
-  customerPhone   String
-  customerAddress String?
-  status          OrderStatus @default(NEW)
-  paymentMethod   String?
-  totalAmount     Int
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id               String      @id @default(uuid())
+  tenantId         String
+  tenant           Tenant      @relation(fields: [tenantId], references: [id])
+  customerId       String?
+  customer         Customer?   @relation(fields: [customerId], references: [id])
+  customerName     String
+  customerPhone    String
+  additionalPhones String[]    @default([])
+  // Nullable at the DB level so historical orders (predating structured
+  // addresses) don't block the migration - createOrderSchema requires all
+  // three for every new order regardless.
+  addressRegion    String?
+  addressDistrict  String?
+  addressMahalla   String?
+  addressNote      String?
+  status           OrderStatus @default(NEW)
+  paymentMethod    String?
+  totalAmount      Int
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 
   items             OrderItem[]
   statusHistory     OrderStatusHistory[]
@@ -319,6 +330,35 @@ model Order {
   @@index([tenantId, status])
   @@index([tenantId, createdAt])
   @@map("orders")
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  phone     String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders Order[]
+
+  @@unique([tenantId, phone])
+  @@map("customers")
+}
+
+model Banner {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  imageUrl  String
+  linkUrl   String?
+  position  Int
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@map("banners")
 }
 
 model OrderItem {

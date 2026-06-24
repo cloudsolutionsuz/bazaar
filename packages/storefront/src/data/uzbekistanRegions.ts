@@ -1,0 +1,275 @@
+// Hand-authored from general knowledge of Uzbekistan's administrative
+// divisions (14 regions, each with its districts/cities) - not pulled from
+// an official government API. Names are Russian-only for now (the
+// storefront's other UI labels are ru/uz, but localizing every place name
+// into Uzbek script was out of scope here). If something is missing,
+// misspelled, or a district was merged/renamed, this is a plain array -
+// just edit it, no migration needed.
+//
+// Duplicated (not shared) from packages/backend/src/data/uzbekistanRegions.ts -
+// this project keeps per-package copies of small reference data rather than
+// a shared internal package (same pattern as OrderStatus/TenantStatus).
+// Keep this file's region/district codes in sync with the backend copy -
+// the backend validates submitted codes against its own list.
+
+export interface District {
+  code: string;
+  name: string;
+}
+
+export interface Region {
+  code: string;
+  name: string;
+  districts: District[];
+}
+
+export const UZBEKISTAN_REGIONS: Region[] = [
+  {
+    code: "tashkent_city",
+    name: "Город Ташкент",
+    districts: [
+      { code: "bektemir", name: "Бектемирский район" },
+      { code: "chilanzar", name: "Чиланзарский район" },
+      { code: "mirobod", name: "Мирободский район" },
+      { code: "mirzo_ulugbek", name: "Мирзо-Улугбекский район" },
+      { code: "olmazor", name: "Алмазарский район" },
+      { code: "sergeli", name: "Сергелийский район" },
+      { code: "shaykhantakhur", name: "Шайхантахурский район" },
+      { code: "uchtepa", name: "Учтепинский район" },
+      { code: "yakkasaray", name: "Яккасарайский район" },
+      { code: "yashnobod", name: "Яшнободский район" },
+      { code: "yunusabad", name: "Юнусабадский район" },
+    ],
+  },
+  {
+    code: "tashkent_region",
+    name: "Ташкентская область",
+    districts: [
+      { code: "angren", name: "Ангрен" },
+      { code: "bekabad", name: "Бекабад" },
+      { code: "bostanliq", name: "Бостанлыкский район" },
+      { code: "buka", name: "Букинский район" },
+      { code: "chinaz", name: "Чиназский район" },
+      { code: "chirchiq", name: "Чирчик" },
+      { code: "ohangaron", name: "Ахангаранский район" },
+      { code: "oqqorgon", name: "Аккурганский район" },
+      { code: "olmaliq", name: "Алмалык" },
+      { code: "parkent", name: "Паркентский район" },
+      { code: "piskent", name: "Пскентский район" },
+      { code: "qibray", name: "Кибрайский район" },
+      { code: "quyi_chirchiq", name: "Нижнечирчикский район" },
+      { code: "yangiyul", name: "Янгиюль" },
+      { code: "yuqori_chirchiq", name: "Верхнечирчикский район" },
+      { code: "zangiota", name: "Зангиатинский район" },
+    ],
+  },
+  {
+    code: "andijan",
+    name: "Андижанская область",
+    districts: [
+      { code: "andijan_city", name: "Андижан" },
+      { code: "asaka", name: "Асака" },
+      { code: "balikchi", name: "Балыкчинский район" },
+      { code: "boz", name: "Бозский район" },
+      { code: "buloqboshi", name: "Булакбашинский район" },
+      { code: "izboskan", name: "Избасканский район" },
+      { code: "jalaquduq", name: "Джалакудукский район" },
+      { code: "khojaobod", name: "Ходжаабадский район" },
+      { code: "kurgantepa", name: "Кургантепинский район" },
+      { code: "marhamat", name: "Мархаматский район" },
+      { code: "oltinkul", name: "Алтынкульский район" },
+      { code: "pakhtaobod", name: "Пахтаабадский район" },
+      { code: "shahrikhon", name: "Шахриханский район" },
+      { code: "ulugnor", name: "Улугнорский район" },
+    ],
+  },
+  {
+    code: "bukhara",
+    name: "Бухарская область",
+    districts: [
+      { code: "bukhara_city", name: "Бухара" },
+      { code: "gijduvan", name: "Гиждуванский район" },
+      { code: "jondor", name: "Жондорский район" },
+      { code: "kogon", name: "Каганский район" },
+      { code: "korakul", name: "Каракульский район" },
+      { code: "korovulbozor", name: "Караулбазарский район" },
+      { code: "peshku", name: "Пешкунский район" },
+      { code: "romitan", name: "Ромитанский район" },
+      { code: "shofirkon", name: "Шафирканский район" },
+      { code: "vobkent", name: "Вабкентский район" },
+    ],
+  },
+  {
+    code: "fergana",
+    name: "Ферганская область",
+    districts: [
+      { code: "fergana_city", name: "Фергана" },
+      { code: "margilan", name: "Маргилан" },
+      { code: "kuvasoy", name: "Кувасай" },
+      { code: "beshariq", name: "Бешарыкский район" },
+      { code: "bogdod", name: "Багдадский район" },
+      { code: "dangara", name: "Дангаринский район" },
+      { code: "furqat", name: "Фуркатский район" },
+      { code: "kushtepa", name: "Куштепинский район" },
+      { code: "oltiariq", name: "Алтыарыкский район" },
+      { code: "quva", name: "Кувинский район" },
+      { code: "rishton", name: "Риштанский район" },
+      { code: "toshloq", name: "Ташлакский район" },
+      { code: "uchkuprik", name: "Учкуприкский район" },
+      { code: "yozyovon", name: "Язъяванский район" },
+    ],
+  },
+  {
+    code: "jizzakh",
+    name: "Джизакская область",
+    districts: [
+      { code: "jizzakh_city", name: "Джизак" },
+      { code: "arnasoy", name: "Арнасайский район" },
+      { code: "bakhmal", name: "Бахмальский район" },
+      { code: "dustlik", name: "Дустликский район" },
+      { code: "forish", name: "Форишский район" },
+      { code: "gallaorol", name: "Галляаральский район" },
+      { code: "mirzachul", name: "Мирзачульский район" },
+      { code: "paxtakor", name: "Пахтакорский район" },
+      { code: "yangiobod", name: "Янгиабадский район" },
+      { code: "zafarobod", name: "Зафарабадский район" },
+      { code: "zarbdor", name: "Зарбдарский район" },
+      { code: "zomin", name: "Зааминский район" },
+    ],
+  },
+  {
+    code: "khorezm",
+    name: "Хорезмская область",
+    districts: [
+      { code: "urgench", name: "Ургенч" },
+      { code: "khiva", name: "Хива" },
+      { code: "bogot", name: "Багатский район" },
+      { code: "gurlan", name: "Гурленский район" },
+      { code: "khazarasp", name: "Хазараспский район" },
+      { code: "khonqa", name: "Ханкинский район" },
+      { code: "qoshkupir", name: "Кошкупырский район" },
+      { code: "shovot", name: "Шаватский район" },
+      { code: "yangiariq", name: "Янгиарыкский район" },
+      { code: "yangibozor", name: "Янгибазарский район" },
+    ],
+  },
+  {
+    code: "namangan",
+    name: "Наманганская область",
+    districts: [
+      { code: "namangan_city", name: "Наманган" },
+      { code: "chortoq", name: "Чартакский район" },
+      { code: "chust", name: "Чустский район" },
+      { code: "kosonsoy", name: "Касансайский район" },
+      { code: "mingbuloq", name: "Мингбулакский район" },
+      { code: "norin", name: "Нарынский район" },
+      { code: "pop", name: "Папский район" },
+      { code: "uchqurgon", name: "Учкурганский район" },
+      { code: "uychi", name: "Уйчинский район" },
+      { code: "yangiqurgon", name: "Янгикурганский район" },
+    ],
+  },
+  {
+    code: "navoi",
+    name: "Навоийская область",
+    districts: [
+      { code: "navoi_city", name: "Навои" },
+      { code: "zarafshon", name: "Зарафшан" },
+      { code: "konimekh", name: "Канимехский район" },
+      { code: "karmana", name: "Карманинский район" },
+      { code: "khatirchi", name: "Хатырчинский район" },
+      { code: "nurota", name: "Нуратинский район" },
+      { code: "qiziltepa", name: "Кызылтепинский район" },
+      { code: "tomdi", name: "Томдинский район" },
+      { code: "uchquduq", name: "Учкудукский район" },
+    ],
+  },
+  {
+    code: "kashkadarya",
+    name: "Кашкадарьинская область",
+    districts: [
+      { code: "qarshi", name: "Карши" },
+      { code: "shahrisabz", name: "Шахрисабз" },
+      { code: "chiroqchi", name: "Чиракчинский район" },
+      { code: "dehqonobod", name: "Дехканабадский район" },
+      { code: "guzor", name: "Гузарский район" },
+      { code: "kasbi", name: "Касбийский район" },
+      { code: "kitob", name: "Китабский район" },
+      { code: "koson", name: "Касанский район" },
+      { code: "mirishkor", name: "Миришкорский район" },
+      { code: "muborak", name: "Мубарекский район" },
+      { code: "nishon", name: "Нишанский район" },
+      { code: "yakkabog", name: "Яккабагский район" },
+    ],
+  },
+  {
+    code: "karakalpakstan",
+    name: "Республика Каракалпакстан",
+    districts: [
+      { code: "nukus_city", name: "Нукус" },
+      { code: "amudarya", name: "Амударьинский район" },
+      { code: "beruniy", name: "Берунийский район" },
+      { code: "chimboy", name: "Чимбайский район" },
+      { code: "ellikqala", name: "Элликкалинский район" },
+      { code: "kegeyli", name: "Кегейлийский район" },
+      { code: "khojayli", name: "Ходжейлийский район" },
+      { code: "kungrad", name: "Кунградский район" },
+      { code: "moynaq", name: "Муйнакский район" },
+      { code: "qanlikul", name: "Канлыкульский район" },
+      { code: "shumanay", name: "Шуманайский район" },
+      { code: "taxtakupir", name: "Тахтакупырский район" },
+      { code: "tortkul", name: "Турткульский район" },
+    ],
+  },
+  {
+    code: "samarkand",
+    name: "Самаркандская область",
+    districts: [
+      { code: "samarkand_city", name: "Самарканд" },
+      { code: "kattakurgan", name: "Каттакурган" },
+      { code: "bulungur", name: "Булунгурский район" },
+      { code: "ishtikhon", name: "Иштыханский район" },
+      { code: "jomboy", name: "Джамбайский район" },
+      { code: "narpay", name: "Нарпайский район" },
+      { code: "nurobod", name: "Нурабадский район" },
+      { code: "oqdarya", name: "Акдарьинский район" },
+      { code: "pastdargom", name: "Пастдаргомский район" },
+      { code: "paxtachi", name: "Пахтачийский район" },
+      { code: "payariq", name: "Пайарыкский район" },
+      { code: "tayloq", name: "Тайлякский район" },
+      { code: "urgut", name: "Ургутский район" },
+    ],
+  },
+  {
+    code: "sirdarya",
+    name: "Сырдарьинская область",
+    districts: [
+      { code: "guliston", name: "Гулистан" },
+      { code: "boyovut", name: "Баяутский район" },
+      { code: "mirzaobod", name: "Мирзаабадский район" },
+      { code: "sardoba", name: "Сардобинский район" },
+      { code: "sayhunobod", name: "Сайхунабадский район" },
+      { code: "sirdaryo_district", name: "Сырдарьинский район" },
+      { code: "yangiyer", name: "Янгиер" },
+    ],
+  },
+  {
+    code: "surkhandarya",
+    name: "Сурхандарьинская область",
+    districts: [
+      { code: "termez", name: "Термез" },
+      { code: "angor", name: "Ангорский район" },
+      { code: "bandikhon", name: "Бандиханский район" },
+      { code: "boysun", name: "Байсунский район" },
+      { code: "denov", name: "Денауский район" },
+      { code: "jarqurgon", name: "Джаркурганский район" },
+      { code: "muzrabot", name: "Музрабадский район" },
+      { code: "oltinsoy", name: "Алтынсайский район" },
+      { code: "qiziriq", name: "Кызыриыкский район" },
+      { code: "sariosiyo", name: "Сариасийский район" },
+      { code: "sherobod", name: "Шерабадский район" },
+      { code: "shurchi", name: "Шурчинский район" },
+      { code: "uzun", name: "Узунский район" },
+    ],
+  },
+];

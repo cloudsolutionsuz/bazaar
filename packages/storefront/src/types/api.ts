@@ -46,15 +46,29 @@ export interface OrderItemResult {
   quantity: number;
   unitPrice: number;
   totalPrice: number;
+  variant?: { product: { name: string } };
 }
 
 export interface OrderResult {
   id: string;
   customerName: string;
   customerPhone: string;
+  additionalPhones: string[];
+  addressRegion: string | null;
+  addressDistrict: string | null;
+  addressMahalla: string | null;
+  addressNote: string | null;
   totalAmount: number;
   status: string;
+  createdAt: string;
   items: OrderItemResult[];
+}
+
+export interface Banner {
+  id: string;
+  imageUrl: string;
+  linkUrl: string | null;
+  position: number;
 }
 
 export interface ApiErrorBody {

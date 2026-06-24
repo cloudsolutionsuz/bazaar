@@ -32,6 +32,9 @@ export function Layout() {
               <NavLink to="/inventory" className={navItemClass}>
                 {t("nav.inventory")}
               </NavLink>
+              <NavLink to="/banners" className={navItemClass}>
+                {t("nav.banners")}
+              </NavLink>
             </>
           )}
           {ALL_STAFF_ROLES.has(role) && (

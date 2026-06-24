@@ -20,6 +20,7 @@
   "nav": {
     "products": "Tovarlar",
     "inventory": "Ombor",
+    "banners": "Bannerlar",
     "orders": "Buyurtmalar",
     "billing": "Billing",
     "employees": "Xodimlar",
@@ -112,6 +113,11 @@
     "date": "Sana",
     "total": "Summa",
     "address": "Manzil",
+    "additionalPhones": "Qo'shimcha telefonlar",
+    "region": "Viloyat",
+    "district": "Shahar/Tuman",
+    "mahalla": "Mahalla",
+    "addressNote": "Qo'shimcha ma'lumot",
     "paymentMethod": "To'lov usuli",
     "items": "Buyurtma tarkibi",
     "statusHistory": "Holat tarixi",
@@ -210,5 +216,16 @@
     "telegramChatId": "Telegram Chat ID",
     "telegramChatIdHint": "Yangi buyurtmalar va past qoldiq haqida Telegram orqali xabar olish uchun @userinfobot botiga yozing va chat ID'ingizni shu yerga kiriting",
     "saved": "Saqlandi"
+  },
+  "banners": {
+    "title": "Bannerlar",
+    "add": "Banner qo'shish",
+    "image": "Rasm",
+    "linkUrl": "Havola (ixtiyoriy)",
+    "noLink": "Havolasiz",
+    "active": "Faol",
+    "inactive": "Yashirilgan",
+    "activate": "Yoqish",
+    "deactivate": "Yashirish"
   }
 }

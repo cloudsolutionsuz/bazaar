@@ -6,7 +6,19 @@ import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Table, Thead, Tbody, Th, Td } from "../../components/ui/Table";
 import { STATUS_COLORS, STATUS_LABEL_KEYS } from "./OrdersListPage";
+import { UZBEKISTAN_REGIONS } from "../../data/uzbekistanRegions";
 import type { OrderStatus } from "../../types/api";
+
+function regionName(code: string | null): string {
+  if (!code) return "—";
+  return UZBEKISTAN_REGIONS.find((r) => r.code === code)?.name ?? code;
+}
+
+function districtName(regionCode: string | null, districtCode: string | null): string {
+  if (!regionCode || !districtCode) return "—";
+  const region = UZBEKISTAN_REGIONS.find((r) => r.code === regionCode);
+  return region?.districts.find((d) => d.code === districtCode)?.name ?? districtCode;
+}
 
 export function OrderDetailPage() {
   const { t } = useTranslation();
@@ -50,12 +62,28 @@ export function OrderDetailPage() {
           <div>{order.customerPhone}</div>
         </div>
         <div>
+          <div className="text-gray-500">{t("orders.additionalPhones")}</div>
+          <div>{order.additionalPhones.length > 0 ? order.additionalPhones.join(", ") : "—"}</div>
+        </div>
+        <div>
           <div className="text-gray-500">{t("orders.paymentMethod")}</div>
           <div>{order.paymentMethod ?? "—"}</div>
         </div>
+        <div>
+          <div className="text-gray-500">{t("orders.region")}</div>
+          <div>{regionName(order.addressRegion)}</div>
+        </div>
+        <div>
+          <div className="text-gray-500">{t("orders.district")}</div>
+          <div>{districtName(order.addressRegion, order.addressDistrict)}</div>
+        </div>
+        <div>
+          <div className="text-gray-500">{t("orders.mahalla")}</div>
+          <div>{order.addressMahalla ?? "—"}</div>
+        </div>
         <div className="col-span-2">
-          <div className="text-gray-500">{t("orders.address")}</div>
-          <div>{order.customerAddress ?? "—"}</div>
+          <div className="text-gray-500">{t("orders.addressNote")}</div>
+          <div>{order.addressNote ?? "—"}</div>
         </div>
       </div>
 

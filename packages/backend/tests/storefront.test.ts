@@ -4,6 +4,7 @@ import { createApp } from "../src/app";
 import { prisma } from "../src/db/prisma";
 import { registerAndLoginSeller, type TestSeller } from "./helpers/registerTenant";
 import { deleteTenantCompletely } from "./helpers/cleanupTenant";
+import { DEFAULT_ADDRESS } from "./helpers/orderFixtures";
 
 const describeWithDb = process.env.SKIP_DB_TESTS ? describe.skip : describe;
 
@@ -74,6 +75,7 @@ describeWithDb("storefront (integration)", () => {
     const res = await request(app).post("/api/storefront/orders").set("Host", host).send({
       customerName: "Guest Buyer",
       customerPhone: "+998901112233",
+      ...DEFAULT_ADDRESS,
       items: [{ variantId: activeVariantId, quantity: 2 }],
     });
 

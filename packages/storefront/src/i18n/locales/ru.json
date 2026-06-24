@@ -30,7 +30,14 @@
     "title": "Оформление заказа",
     "name": "Ваше имя",
     "phone": "Телефон",
-    "address": "Адрес доставки",
+    "additionalPhone": "Дополнительный номер",
+    "addPhone": "Добавить номер телефона",
+    "region": "Регион",
+    "regionPlaceholder": "Выберите регион",
+    "district": "Город/Район",
+    "districtPlaceholder": "Выберите город/район",
+    "mahalla": "Махалля",
+    "addressNote": "Дополнительная информация (дом, подъезд, ориентир)",
     "paymentMethod": "Способ оплаты",
     "paymentCash": "Наличными при получении",
     "paymentCard": "Картой при получении",
@@ -43,6 +50,20 @@
     "message": "Продавец свяжется с вами по указанному телефону для подтверждения",
     "orderNumber": "Номер заказа",
     "total": "Сумма",
-    "backToShop": "Вернуться в магазин"
+    "backToShop": "Вернуться в магазин",
+    "viewMyOrders": "Мои заказы"
+  },
+  "myOrders": {
+    "navLink": "Мои заказы",
+    "title": "Мои заказы",
+    "hint": "Введите номер телефона, который вы указывали при заказе",
+    "search": "Найти",
+    "empty": "Заказы не найдены",
+    "statusNew": "Новый",
+    "statusProcessing": "В обработке",
+    "statusShipped": "Отправлен",
+    "statusDelivered": "Доставлен",
+    "statusCancelled": "Отменён",
+    "statusRefunded": "Возврат"
   }
 }

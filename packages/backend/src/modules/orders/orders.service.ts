@@ -105,12 +105,27 @@ export async function createOrder(tenantId: string, userId: string | null, input
       }
     }
 
+    // Customer is the buyer's "mini-account" - no OTP, just a phone-number
+    // identity so they can later look up their own order history. Reused by
+    // both storefront checkout and staff-created orders, so any order with
+    // this phone gets attributed to the same customer regardless of channel.
+    const customer = await tx.customer.upsert({
+      where: { tenantId_phone: { tenantId, phone: input.customerPhone } },
+      update: { name: input.customerName },
+      create: { tenantId, phone: input.customerPhone, name: input.customerName },
+    });
+
     const order = await tx.order.create({
       data: {
         tenantId,
+        customerId: customer.id,
         customerName: input.customerName,
         customerPhone: input.customerPhone,
-        customerAddress: input.customerAddress,
+        additionalPhones: input.additionalPhones ?? [],
+        addressRegion: input.addressRegion,
+        addressDistrict: input.addressDistrict,
+        addressMahalla: input.addressMahalla,
+        addressNote: input.addressNote,
         paymentMethod: input.paymentMethod,
         totalAmount,
         items: { create: orderItemsData },
@@ -225,7 +240,21 @@ export async function exportOrdersToExcel(tenantId: string): Promise<Buffer> {
 
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet("Orders");
-  sheet.addRow(["Order ID", "Date", "Customer", "Phone", "Status", "Payment Method", "Items", "Total Amount"]);
+  sheet.addRow([
+    "Order ID",
+    "Date",
+    "Customer",
+    "Phone",
+    "Additional Phones",
+    "Region",
+    "District",
+    "Mahalla",
+    "Address Note",
+    "Status",
+    "Payment Method",
+    "Items",
+    "Total Amount",
+  ]);
 
   for (const order of orders) {
     const itemsSummary = order.items.map((i) => `${i.variant.sku} x${i.quantity}`).join(", ");
@@ -234,6 +263,11 @@ export async function exportOrdersToExcel(tenantId: string): Promise<Buffer> {
       order.createdAt.toISOString(),
       order.customerName,
       order.customerPhone,
+      order.additionalPhones.join(", "),
+      order.addressRegion ?? "",
+      order.addressDistrict ?? "",
+      order.addressMahalla ?? "",
+      order.addressNote ?? "",
       order.status,
       order.paymentMethod ?? "",
       itemsSummary,

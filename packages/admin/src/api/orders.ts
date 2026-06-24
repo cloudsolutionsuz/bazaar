@@ -22,7 +22,11 @@ export function getOrder(id: string): Promise<{ order: Order }> {
 export interface CreateOrderInput {
   customerName: string;
   customerPhone: string;
-  customerAddress?: string;
+  additionalPhones?: string[];
+  addressRegion: string;
+  addressDistrict: string;
+  addressMahalla: string;
+  addressNote?: string;
   paymentMethod?: string;
   items: { variantId: string; quantity: number }[];
 }

@@ -4,6 +4,7 @@ import { createApp } from "../src/app";
 import { prisma } from "../src/db/prisma";
 import { registerAndLoginSeller, type TestSeller } from "./helpers/registerTenant";
 import { deleteTenantCompletely } from "./helpers/cleanupTenant";
+import { DEFAULT_ADDRESS } from "./helpers/orderFixtures";
 
 const describeWithDb = process.env.SKIP_DB_TESTS ? describe.skip : describe;
 
@@ -80,6 +81,7 @@ describeWithDb("notifications (super admin / telegram, integration)", () => {
     const order = await request(app).post("/api/orders").set(auth()).send({
       customerName: "No Telegram Buyer",
       customerPhone: "+998900000001",
+      ...DEFAULT_ADDRESS,
       items: [{ variantId, quantity: 1 }],
     });
     expect(order.status).toBe(201);
@@ -99,6 +101,7 @@ describeWithDb("notifications (super admin / telegram, integration)", () => {
     const order = await request(app).post("/api/orders").set(auth()).send({
       customerName: "Telegram Buyer",
       customerPhone: "+998900000002",
+      ...DEFAULT_ADDRESS,
       items: [{ variantId, quantity: 1 }],
     });
     expect(order.status).toBe(201);
@@ -115,6 +118,7 @@ describeWithDb("notifications (super admin / telegram, integration)", () => {
     const crossing = await request(app).post("/api/orders").set(auth()).send({
       customerName: "Crossing Buyer",
       customerPhone: "+998900000003",
+      ...DEFAULT_ADDRESS,
       items: [{ variantId, quantity: 4 }],
     });
     expect(crossing.status).toBe(201);
@@ -131,6 +135,7 @@ describeWithDb("notifications (super admin / telegram, integration)", () => {
     const again = await request(app).post("/api/orders").set(auth()).send({
       customerName: "Still Low Buyer",
       customerPhone: "+998900000004",
+      ...DEFAULT_ADDRESS,
       items: [{ variantId, quantity: 1 }],
     });
     expect(again.status).toBe(201);

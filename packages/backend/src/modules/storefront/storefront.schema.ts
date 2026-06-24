@@ -15,3 +15,9 @@ export const trackPageViewSchema = z.object({
 });
 
 export type TrackPageViewInput = z.infer<typeof trackPageViewSchema>;
+
+export const myOrdersQuerySchema = z.object({
+  phone: z.string().min(3).max(30),
+});
+
+export type MyOrdersQuery = z.infer<typeof myOrdersQuerySchema>;

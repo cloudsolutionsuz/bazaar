@@ -31,5 +31,18 @@ const spreadsheetUpload = multer({
   limits: { fileSize: 10 * 1024 * 1024 },
 }).single("file");
 
+const bannerImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 8 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) {
+      cb(new Error("Only image files are allowed"));
+      return;
+    }
+    cb(null, true);
+  },
+}).single("image");
+
 export const uploadProductImages = withMulterErrorHandling(imagesUpload);
 export const uploadSpreadsheet = withMulterErrorHandling(spreadsheetUpload);
+export const uploadBannerImage = withMulterErrorHandling(bannerImageUpload);

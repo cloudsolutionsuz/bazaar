@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import * as storefrontApi from "../api/storefront";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
+import { BannerCarousel } from "../components/BannerCarousel";
 
 export function CatalogPage() {
   const { t } = useTranslation();
@@ -22,6 +23,7 @@ export function CatalogPage() {
 
   return (
     <div>
+      <BannerCarousel />
       <input
         value={search}
         onChange={(e) => setSearch(e.target.value)}

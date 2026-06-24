@@ -1,7 +1,8 @@
 import type { Request, Response } from "express";
 import * as storefrontService from "./storefront.service";
 import * as ordersService from "../orders/orders.service";
-import type { ListStorefrontProductsQuery, TrackPageViewInput } from "./storefront.schema";
+import * as bannersService from "../banners/banners.service";
+import type { ListStorefrontProductsQuery, MyOrdersQuery, TrackPageViewInput } from "./storefront.schema";
 import type { CreateOrderInput } from "../orders/orders.schema";
 
 export async function listCategories(req: Request, res: Response): Promise<void> {
@@ -27,4 +28,15 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
 export async function trackPageView(req: Request, res: Response): Promise<void> {
   await storefrontService.trackPageView(req.tenant!.id, req.body as TrackPageViewInput);
   res.status(204).send();
+}
+
+export async function getMyOrders(req: Request, res: Response): Promise<void> {
+  const { phone } = req.query as unknown as MyOrdersQuery;
+  const orders = await storefrontService.getMyOrders(req.tenant!.id, phone);
+  res.json({ orders });
+}
+
+export async function listBanners(req: Request, res: Response): Promise<void> {
+  const banners = await bannersService.listActiveBanners(req.tenant!.id);
+  res.json({ banners });
 }

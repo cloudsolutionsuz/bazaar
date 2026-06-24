@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
+import { normalizePhone } from "../../utils/phone";
 import type { ListStorefrontProductsQuery, TrackPageViewInput } from "./storefront.schema";
 
 const productInclude = {
@@ -60,4 +61,22 @@ export function trackPageView(tenantId: string, input: TrackPageViewInput) {
   return prisma.pageView.create({
     data: { tenantId, sessionId: input.sessionId, path: input.path },
   });
+}
+
+// No OTP/verification by design - phone number alone is the buyer's
+// "mini-account" identity. Anyone who knows the phone number can see that
+// number's order history for this shop; this is a deliberate low-friction
+// trade-off, not an oversight.
+export async function getMyOrders(tenantId: string, rawPhone: string) {
+  const phone = normalizePhone(rawPhone);
+  const customer = await prisma.customer.findUnique({
+    where: { tenantId_phone: { tenantId, phone } },
+    include: {
+      orders: {
+        orderBy: { createdAt: "desc" },
+        include: { items: { include: { variant: { include: { product: true } } } } },
+      },
+    },
+  });
+  return customer?.orders ?? [];
 }

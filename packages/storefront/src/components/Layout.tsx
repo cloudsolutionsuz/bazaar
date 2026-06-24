@@ -24,6 +24,9 @@ export function Layout() {
             Bazaar
           </Link>
           <div className="flex items-center gap-3">
+            <Link to="/my-orders" className="text-sm text-clay-700 hover:underline">
+              {t("myOrders.navLink")}
+            </Link>
             <select
               value={i18n.language}
               onChange={(e) => changeLanguage(e.target.value as "ru" | "uz")}

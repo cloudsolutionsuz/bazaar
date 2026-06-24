@@ -1,6 +1,6 @@
 import { apiRequest } from "./client";
 import { getSessionId } from "../utils/session";
-import type { Category, OrderResult, Paginated, Product } from "../types/api";
+import type { Banner, Category, OrderResult, Paginated, Product } from "../types/api";
 
 export function listCategories(): Promise<{ categories: Category[] }> {
   return apiRequest("/api/storefront/categories");
@@ -24,7 +24,11 @@ export function getProduct(id: string): Promise<{ product: Product }> {
 export interface CheckoutInput {
   customerName: string;
   customerPhone: string;
-  customerAddress?: string;
+  additionalPhones?: string[];
+  addressRegion: string;
+  addressDistrict: string;
+  addressMahalla: string;
+  addressNote?: string;
   paymentMethod?: string;
   items: { variantId: string; quantity: number }[];
 }
@@ -40,4 +44,12 @@ export function trackPageView(path: string): void {
     method: "POST",
     body: { sessionId: getSessionId(), path },
   }).catch(() => {});
+}
+
+export function getMyOrders(phone: string): Promise<{ orders: OrderResult[] }> {
+  return apiRequest("/api/storefront/orders/by-phone", { query: { phone } });
+}
+
+export function listBanners(): Promise<{ banners: Banner[] }> {
+  return apiRequest("/api/storefront/banners");
 }

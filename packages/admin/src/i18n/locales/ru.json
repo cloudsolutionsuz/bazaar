@@ -20,6 +20,7 @@
   "nav": {
     "products": "Товары",
     "inventory": "Склад",
+    "banners": "Баннеры",
     "orders": "Заказы",
     "billing": "Биллинг",
     "employees": "Сотрудники",
@@ -112,6 +113,11 @@
     "date": "Дата",
     "total": "Сумма",
     "address": "Адрес",
+    "additionalPhones": "Доп. телефоны",
+    "region": "Регион",
+    "district": "Город/Район",
+    "mahalla": "Махалля",
+    "addressNote": "Доп. информация",
     "paymentMethod": "Способ оплаты",
     "items": "Состав заказа",
     "statusHistory": "История статусов",
@@ -210,5 +216,16 @@
     "telegramChatId": "Telegram Chat ID",
     "telegramChatIdHint": "Чтобы получать уведомления о новых заказах и низком остатке в Telegram, напишите боту @userinfobot и укажите здесь свой chat ID",
     "saved": "Сохранено"
+  },
+  "banners": {
+    "title": "Баннеры",
+    "add": "Добавить баннер",
+    "image": "Изображение",
+    "linkUrl": "Ссылка (необязательно)",
+    "noLink": "Без ссылки",
+    "active": "Активен",
+    "inactive": "Скрыт",
+    "activate": "Включить",
+    "deactivate": "Скрыть"
   }
 }

@@ -8,6 +8,7 @@ import { AcceptInvitePage } from "./pages/AcceptInvitePage";
 import { ProductsListPage } from "./pages/products/ProductsListPage";
 import { ProductFormPage } from "./pages/products/ProductFormPage";
 import { InventoryPage } from "./pages/inventory/InventoryPage";
+import { BannersPage } from "./pages/banners/BannersPage";
 import { OrdersListPage } from "./pages/orders/OrdersListPage";
 import { OrderDetailPage } from "./pages/orders/OrderDetailPage";
 import { BillingPage } from "./pages/billing/BillingPage";
@@ -42,6 +43,7 @@ export function App() {
                 <Route path="/products" element={<ProductsListPage />} />
                 <Route path="/products/:id" element={<ProductFormPage />} />
                 <Route path="/inventory" element={<InventoryPage />} />
+                <Route path="/banners" element={<BannersPage />} />
                 <Route path="/orders" element={<OrdersListPage />} />
                 <Route path="/orders/:id" element={<OrderDetailPage />} />
                 <Route path="/billing" element={<BillingPage />} />

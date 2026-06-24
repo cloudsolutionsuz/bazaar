@@ -4,6 +4,9 @@ import { useTranslation } from "react-i18next";
 import { useCart } from "../cart/CartContext";
 import * as storefrontApi from "../api/storefront";
 import { ApiError } from "../api/client";
+import { UZBEKISTAN_REGIONS } from "../data/uzbekistanRegions";
+
+const MAX_ADDITIONAL_PHONES = 5;
 
 export function CheckoutPage() {
   const { t } = useTranslation();
@@ -12,10 +15,33 @@ export function CheckoutPage() {
 
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
-  const [customerAddress, setCustomerAddress] = useState("");
+  const [additionalPhones, setAdditionalPhones] = useState<string[]>([]);
+  const [addressRegion, setAddressRegion] = useState("");
+  const [addressDistrict, setAddressDistrict] = useState("");
+  const [addressMahalla, setAddressMahalla] = useState("");
+  const [addressNote, setAddressNote] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("cash");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const districts = UZBEKISTAN_REGIONS.find((r) => r.code === addressRegion)?.districts ?? [];
+
+  function handleRegionChange(code: string) {
+    setAddressRegion(code);
+    setAddressDistrict("");
+  }
+
+  function addPhoneField() {
+    setAdditionalPhones((phones) => [...phones, ""]);
+  }
+
+  function updatePhoneField(index: number, value: string) {
+    setAdditionalPhones((phones) => phones.map((p, i) => (i === index ? value : p)));
+  }
+
+  function removePhoneField(index: number) {
+    setAdditionalPhones((phones) => phones.filter((_, i) => i !== index));
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -25,7 +51,11 @@ export function CheckoutPage() {
       const result = await storefrontApi.placeOrder({
         customerName,
         customerPhone,
-        customerAddress: customerAddress || undefined,
+        additionalPhones: additionalPhones.filter((p) => p.trim() !== ""),
+        addressRegion,
+        addressDistrict,
+        addressMahalla,
+        addressNote: addressNote || undefined,
         paymentMethod: paymentMethod === "cash" ? t("checkout.paymentCash") : t("checkout.paymentCard"),
         items: items.map((i) => ({ variantId: i.variantId, quantity: i.quantity })),
       });
@@ -62,6 +92,7 @@ export function CheckoutPage() {
             className="w-full rounded-md border border-clay-200 px-3 py-2 text-sm focus:border-clay-500 focus:outline-none"
           />
         </div>
+
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">{t("checkout.phone")}</label>
           <input
@@ -71,14 +102,91 @@ export function CheckoutPage() {
             className="w-full rounded-md border border-clay-200 px-3 py-2 text-sm focus:border-clay-500 focus:outline-none"
           />
         </div>
+
+        {additionalPhones.map((phone, index) => (
+          <div key={index} className="flex items-end gap-2">
+            <div className="flex-1">
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t("checkout.additionalPhone")}</label>
+              <input
+                value={phone}
+                onChange={(e) => updatePhoneField(index, e.target.value)}
+                className="w-full rounded-md border border-clay-200 px-3 py-2 text-sm focus:border-clay-500 focus:outline-none"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => removePhoneField(index)}
+              className="rounded-md border border-clay-200 px-3 py-2 text-sm text-gray-500 hover:bg-clay-50"
+            >
+              ×
+            </button>
+          </div>
+        ))}
+        {additionalPhones.length < MAX_ADDITIONAL_PHONES && (
+          <button type="button" onClick={addPhoneField} className="text-sm text-clay-600 hover:underline">
+            + {t("checkout.addPhone")}
+          </button>
+        )}
+
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">{t("checkout.address")}</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700">{t("checkout.region")}</label>
+          <select
+            required
+            value={addressRegion}
+            onChange={(e) => handleRegionChange(e.target.value)}
+            className="w-full rounded-md border border-clay-200 px-3 py-2 text-sm focus:border-clay-500 focus:outline-none"
+          >
+            <option value="" disabled>
+              {t("checkout.regionPlaceholder")}
+            </option>
+            {UZBEKISTAN_REGIONS.map((region) => (
+              <option key={region.code} value={region.code}>
+                {region.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">{t("checkout.district")}</label>
+          <select
+            required
+            disabled={!addressRegion}
+            value={addressDistrict}
+            onChange={(e) => setAddressDistrict(e.target.value)}
+            className="w-full rounded-md border border-clay-200 px-3 py-2 text-sm focus:border-clay-500 focus:outline-none disabled:bg-clay-50"
+          >
+            <option value="" disabled>
+              {t("checkout.districtPlaceholder")}
+            </option>
+            {districts.map((district) => (
+              <option key={district.code} value={district.code}>
+                {district.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">{t("checkout.mahalla")}</label>
           <input
-            value={customerAddress}
-            onChange={(e) => setCustomerAddress(e.target.value)}
+            required
+            value={addressMahalla}
+            onChange={(e) => setAddressMahalla(e.target.value)}
             className="w-full rounded-md border border-clay-200 px-3 py-2 text-sm focus:border-clay-500 focus:outline-none"
           />
         </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">{t("checkout.addressNote")}</label>
+          <textarea
+            value={addressNote}
+            onChange={(e) => setAddressNote(e.target.value)}
+            rows={2}
+            className="w-full rounded-md border border-clay-200 px-3 py-2 text-sm focus:border-clay-500 focus:outline-none"
+          />
+        </div>
+
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">{t("checkout.paymentMethod")}</label>
           <div className="flex gap-4 text-sm">

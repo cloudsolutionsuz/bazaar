@@ -5,6 +5,7 @@ import { createApp } from "../src/app";
 import { prisma } from "../src/db/prisma";
 import { registerAndLoginSeller, type TestSeller } from "./helpers/registerTenant";
 import { deleteTenantCompletely } from "./helpers/cleanupTenant";
+import { DEFAULT_ADDRESS } from "./helpers/orderFixtures";
 
 const describeWithDb = process.env.SKIP_DB_TESTS ? describe.skip : describe;
 
@@ -122,7 +123,7 @@ describeWithDb("products / inventory / orders (integration)", () => {
       const variant = created.body.product.variants[0];
 
       await request(app).post("/api/orders").set(auth()).send({
-        customerName: "Buyer", customerPhone: "+998901234567",
+        customerName: "Buyer", customerPhone: "+998901234567", ...DEFAULT_ADDRESS,
         items: [{ variantId: variant.id, quantity: 1 }],
       });
 
@@ -171,7 +172,7 @@ describeWithDb("products / inventory / orders (integration)", () => {
       const variant = created.body.product.variants[0];
 
       const order = await request(app).post("/api/orders").set(auth()).send({
-        customerName: "Jamshid", customerPhone: "+998901112233", paymentMethod: "cash",
+        customerName: "Jamshid", customerPhone: "+998901112233", paymentMethod: "cash", ...DEFAULT_ADDRESS,
         items: [{ variantId: variant.id, quantity: 4 }],
       });
 
@@ -191,7 +192,7 @@ describeWithDb("products / inventory / orders (integration)", () => {
       const variant = created.body.product.variants[0];
 
       const res = await request(app).post("/api/orders").set(auth()).send({
-        customerName: "Buyer", customerPhone: "+998900000000",
+        customerName: "Buyer", customerPhone: "+998900000000", ...DEFAULT_ADDRESS,
         items: [{ variantId: variant.id, quantity: 5 }],
       });
 
@@ -206,7 +207,7 @@ describeWithDb("products / inventory / orders (integration)", () => {
       const variant = created.body.product.variants[0];
 
       const order = await request(app).post("/api/orders").set(auth()).send({
-        customerName: "Buyer", customerPhone: "+998900000001",
+        customerName: "Buyer", customerPhone: "+998900000001", ...DEFAULT_ADDRESS,
         items: [{ variantId: variant.id, quantity: 3 }],
       });
       const orderId = order.body.order.id;

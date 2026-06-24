@@ -104,7 +104,11 @@ export interface Order {
   tenantId: string;
   customerName: string;
   customerPhone: string;
-  customerAddress: string | null;
+  additionalPhones: string[];
+  addressRegion: string | null;
+  addressDistrict: string | null;
+  addressMahalla: string | null;
+  addressNote: string | null;
   status: OrderStatus;
   paymentMethod: string | null;
   totalAmount: number;
@@ -212,6 +216,14 @@ export interface TenantWithRelations extends Tenant {
   plan: Plan;
   users: User[];
   invoices: BillingInvoice[];
+}
+
+export interface Banner {
+  id: string;
+  imageUrl: string;
+  linkUrl: string | null;
+  position: number;
+  isActive: boolean;
 }
 
 export interface PlatformStats {

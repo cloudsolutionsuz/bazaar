@@ -30,7 +30,14 @@
     "title": "Buyurtmani rasmiylashtirish",
     "name": "Ismingiz",
     "phone": "Telefon",
-    "address": "Yetkazib berish manzili",
+    "additionalPhone": "Qo'shimcha raqam",
+    "addPhone": "Telefon raqami qo'shish",
+    "region": "Viloyat",
+    "regionPlaceholder": "Viloyatni tanlang",
+    "district": "Shahar/Tuman",
+    "districtPlaceholder": "Shahar/tumanni tanlang",
+    "mahalla": "Mahalla",
+    "addressNote": "Qo'shimcha ma'lumot (uy, kirish, mo'ljal)",
     "paymentMethod": "To'lov usuli",
     "paymentCash": "Yetkazib berishda naqd",
     "paymentCard": "Yetkazib berishda karta",
@@ -43,6 +50,20 @@
     "message": "Sotuvchi tasdiqlash uchun siz bilan telefon orqali bog'lanadi",
     "orderNumber": "Buyurtma raqami",
     "total": "Summa",
-    "backToShop": "Do'konga qaytish"
+    "backToShop": "Do'konga qaytish",
+    "viewMyOrders": "Mening buyurtmalarim"
+  },
+  "myOrders": {
+    "navLink": "Mening buyurtmalarim",
+    "title": "Mening buyurtmalarim",
+    "hint": "Buyurtma berishda ko'rsatgan telefon raqamingizni kiriting",
+    "search": "Qidirish",
+    "empty": "Buyurtmalar topilmadi",
+    "statusNew": "Yangi",
+    "statusProcessing": "Ishlanmoqda",
+    "statusShipped": "Yuborildi",
+    "statusDelivered": "Yetkazildi",
+    "statusCancelled": "Bekor qilindi",
+    "statusRefunded": "Qaytarildi"
   }
 }

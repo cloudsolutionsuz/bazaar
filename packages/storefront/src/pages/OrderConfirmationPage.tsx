@@ -25,9 +25,14 @@ export function OrderConfirmationPage() {
         </div>
       </div>
 
-      <Link to="/" className="inline-block rounded-md bg-clay-600 px-4 py-2 text-sm font-medium text-white hover:bg-clay-700">
-        {t("confirmation.backToShop")}
-      </Link>
+      <div className="flex items-center justify-center gap-3">
+        <Link to="/" className="inline-block rounded-md bg-clay-600 px-4 py-2 text-sm font-medium text-white hover:bg-clay-700">
+          {t("confirmation.backToShop")}
+        </Link>
+        <Link to="/my-orders" className="inline-block rounded-md border border-clay-200 px-4 py-2 text-sm font-medium text-clay-700 hover:bg-clay-50">
+          {t("confirmation.viewMyOrders")}
+        </Link>
+      </div>
     </div>
   );
 }

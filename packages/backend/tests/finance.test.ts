@@ -4,6 +4,7 @@ import { createApp } from "../src/app";
 import { prisma } from "../src/db/prisma";
 import { registerAndLoginSeller, type TestSeller } from "./helpers/registerTenant";
 import { deleteTenantCompletely } from "./helpers/cleanupTenant";
+import { DEFAULT_ADDRESS } from "./helpers/orderFixtures";
 
 const describeWithDb = process.env.SKIP_DB_TESTS ? describe.skip : describe;
 
@@ -68,6 +69,7 @@ describeWithDb("finance (integration)", () => {
     const order = await request(app).post("/api/orders").set(auth()).send({
       customerName: "Finance Buyer",
       customerPhone: "+998900000111",
+      ...DEFAULT_ADDRESS,
       items: [{ variantId, quantity: 2 }],
     });
     expect(order.status).toBe(201);
@@ -93,6 +95,7 @@ describeWithDb("finance (integration)", () => {
     const activeOrder = await request(app).post("/api/orders").set(auth()).send({
       customerName: "PnL Buyer",
       customerPhone: "+998900000222",
+      ...DEFAULT_ADDRESS,
       items: [{ variantId, quantity: 3 }],
     });
     expect(activeOrder.status).toBe(201);
@@ -142,6 +145,7 @@ describeWithDb("finance (integration)", () => {
     const firstSale = await request(app).post("/api/orders").set(auth()).send({
       customerName: "FIFO Buyer 1",
       customerPhone: "+998900000333",
+      ...DEFAULT_ADDRESS,
       items: [{ variantId: fifoVariantId, quantity: 7 }],
     });
     expect(firstSale.status).toBe(201);
@@ -151,6 +155,7 @@ describeWithDb("finance (integration)", () => {
     const secondSale = await request(app).post("/api/orders").set(auth()).send({
       customerName: "FIFO Buyer 2",
       customerPhone: "+998900000444",
+      ...DEFAULT_ADDRESS,
       items: [{ variantId: fifoVariantId, quantity: 2 }],
     });
     expect(secondSale.status).toBe(201);
