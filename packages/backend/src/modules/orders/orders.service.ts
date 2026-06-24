@@ -3,6 +3,7 @@ import { Prisma, type OrderStatus } from "@prisma/client";
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
 import { assertWithinPlanLimit } from "../plans/limits";
+import { notifyLowStock, notifyNewOrder } from "../../utils/notifications";
 import type { CreateOrderInput, ListOrdersQuery } from "./orders.schema";
 
 const orderInclude = {
@@ -144,6 +145,21 @@ export async function createOrder(tenantId: string, userId: string | null, input
 
     return order.id;
   });
+
+  const tenant = await prisma.tenant.findUnique({ where: { id: tenantId }, select: { telegramChatId: true } });
+  const chatId = tenant?.telegramChatId ?? null;
+
+  await notifyNewOrder(chatId, input.customerName, totalAmount);
+
+  for (const item of orderItemsData) {
+    const variant = variantById.get(item.variantId)!;
+    const stockBefore = variant.stockQuantity;
+    const stockAfter = stockBefore - item.quantity;
+    const threshold = variant.lowStockThreshold;
+    if (threshold !== null && stockBefore > threshold && stockAfter <= threshold) {
+      await notifyLowStock(chatId, variant.sku, stockAfter);
+    }
+  }
 
   return getOrder(tenantId, orderId);
 }

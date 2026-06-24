@@ -12,6 +12,7 @@ import { OrdersListPage } from "./pages/orders/OrdersListPage";
 import { OrderDetailPage } from "./pages/orders/OrderDetailPage";
 import { BillingPage } from "./pages/billing/BillingPage";
 import { EmployeesPage } from "./pages/employees/EmployeesPage";
+import { SettingsPage } from "./pages/SettingsPage";
 import { KassaPage } from "./pages/finance/KassaPage";
 import { ReportsPage } from "./pages/finance/ReportsPage";
 import { TenantsListPage } from "./pages/platform/TenantsListPage";
@@ -45,6 +46,7 @@ export function App() {
                 <Route path="/orders/:id" element={<OrderDetailPage />} />
                 <Route path="/billing" element={<BillingPage />} />
                 <Route path="/employees" element={<EmployeesPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/kassa" element={<KassaPage />} />
                 <Route path="/reports" element={<ReportsPage />} />
                 <Route path="/platform/tenants" element={<TenantsListPage />} />

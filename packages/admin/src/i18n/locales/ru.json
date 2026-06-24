@@ -27,6 +27,7 @@
     "reports": "Отчёты",
     "tenants": "Магазины",
     "plans": "Тарифы",
+    "settings": "Настройки",
     "logout": "Выйти"
   },
   "login": {
@@ -201,5 +202,11 @@
     "maxOrdersPerMonth": "Лимит заказов/мес",
     "maxEmployees": "Лимит сотрудников",
     "unlimited": "Без лимита"
+  },
+  "settings": {
+    "title": "Настройки",
+    "telegramChatId": "Telegram Chat ID",
+    "telegramChatIdHint": "Чтобы получать уведомления о новых заказах и низком остатке в Telegram, напишите боту @userinfobot и укажите здесь свой chat ID",
+    "saved": "Сохранено"
   }
 }

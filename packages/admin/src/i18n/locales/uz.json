@@ -27,6 +27,7 @@
     "reports": "Hisobotlar",
     "tenants": "Do'konlar",
     "plans": "Tariflar",
+    "settings": "Sozlamalar",
     "logout": "Chiqish"
   },
   "login": {
@@ -201,5 +202,11 @@
     "maxOrdersPerMonth": "Oylik buyurtmalar chegarasi",
     "maxEmployees": "Xodimlar chegarasi",
     "unlimited": "Cheklanmagan"
+  },
+  "settings": {
+    "title": "Sozlamalar",
+    "telegramChatId": "Telegram Chat ID",
+    "telegramChatIdHint": "Yangi buyurtmalar va past qoldiq haqida Telegram orqali xabar olish uchun @userinfobot botiga yozing va chat ID'ingizni shu yerga kiriting",
+    "saved": "Saqlandi"
   }
 }

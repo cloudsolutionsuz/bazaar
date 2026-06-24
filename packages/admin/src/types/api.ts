@@ -11,6 +11,7 @@ export interface Tenant {
   status: TenantStatus;
   planId: string;
   trialEndsAt: string | null;
+  telegramChatId: string | null;
   createdAt: string;
 }
 

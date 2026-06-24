@@ -1,0 +1,47 @@
+# Production reference compose file - NOT deployed or tested against a real
+# VPS yet (see project notes: no domain/server provisioned). Frontends
+# (admin/storefront/landing) are intentionally not containerized here - they
+# build to static files (`npm run build` in each package) and are served
+# directly by the host's nginx (see nginx/bazaar.conf), which is simpler
+# than running three extra nginx-in-Docker containers for static assets at
+# this project's scale.
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: bazaar
+      POSTGRES_PASSWORD: bazaar
+      POSTGRES_DB: bazaar
+    volumes:
+      - bazaar_postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - bazaar_redis_data:/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: packages/backend/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - packages/backend/.env
+    environment:
+      # Inside the Docker network the DB is reached by service name, not
+      # localhost - overrides whatever DATABASE_URL is in the .env file.
+      DATABASE_URL: postgresql://bazaar:bazaar@postgres:5432/bazaar?schema=public
+    ports:
+      - "4000:4000"
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - bazaar_uploads:/app/packages/backend/uploads
+
+volumes:
+  bazaar_postgres_data:
+  bazaar_redis_data:
+  bazaar_uploads:

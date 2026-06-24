@@ -90,6 +90,7 @@ model Tenant {
   planId       String
   plan         Plan         @relation(fields: [planId], references: [id])
   trialEndsAt  DateTime?
+  telegramChatId String?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
