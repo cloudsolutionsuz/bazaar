@@ -6,6 +6,7 @@ import * as financeApi from "../../api/finance";
 import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
 import { Table, Thead, Tbody, Th, Td } from "../../components/ui/Table";
+import { StatCard } from "../../components/ui/StatCard";
 
 type Tab = "analytics" | "pnl";
 type Granularity = "day" | "week" | "month";
@@ -80,30 +81,6 @@ export function ReportsPage() {
       </div>
 
       {tab === "pnl" ? <PnLTab from={from} to={to} /> : <AnalyticsTab from={from} to={to} granularity={granularity} />}
-    </div>
-  );
-}
-
-function StatCard({
-  label,
-  value,
-  highlight = false,
-  isCount = false,
-  suffix = "",
-}: {
-  label: string;
-  value: number;
-  highlight?: boolean;
-  isCount?: boolean;
-  suffix?: string;
-}) {
-  return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4">
-      <div className="text-sm text-gray-500">{label}</div>
-      <div className={`text-xl font-semibold ${highlight ? (value >= 0 ? "text-green-600" : "text-red-600") : "text-gray-900"}`}>
-        {isCount ? value : value.toLocaleString()}
-        {suffix}
-      </div>
     </div>
   );
 }

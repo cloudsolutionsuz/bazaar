@@ -12,6 +12,9 @@ export interface Tenant {
   planId: string;
   trialEndsAt: string | null;
   telegramChatId: string | null;
+  logoUrl: string | null;
+  themeColor: string | null;
+  description: string | null;
   createdAt: string;
 }
 
@@ -116,6 +119,23 @@ export interface Order {
   statusHistory: OrderStatusHistoryEntry[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface Customer {
+  id: string;
+  phone: string;
+  name: string;
+  orderCount: number;
+  totalSpent: number;
+  lastOrderAt: string | null;
+  createdAt: string;
+}
+
+export interface DashboardSummary {
+  today: { revenue: number; orderCount: number };
+  week: { revenue: number; orderCount: number };
+  lowStockCount: number;
+  recentOrders: Order[];
 }
 
 export interface Paginated<T> {

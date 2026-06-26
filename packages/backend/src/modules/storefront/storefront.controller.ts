@@ -40,3 +40,8 @@ export async function listBanners(req: Request, res: Response): Promise<void> {
   const banners = await bannersService.listActiveBanners(req.tenant!.id);
   res.json({ banners });
 }
+
+export async function getMeta(req: Request, res: Response): Promise<void> {
+  const { name, logoUrl, themeColor, description } = req.tenant!;
+  res.json({ name, logoUrl, themeColor, description });
+}

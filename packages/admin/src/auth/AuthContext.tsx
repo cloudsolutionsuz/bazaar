@@ -9,6 +9,7 @@ interface AuthState {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  refreshTenant: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
@@ -56,7 +57,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setTenant(null);
   }
 
-  return <AuthContext.Provider value={{ user, tenant, loading, login, logout }}>{children}</AuthContext.Provider>;
+  async function refreshTenant(): Promise<void> {
+    const me = await authApi.fetchMe();
+    setTenant(me.tenant);
+  }
+
+  return (
+    <AuthContext.Provider value={{ user, tenant, loading, login, logout, refreshTenant }}>{children}</AuthContext.Provider>
+  );
 }
 
 export function useAuth(): AuthState {

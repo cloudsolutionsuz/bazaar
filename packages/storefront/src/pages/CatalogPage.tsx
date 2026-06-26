@@ -6,34 +6,66 @@ import * as storefrontApi from "../api/storefront";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import { BannerCarousel } from "../components/BannerCarousel";
 
+const PAGE_SIZE = 24;
+
 export function CatalogPage() {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [sort, setSort] = useState<"newest" | "price_asc" | "price_desc">("newest");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [page, setPage] = useState(1);
   const debouncedSearch = useDebouncedValue(search);
+  const debouncedMinPrice = useDebouncedValue(minPrice);
+  const debouncedMaxPrice = useDebouncedValue(maxPrice);
+
+  const metaQuery = useQuery({ queryKey: ["tenant-meta"], queryFn: storefrontApi.getMeta });
+  const accentStyle = metaQuery.data?.themeColor ? { backgroundColor: metaQuery.data.themeColor } : undefined;
 
   const categoriesQuery = useQuery({ queryKey: ["categories"], queryFn: storefrontApi.listCategories });
   const productsQuery = useQuery({
-    queryKey: ["products", { search: debouncedSearch, categoryId }],
+    queryKey: ["products", { search: debouncedSearch, categoryId, sort, minPrice: debouncedMinPrice, maxPrice: debouncedMaxPrice, page }],
     queryFn: () =>
-      storefrontApi.listProducts({ search: debouncedSearch || undefined, categoryId: categoryId || undefined, pageSize: 50 }),
+      storefrontApi.listProducts({
+        search: debouncedSearch || undefined,
+        categoryId: categoryId || undefined,
+        sort,
+        minPrice: debouncedMinPrice ? Number(debouncedMinPrice) : undefined,
+        maxPrice: debouncedMaxPrice ? Number(debouncedMaxPrice) : undefined,
+        page,
+        pageSize: PAGE_SIZE,
+      }),
   });
 
   const products = productsQuery.data?.items ?? [];
+  const total = productsQuery.data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  function resetToFirstPage() {
+    setPage(1);
+  }
 
   return (
     <div>
       <BannerCarousel />
       <input
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          resetToFirstPage();
+        }}
         placeholder={t("catalog.searchPlaceholder")}
         className="mb-4 w-full rounded-lg border border-clay-200 bg-white px-4 py-3 text-sm focus:border-clay-500 focus:outline-none"
       />
 
-      <div className="mb-6 flex flex-wrap gap-2">
+      <div className="mb-4 flex flex-wrap gap-2">
         <button
-          onClick={() => setCategoryId("")}
+          onClick={() => {
+            setCategoryId("");
+            resetToFirstPage();
+          }}
+          style={categoryId === "" ? accentStyle : undefined}
           className={`rounded-full px-3 py-1 text-sm ${categoryId === "" ? "bg-clay-600 text-white" : "bg-clay-100 text-clay-700"}`}
         >
           {t("common.all")}
@@ -41,12 +73,53 @@ export function CatalogPage() {
         {categoriesQuery.data?.categories.map((c) => (
           <button
             key={c.id}
-            onClick={() => setCategoryId(c.id)}
+            onClick={() => {
+              setCategoryId(c.id);
+              resetToFirstPage();
+            }}
+            style={categoryId === c.id ? accentStyle : undefined}
             className={`rounded-full px-3 py-1 text-sm ${categoryId === c.id ? "bg-clay-600 text-white" : "bg-clay-100 text-clay-700"}`}
           >
             {c.name}
           </button>
         ))}
+      </div>
+
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <select
+          value={sort}
+          onChange={(e) => {
+            setSort(e.target.value as typeof sort);
+            resetToFirstPage();
+          }}
+          className="rounded-md border border-clay-200 bg-white px-3 py-2 text-sm text-clay-700"
+        >
+          <option value="newest">{t("catalog.sortNewest")}</option>
+          <option value="price_asc">{t("catalog.sortPriceAsc")}</option>
+          <option value="price_desc">{t("catalog.sortPriceDesc")}</option>
+        </select>
+        <input
+          type="number"
+          min={0}
+          value={minPrice}
+          onChange={(e) => {
+            setMinPrice(e.target.value);
+            resetToFirstPage();
+          }}
+          placeholder={t("catalog.priceFrom")}
+          className="w-28 rounded-md border border-clay-200 bg-white px-3 py-2 text-sm focus:border-clay-500 focus:outline-none"
+        />
+        <input
+          type="number"
+          min={0}
+          value={maxPrice}
+          onChange={(e) => {
+            setMaxPrice(e.target.value);
+            resetToFirstPage();
+          }}
+          placeholder={t("catalog.priceTo")}
+          className="w-28 rounded-md border border-clay-200 bg-white px-3 py-2 text-sm focus:border-clay-500 focus:outline-none"
+        />
       </div>
 
       {products.length === 0 ? (
@@ -77,6 +150,30 @@ export function CatalogPage() {
               </Link>
             );
           })}
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="mt-6 flex items-center justify-between text-sm text-clay-700">
+          <span>
+            {t("catalog.page")} {page} / {totalPages}
+          </span>
+          <div className="flex gap-2">
+            <button
+              disabled={page <= 1}
+              onClick={() => setPage((p) => p - 1)}
+              className="rounded-md bg-clay-100 px-3 py-1.5 text-clay-700 disabled:opacity-30"
+            >
+              ←
+            </button>
+            <button
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => p + 1)}
+              className="rounded-md bg-clay-100 px-3 py-1.5 text-clay-700 disabled:opacity-30"
+            >
+              →
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -5,6 +5,8 @@ import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { Layout } from "./components/Layout";
 import { LoginPage } from "./pages/LoginPage";
 import { AcceptInvitePage } from "./pages/AcceptInvitePage";
+import { DashboardPage } from "./pages/DashboardPage";
+import { CustomersListPage } from "./pages/customers/CustomersListPage";
 import { ProductsListPage } from "./pages/products/ProductsListPage";
 import { ProductFormPage } from "./pages/products/ProductFormPage";
 import { InventoryPage } from "./pages/inventory/InventoryPage";
@@ -24,9 +26,13 @@ const queryClient = new QueryClient();
 
 // SUPER_ADMIN has no tenant, so the tenant-scoped pages (/products etc.)
 // would error out for them - send each role to its own home page instead.
+// CASHIER has no access to /dashboard or /products (both OWNER/MANAGER-only
+// on the backend), so it gets its own landing page among the pages it can use.
 function RoleHome() {
   const { user } = useAuth();
-  return <Navigate to={user?.role === "SUPER_ADMIN" ? "/platform/tenants" : "/products"} replace />;
+  if (user?.role === "SUPER_ADMIN") return <Navigate to="/platform/tenants" replace />;
+  if (user?.role === "CASHIER") return <Navigate to="/orders" replace />;
+  return <Navigate to="/dashboard" replace />;
 }
 
 export function App() {
@@ -40,6 +46,8 @@ export function App() {
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
                 <Route path="/" element={<RoleHome />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/customers" element={<CustomersListPage />} />
                 <Route path="/products" element={<ProductsListPage />} />
                 <Route path="/products/:id" element={<ProductFormPage />} />
                 <Route path="/inventory" element={<InventoryPage />} />

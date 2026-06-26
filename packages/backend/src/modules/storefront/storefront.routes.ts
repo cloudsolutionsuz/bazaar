@@ -16,6 +16,7 @@ storefrontRouter.get("/products/:id", asyncHandler(storefrontController.getProdu
 storefrontRouter.post("/orders", validateBody(createOrderSchema), asyncHandler(storefrontController.createOrder));
 storefrontRouter.get("/orders/by-phone", validateQuery(myOrdersQuerySchema), asyncHandler(storefrontController.getMyOrders));
 storefrontRouter.get("/banners", asyncHandler(storefrontController.listBanners));
+storefrontRouter.get("/meta", asyncHandler(storefrontController.getMeta));
 storefrontRouter.post(
   "/analytics/track",
   validateBody(trackPageViewSchema),

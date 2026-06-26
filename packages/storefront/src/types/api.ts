@@ -71,6 +71,13 @@ export interface Banner {
   position: number;
 }
 
+export interface TenantMeta {
+  name: string;
+  logoUrl: string | null;
+  themeColor: string | null;
+  description: string | null;
+}
+
 export interface ApiErrorBody {
   error: { code: string; message: string };
 }

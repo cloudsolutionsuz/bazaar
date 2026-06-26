@@ -114,4 +114,32 @@ describeWithDb("customers (mini-account by phone, integration)", () => {
     expect(res.status).toBe(201);
     expect(res.body.order.additionalPhones).toEqual(["998900002223", "998900002224"]);
   });
+
+  it("lists customers for the admin with order count/total spent, excluding cancelled/refunded orders", async () => {
+    const cancelledBuyer = await request(app)
+      .post("/api/storefront/orders")
+      .set("Host", host)
+      .send({
+        customerName: "Cancels Everything",
+        customerPhone: "+998900003333",
+        ...DEFAULT_ADDRESS,
+        items: [{ variantId, quantity: 1 }],
+      });
+    await request(app)
+      .patch(`/api/orders/${cancelledBuyer.body.order.id}/status`)
+      .set(auth())
+      .send({ status: "CANCELLED" });
+
+    const list = await request(app).get("/api/customers").set(auth()).query({ search: "Aziz" });
+    expect(list.status).toBe(200);
+    expect(list.body.items).toHaveLength(1);
+    const aziz = list.body.items[0];
+    expect(aziz.name).toBe("Aziz Karimov");
+    expect(aziz.orderCount).toBe(2);
+    expect(aziz.totalSpent).toBe(30000);
+
+    const cancelled = await request(app).get("/api/customers").set(auth()).query({ search: "Cancels" });
+    expect(cancelled.body.items[0].orderCount).toBe(0);
+    expect(cancelled.body.items[0].totalSpent).toBe(0);
+  });
 });

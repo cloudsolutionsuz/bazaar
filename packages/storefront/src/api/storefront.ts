@@ -1,6 +1,6 @@
 import { apiRequest } from "./client";
 import { getSessionId } from "../utils/session";
-import type { Banner, Category, OrderResult, Paginated, Product } from "../types/api";
+import type { Banner, Category, OrderResult, Paginated, Product, TenantMeta } from "../types/api";
 
 export function listCategories(): Promise<{ categories: Category[] }> {
   return apiRequest("/api/storefront/categories");
@@ -9,6 +9,9 @@ export function listCategories(): Promise<{ categories: Category[] }> {
 export interface ListProductsParams {
   categoryId?: string;
   search?: string;
+  sort?: "newest" | "price_asc" | "price_desc";
+  minPrice?: number;
+  maxPrice?: number;
   page?: number;
   pageSize?: number;
 }
@@ -52,4 +55,8 @@ export function getMyOrders(phone: string): Promise<{ orders: OrderResult[] }> {
 
 export function listBanners(): Promise<{ banners: Banner[] }> {
   return apiRequest("/api/storefront/banners");
+}
+
+export function getMeta(): Promise<TenantMeta> {
+  return apiRequest("/api/storefront/meta");
 }

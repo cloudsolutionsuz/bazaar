@@ -30,13 +30,19 @@ export async function listProducts(tenantId: string, query: ListStorefrontProduc
           ],
         }
       : {}),
+    ...(query.minPrice !== undefined || query.maxPrice !== undefined
+      ? { price: { ...(query.minPrice !== undefined ? { gte: query.minPrice } : {}), ...(query.maxPrice !== undefined ? { lte: query.maxPrice } : {}) } }
+      : {}),
   };
+
+  const orderBy: Prisma.ProductOrderByWithRelationInput =
+    query.sort === "price_asc" ? { price: "asc" } : query.sort === "price_desc" ? { price: "desc" } : { createdAt: "desc" };
 
   const [items, total] = await Promise.all([
     prisma.product.findMany({
       where,
       include: productInclude,
-      orderBy: { createdAt: "desc" },
+      orderBy,
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),

@@ -5,6 +5,9 @@ import { asyncHandler } from "../../utils/asyncHandler";
 import { requireAuth } from "../../middleware/requireAuth";
 import { requireRole } from "../../middleware/requireRole";
 import { validateBody } from "../../middleware/validate";
+import { uploadLogoImage } from "../../middleware/upload";
+import { saveCompressedImage, deleteStoredImage } from "../../utils/imageStorage";
+import { AppError } from "../../middleware/errorHandler";
 import { isValidSubdomain } from "./constants";
 
 export const tenantsRouter = Router();
@@ -25,7 +28,13 @@ tenantsRouter.get(
 );
 
 const updateMySettingsSchema = z.object({
-  telegramChatId: z.string().trim().max(64).nullable(),
+  telegramChatId: z.string().trim().max(64).nullable().optional(),
+  themeColor: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/)
+    .nullable()
+    .optional(),
+  description: z.string().trim().max(1000).nullable().optional(),
 });
 
 tenantsRouter.patch(
@@ -34,10 +43,37 @@ tenantsRouter.patch(
   requireRole("OWNER"),
   validateBody(updateMySettingsSchema),
   asyncHandler(async (req, res) => {
-    const telegramChatId = (req.body.telegramChatId as string | null) || null;
+    const { telegramChatId, themeColor, description } = req.body as z.infer<typeof updateMySettingsSchema>;
     const tenant = await prisma.tenant.update({
       where: { id: req.authUser!.tenantId! },
-      data: { telegramChatId },
+      data: {
+        ...(telegramChatId !== undefined ? { telegramChatId: telegramChatId || null } : {}),
+        ...(themeColor !== undefined ? { themeColor } : {}),
+        ...(description !== undefined ? { description: description || null } : {}),
+      },
+    });
+    res.json({ tenant });
+  }),
+);
+
+tenantsRouter.post(
+  "/me/logo",
+  requireAuth(),
+  requireRole("OWNER"),
+  uploadLogoImage,
+  asyncHandler(async (req, res) => {
+    const file = req.file;
+    if (!file) {
+      throw new AppError(400, "NO_FILE", "No image file was uploaded");
+    }
+    const existing = await prisma.tenant.findUnique({ where: { id: req.authUser!.tenantId! } });
+    const logoUrl = await saveCompressedImage(file.buffer);
+    if (existing?.logoUrl) {
+      await deleteStoredImage(existing.logoUrl);
+    }
+    const tenant = await prisma.tenant.update({
+      where: { id: req.authUser!.tenantId! },
+      data: { logoUrl },
     });
     res.json({ tenant });
   }),

@@ -26,6 +26,9 @@ export function Layout() {
         <nav className="space-y-1">
           {STAFF_AND_MANAGEMENT_ROLES.has(role) && (
             <>
+              <NavLink to="/dashboard" className={navItemClass}>
+                {t("nav.dashboard")}
+              </NavLink>
               <NavLink to="/products" className={navItemClass}>
                 {t("nav.products")}
               </NavLink>
@@ -34,6 +37,9 @@ export function Layout() {
               </NavLink>
               <NavLink to="/banners" className={navItemClass}>
                 {t("nav.banners")}
+              </NavLink>
+              <NavLink to="/customers" className={navItemClass}>
+                {t("nav.customers")}
               </NavLink>
             </>
           )}

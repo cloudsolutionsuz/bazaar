@@ -10,7 +10,13 @@
   "catalog": {
     "searchPlaceholder": "Nimani qidirmoqdasiz?",
     "outOfStock": "Qolmagan",
-    "addToCart": "Savatga"
+    "addToCart": "Savatga",
+    "sortNewest": "Avval yangilari",
+    "sortPriceAsc": "Avval arzonlari",
+    "sortPriceDesc": "Avval qimmatlari",
+    "priceFrom": "Narx dan",
+    "priceTo": "Narx gacha",
+    "page": "Bet"
   },
   "product": {
     "description": "Tavsifi",

@@ -18,9 +18,11 @@
     "noData": "Нет данных"
   },
   "nav": {
+    "dashboard": "Дашборд",
     "products": "Товары",
     "inventory": "Склад",
     "banners": "Баннеры",
+    "customers": "Покупатели",
     "orders": "Заказы",
     "billing": "Биллинг",
     "employees": "Сотрудники",
@@ -215,7 +217,32 @@
     "title": "Настройки",
     "telegramChatId": "Telegram Chat ID",
     "telegramChatIdHint": "Чтобы получать уведомления о новых заказах и низком остатке в Telegram, напишите боту @userinfobot и укажите здесь свой chat ID",
+    "logo": "Логотип магазина",
+    "noLogo": "Нет лого",
+    "uploadLogo": "Загрузить логотип",
+    "themeColor": "Цвет магазина",
+    "description": "Описание магазина",
     "saved": "Сохранено"
+  },
+  "dashboard": {
+    "title": "Дашборд",
+    "revenueToday": "Выручка сегодня",
+    "ordersToday": "Заказов сегодня",
+    "revenueWeek": "Выручка за неделю",
+    "ordersWeek": "Заказов за неделю",
+    "lowStockWarning": "Низкий остаток у {{count}} товаров",
+    "recentOrders": "Последние заказы",
+    "allOrders": "Все заказы"
+  },
+  "customers": {
+    "title": "Покупатели",
+    "searchPlaceholder": "Имя или телефон",
+    "name": "Имя",
+    "phone": "Телефон",
+    "orderCount": "Заказов",
+    "totalSpent": "Потрачено",
+    "lastOrderAt": "Последний заказ",
+    "customerSince": "Клиент с"
   },
   "banners": {
     "title": "Баннеры",

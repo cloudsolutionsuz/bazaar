@@ -18,9 +18,11 @@
     "noData": "Ma'lumot yo'q"
   },
   "nav": {
+    "dashboard": "Boshqaruv paneli",
     "products": "Tovarlar",
     "inventory": "Ombor",
     "banners": "Bannerlar",
+    "customers": "Xaridorlar",
     "orders": "Buyurtmalar",
     "billing": "Billing",
     "employees": "Xodimlar",
@@ -215,7 +217,32 @@
     "title": "Sozlamalar",
     "telegramChatId": "Telegram Chat ID",
     "telegramChatIdHint": "Yangi buyurtmalar va past qoldiq haqida Telegram orqali xabar olish uchun @userinfobot botiga yozing va chat ID'ingizni shu yerga kiriting",
+    "logo": "Do'kon logotipi",
+    "noLogo": "Logo yo'q",
+    "uploadLogo": "Logotip yuklash",
+    "themeColor": "Do'kon rangi",
+    "description": "Do'kon tavsifi",
     "saved": "Saqlandi"
+  },
+  "dashboard": {
+    "title": "Boshqaruv paneli",
+    "revenueToday": "Bugungi tushum",
+    "ordersToday": "Bugungi buyurtmalar",
+    "revenueWeek": "Haftalik tushum",
+    "ordersWeek": "Haftalik buyurtmalar",
+    "lowStockWarning": "{{count}} tovarda qoldiq kam",
+    "recentOrders": "So'nggi buyurtmalar",
+    "allOrders": "Barcha buyurtmalar"
+  },
+  "customers": {
+    "title": "Xaridorlar",
+    "searchPlaceholder": "Ism yoki telefon",
+    "name": "Ism",
+    "phone": "Telefon",
+    "orderCount": "Buyurtmalar",
+    "totalSpent": "Sarflangan",
+    "lastOrderAt": "So'nggi buyurtma",
+    "customerSince": "Xaridor bo'lgan sana"
   },
   "banners": {
     "title": "Bannerlar",

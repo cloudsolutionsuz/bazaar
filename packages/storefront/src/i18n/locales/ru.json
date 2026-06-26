@@ -10,7 +10,13 @@
   "catalog": {
     "searchPlaceholder": "Что вы ищете?",
     "outOfStock": "Нет в наличии",
-    "addToCart": "В корзину"
+    "addToCart": "В корзину",
+    "sortNewest": "Сначала новые",
+    "sortPriceAsc": "Сначала дешевле",
+    "sortPriceDesc": "Сначала дороже",
+    "priceFrom": "Цена от",
+    "priceTo": "Цена до",
+    "page": "Страница"
   },
   "product": {
     "description": "Описание",

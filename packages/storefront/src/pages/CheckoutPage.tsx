@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 import { useCart } from "../cart/CartContext";
 import * as storefrontApi from "../api/storefront";
 import { ApiError } from "../api/client";
@@ -12,6 +13,8 @@ export function CheckoutPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { items, total, clear } = useCart();
+  const metaQuery = useQuery({ queryKey: ["tenant-meta"], queryFn: storefrontApi.getMeta });
+  const accentStyle = metaQuery.data?.themeColor ? { backgroundColor: metaQuery.data.themeColor } : undefined;
 
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -211,6 +214,7 @@ export function CheckoutPage() {
         <button
           type="submit"
           disabled={submitting}
+          style={accentStyle}
           className="w-full rounded-md bg-clay-600 px-4 py-3 text-sm font-medium text-white hover:bg-clay-700 disabled:opacity-50"
         >
           {t("checkout.submit")}

@@ -117,4 +117,39 @@ describeWithDb("storefront (integration)", () => {
 
     await prisma.tenant.update({ where: { id: seller.tenantId }, data: { status: "ACTIVE" } });
   });
+
+  it("sorts by price and filters by price range", async () => {
+    const cheap = await request(app).post("/api/products").set(auth()).send({
+      name: "Cheap Product",
+      price: 1000,
+      variants: [{ sku: `SF-CHEAP-${Date.now()}`, stockQuantity: 5 }],
+    });
+    const expensive = await request(app).post("/api/products").set(auth()).send({
+      name: "Expensive Product",
+      price: 99000,
+      variants: [{ sku: `SF-EXPENSIVE-${Date.now()}`, stockQuantity: 5 }],
+    });
+
+    const asc = await request(app).get("/api/storefront/products").set("Host", host).query({ sort: "price_asc" });
+    expect(asc.status).toBe(200);
+    const ascPrices = asc.body.items.map((p: { price: number }) => p.price);
+    expect(ascPrices).toEqual([...ascPrices].sort((a, b) => a - b));
+
+    const desc = await request(app).get("/api/storefront/products").set("Host", host).query({ sort: "price_desc" });
+    const descPrices = desc.body.items.map((p: { price: number }) => p.price);
+    expect(descPrices).toEqual([...descPrices].sort((a, b) => b - a));
+
+    const ranged = await request(app).get("/api/storefront/products").set("Host", host).query({ minPrice: 500, maxPrice: 2000 });
+    const rangedIds = ranged.body.items.map((p: { id: string }) => p.id);
+    expect(rangedIds).toContain(cheap.body.product.id);
+    expect(rangedIds).not.toContain(expensive.body.product.id);
+  });
+
+  it("exposes tenant meta (name/logo/theme/description) for the storefront header", async () => {
+    const res = await request(app).get("/api/storefront/meta").set("Host", host);
+    expect(res.status).toBe(200);
+    expect(res.body.name).toBe("Test Shop");
+    expect(res.body.logoUrl).toBeNull();
+    expect(res.body.themeColor).toBeNull();
+  });
 });
