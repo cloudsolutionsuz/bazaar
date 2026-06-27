@@ -50,7 +50,7 @@ describeWithDb("auth flow (integration)", () => {
     await prisma.$disconnect();
   });
 
-  it("registers a new seller + tenant on the trial plan", async () => {
+  it("registers a new seller + tenant on the trial plan, already email-verified", async () => {
     const res = await request(app).post("/api/auth/register").send({
       name: "Test Seller",
       email,
@@ -64,24 +64,12 @@ describeWithDb("auth flow (integration)", () => {
     expect(res.body.tenant.status).toBe("TRIAL");
     expect(res.body.user.email).toBe(email);
     expect(res.body.user.passwordHash).toBeUndefined();
-  });
 
-  it("rejects login before the email is verified", async () => {
-    const res = await request(app).post("/api/auth/login").send({ email, password });
-    expect(res.status).toBe(403);
-    expect(res.body.error.code).toBe("EMAIL_NOT_VERIFIED");
-  });
-
-  it("verifies the email using the stored token", async () => {
     const user = await prisma.user.findUniqueOrThrow({ where: { email } });
-    const verification = await prisma.verificationToken.findFirstOrThrow({ where: { userId: user.id } });
-
-    const res = await request(app).get(`/api/auth/verify-email?token=${verification.token}`);
-    expect(res.status).toBe(200);
-    expect(res.body.verified).toBe(true);
+    expect(user.emailVerifiedAt).not.toBeNull();
   });
 
-  it("logs in after verification and returns tokens", async () => {
+  it("logs in immediately after registering, no verification step needed", async () => {
     const res = await request(app).post("/api/auth/login").send({ email, password });
     expect(res.status).toBe(200);
     expect(res.body.accessToken).toBeTruthy();

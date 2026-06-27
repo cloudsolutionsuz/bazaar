@@ -226,6 +226,52 @@ describeWithDb("products / inventory / orders (integration)", () => {
       const movements = await prisma.inventoryMovement.findMany({ where: { orderId } });
       expect(movements.some((m) => m.type === "RETURN")).toBe(true);
     });
+
+    it("stores the courier name on the SHIPPED transition, archives only from a terminal status, and hides archived orders by default", async () => {
+      const created = await request(app).post("/api/products").set(auth()).send({
+        name: "Archive Test Item", price: 2000, variants: [{ sku: `ARCH-${Date.now()}`, stockQuantity: 5 }],
+      });
+      const variant = created.body.product.variants[0];
+
+      const order = await request(app).post("/api/orders").set(auth()).send({
+        customerName: "Archive Buyer", customerPhone: "+998900000002", ...DEFAULT_ADDRESS,
+        items: [{ variantId: variant.id, quantity: 1 }],
+      });
+      const orderId = order.body.order.id;
+
+      const earlyArchive = await request(app)
+        .patch(`/api/orders/${orderId}/status`)
+        .set(auth())
+        .send({ status: "ARCHIVED" });
+      expect(earlyArchive.status).toBe(400);
+      expect(earlyArchive.body.error.code).toBe("INVALID_TRANSITION");
+
+      const processing = await request(app).patch(`/api/orders/${orderId}/status`).set(auth()).send({ status: "PROCESSING" });
+      expect(processing.status).toBe(200);
+
+      const shipped = await request(app)
+        .patch(`/api/orders/${orderId}/status`)
+        .set(auth())
+        .send({ status: "SHIPPED", courierName: "Aziz Kuryer" });
+      expect(shipped.status).toBe(200);
+      expect(shipped.body.order.courierName).toBe("Aziz Kuryer");
+
+      const delivered = await request(app).patch(`/api/orders/${orderId}/status`).set(auth()).send({ status: "DELIVERED" });
+      expect(delivered.status).toBe(200);
+
+      const archived = await request(app).patch(`/api/orders/${orderId}/status`).set(auth()).send({ status: "ARCHIVED" });
+      expect(archived.status).toBe(200);
+      expect(archived.body.order.status).toBe("ARCHIVED");
+
+      const defaultList = await request(app).get("/api/orders").set(auth()).query({ pageSize: 100 });
+      expect(defaultList.body.items.map((o: { id: string }) => o.id)).not.toContain(orderId);
+
+      const archivedList = await request(app).get("/api/orders").set(auth()).query({ status: "ARCHIVED" });
+      expect(archivedList.body.items.map((o: { id: string }) => o.id)).toContain(orderId);
+
+      const includeArchivedList = await request(app).get("/api/orders").set(auth()).query({ includeArchived: "true", pageSize: 100 });
+      expect(includeArchivedList.body.items.map((o: { id: string }) => o.id)).toContain(orderId);
+    });
   });
 
   describe("plan limits", () => {

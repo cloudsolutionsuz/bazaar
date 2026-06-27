@@ -11,13 +11,17 @@ const orderInclude = {
   statusHistory: { orderBy: { createdAt: "asc" as const } },
 };
 
+// ARCHIVED is only reachable from terminal states - it's a purely organizational
+// move to declutter the working orders list, not a real business transition, so
+// active orders (NEW/PROCESSING/SHIPPED) can't be archived directly.
 const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   NEW: ["PROCESSING", "CANCELLED"],
   PROCESSING: ["SHIPPED", "CANCELLED"],
   SHIPPED: ["DELIVERED", "REFUNDED"],
-  DELIVERED: ["REFUNDED"],
-  CANCELLED: [],
-  REFUNDED: [],
+  DELIVERED: ["REFUNDED", "ARCHIVED"],
+  CANCELLED: ["ARCHIVED"],
+  REFUNDED: ["ARCHIVED"],
+  ARCHIVED: [],
 };
 
 const RESTOCKING_STATUSES = new Set<OrderStatus>(["CANCELLED", "REFUNDED"]);
@@ -36,7 +40,7 @@ export async function listOrders(tenantId: string, query: ListOrdersQuery) {
 
   const where: Prisma.OrderWhereInput = {
     tenantId,
-    ...(query.status ? { status: query.status } : {}),
+    ...(query.status ? { status: query.status } : query.includeArchived ? {} : { status: { not: "ARCHIVED" } }),
     ...(query.from || query.to
       ? { createdAt: { ...(query.from ? { gte: query.from } : {}), ...(query.to ? { lte: query.to } : {}) } }
       : {}),
@@ -179,7 +183,13 @@ export async function createOrder(tenantId: string, userId: string | null, input
   return getOrder(tenantId, orderId);
 }
 
-export async function updateOrderStatus(tenantId: string, userId: string, orderId: string, nextStatus: OrderStatus) {
+export async function updateOrderStatus(
+  tenantId: string,
+  userId: string,
+  orderId: string,
+  nextStatus: OrderStatus,
+  courierName?: string,
+) {
   const order = await getOrder(tenantId, orderId);
 
   if (order.status === nextStatus) {
@@ -190,7 +200,10 @@ export async function updateOrderStatus(tenantId: string, userId: string, orderI
   }
 
   await prisma.$transaction(async (tx) => {
-    await tx.order.update({ where: { id: orderId }, data: { status: nextStatus } });
+    await tx.order.update({
+      where: { id: orderId },
+      data: { status: nextStatus, ...(courierName !== undefined ? { courierName } : {}) },
+    });
     await tx.orderStatusHistory.create({
       data: { orderId, fromStatus: order.status, toStatus: nextStatus, changedByUserId: userId },
     });
@@ -251,6 +264,7 @@ export async function exportOrdersToExcel(tenantId: string): Promise<Buffer> {
     "Mahalla",
     "Address Note",
     "Status",
+    "Courier",
     "Payment Method",
     "Items",
     "Total Amount",
@@ -269,6 +283,7 @@ export async function exportOrdersToExcel(tenantId: string): Promise<Buffer> {
       order.addressMahalla ?? "",
       order.addressNote ?? "",
       order.status,
+      order.courierName ?? "",
       order.paymentMethod ?? "",
       itemsSummary,
       order.totalAmount,

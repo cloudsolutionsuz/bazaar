@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import type { Tenant, User } from "@prisma/client";
 import { prisma } from "../../db/prisma";
 import { env } from "../../config/env";
@@ -10,11 +9,8 @@ import {
   refreshTokenExpiry,
   signAccessToken,
 } from "../../utils/jwt";
-import { sendVerificationEmail } from "../../utils/email";
 import { isValidSubdomain } from "../tenants/constants";
 import type { LoginInput, RegisterInput } from "./auth.schema";
-
-const EMAIL_VERIFICATION_TTL_HOURS = 24;
 
 export function toPublicUser(user: User) {
   const { passwordHash, ...rest } = user;
@@ -58,6 +54,9 @@ export async function registerSeller(input: RegisterInput): Promise<{ tenant: Te
       },
     });
 
+    // No email-verification step by design (matches the buyer mini-account
+    // trade-off elsewhere in this project): a seller can log in immediately
+    // after registering, no real SMTP needed.
     const user = await tx.user.create({
       data: {
         tenantId: tenant.id,
@@ -66,38 +65,14 @@ export async function registerSeller(input: RegisterInput): Promise<{ tenant: Te
         role: "OWNER",
         name: input.name,
         phone: input.phone,
+        emailVerifiedAt: new Date(),
       },
     });
 
-    const token = crypto.randomBytes(32).toString("hex");
-    await tx.verificationToken.create({
-      data: {
-        userId: user.id,
-        token,
-        type: "EMAIL_VERIFY",
-        expiresAt: new Date(Date.now() + EMAIL_VERIFICATION_TTL_HOURS * 60 * 60 * 1000),
-      },
-    });
-
-    return { tenant, user, verificationToken: token };
+    return { tenant, user };
   });
 
-  await sendVerificationEmail(result.user.email, result.verificationToken);
-
   return { tenant: result.tenant, user: toPublicUser(result.user) };
-}
-
-export async function verifyEmail(token: string): Promise<void> {
-  const record = await prisma.verificationToken.findUnique({ where: { token } });
-
-  if (!record || record.type !== "EMAIL_VERIFY" || record.expiresAt < new Date()) {
-    throw new AppError(400, "INVALID_VERIFICATION_TOKEN", "Verification link is invalid or expired");
-  }
-
-  await prisma.$transaction([
-    prisma.user.update({ where: { id: record.userId }, data: { emailVerifiedAt: new Date() } }),
-    prisma.verificationToken.delete({ where: { id: record.id } }),
-  ]);
 }
 
 export async function acceptInvite(token: string, password: string): Promise<void> {

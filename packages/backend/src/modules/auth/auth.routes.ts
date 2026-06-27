@@ -8,7 +8,6 @@ import * as authController from "./auth.controller";
 export const authRouter = Router();
 
 authRouter.post("/register", validateBody(registerSchema), asyncHandler(authController.register));
-authRouter.get("/verify-email", asyncHandler(authController.verifyEmail));
 authRouter.post("/accept-invite", validateBody(acceptInviteSchema), asyncHandler(authController.acceptInvite));
 authRouter.post("/login", validateBody(loginSchema), asyncHandler(authController.login));
 authRouter.post("/refresh", validateBody(refreshSchema), asyncHandler(authController.refresh));

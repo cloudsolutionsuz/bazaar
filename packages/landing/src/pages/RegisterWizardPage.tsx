@@ -6,6 +6,7 @@ import * as registrationApi from "../api/registration";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import { Header } from "../components/Header";
 import { ApiError } from "../api/client";
+import { ADMIN_URL } from "../config";
 
 interface FieldProps {
   label: string;
@@ -79,7 +80,13 @@ export function RegisterWizardPage() {
         <Header />
         <div className="mx-auto max-w-lg px-4 py-20 text-center">
           <h1 className="mb-3 text-2xl font-bold text-brand-700">{t("register.successTitle")}</h1>
-          <p className="text-gray-600">{t("register.successMessage", { email })}</p>
+          <p className="mb-6 text-gray-600">{t("register.successMessage")}</p>
+          <a
+            href={`${ADMIN_URL}/login`}
+            className="inline-block rounded-md bg-brand-600 px-6 py-3 text-sm font-medium text-white hover:bg-brand-700"
+          >
+            {t("register.loginButton")}
+          </a>
         </div>
       </div>
     );

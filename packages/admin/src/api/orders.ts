@@ -7,6 +7,7 @@ export interface ListOrdersParams {
   to?: string;
   minAmount?: number;
   maxAmount?: number;
+  includeArchived?: boolean;
   page?: number;
   pageSize?: number;
 }
@@ -35,8 +36,8 @@ export function createOrder(input: CreateOrderInput): Promise<{ order: Order }> 
   return apiRequest("/api/orders", { method: "POST", body: input });
 }
 
-export function updateOrderStatus(id: string, status: OrderStatus): Promise<{ order: Order }> {
-  return apiRequest(`/api/orders/${id}/status`, { method: "PATCH", body: { status } });
+export function updateOrderStatus(id: string, status: OrderStatus, courierName?: string): Promise<{ order: Order }> {
+  return apiRequest(`/api/orders/${id}/status`, { method: "PATCH", body: { status, courierName } });
 }
 
 export function exportOrders(): Promise<Blob> {
@@ -49,7 +50,8 @@ export const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   NEW: ["PROCESSING", "CANCELLED"],
   PROCESSING: ["SHIPPED", "CANCELLED"],
   SHIPPED: ["DELIVERED", "REFUNDED"],
-  DELIVERED: ["REFUNDED"],
-  CANCELLED: [],
-  REFUNDED: [],
+  DELIVERED: ["REFUNDED", "ARCHIVED"],
+  CANCELLED: ["ARCHIVED"],
+  REFUNDED: ["ARCHIVED"],
+  ARCHIVED: [],
 };

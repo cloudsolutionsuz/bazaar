@@ -9,15 +9,6 @@ export async function register(req: Request, res: Response): Promise<void> {
   res.status(201).json(result);
 }
 
-export async function verifyEmail(req: Request, res: Response): Promise<void> {
-  const token = req.query.token;
-  if (typeof token !== "string" || !token) {
-    throw new AppError(400, "MISSING_TOKEN", "Verification token is required");
-  }
-  await authService.verifyEmail(token);
-  res.json({ verified: true });
-}
-
 export async function acceptInvite(req: Request, res: Response): Promise<void> {
   const { token, password } = req.body as AcceptInviteInput;
   await authService.acceptInvite(token, password);

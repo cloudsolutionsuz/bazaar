@@ -29,10 +29,11 @@ export const createOrderSchema = z
     path: ["addressDistrict"],
   });
 
-export const orderStatusValues = ["NEW", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"] as const;
+export const orderStatusValues = ["NEW", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED", "ARCHIVED"] as const;
 
 export const updateOrderStatusSchema = z.object({
   status: z.enum(orderStatusValues),
+  courierName: z.string().max(200).optional(),
 });
 
 export const listOrdersQuerySchema = z.object({
@@ -41,6 +42,7 @@ export const listOrdersQuerySchema = z.object({
   to: z.coerce.date().optional(),
   minAmount: z.coerce.number().int().min(0).optional(),
   maxAmount: z.coerce.number().int().min(0).optional(),
+  includeArchived: z.coerce.boolean().optional(),
   page: z.coerce.number().int().min(1).optional(),
   pageSize: z.coerce.number().int().min(1).max(100).optional(),
 });

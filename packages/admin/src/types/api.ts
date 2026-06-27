@@ -1,6 +1,6 @@
 export type ProductStatus = "ACTIVE" | "HIDDEN" | "OUT_OF_STOCK";
 export type InventoryMovementType = "RECEIPT" | "SALE" | "RETURN" | "ADJUSTMENT";
-export type OrderStatus = "NEW" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "REFUNDED";
+export type OrderStatus = "NEW" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "REFUNDED" | "ARCHIVED";
 
 export type TenantStatus = "TRIAL" | "ACTIVE" | "PAST_DUE" | "BLOCKED";
 
@@ -113,6 +113,7 @@ export interface Order {
   addressMahalla: string | null;
   addressNote: string | null;
   status: OrderStatus;
+  courierName: string | null;
   paymentMethod: string | null;
   totalAmount: number;
   items: OrderItem[];

@@ -26,8 +26,6 @@ export async function registerAndLoginSeller(app: Express, planCode: "start" | "
   });
 
   const user = await prisma.user.findUniqueOrThrow({ where: { email } });
-  const verification = await prisma.verificationToken.findFirstOrThrow({ where: { userId: user.id } });
-  await request(app).get(`/api/auth/verify-email?token=${verification.token}`);
 
   const login = await request(app).post("/api/auth/login").send({ email, password });
 

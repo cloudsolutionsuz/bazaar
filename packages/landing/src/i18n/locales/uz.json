@@ -49,17 +49,10 @@
     "back": "Orqaga",
     "next": "Keyingisi",
     "submit": "Ro'yxatdan o'tish",
-    "successTitle": "Deyarli tayyor!",
-    "successMessage": "{{email}} manziliga tasdiqlash xati yubordik. Do'konni faollashtirish uchun xatdagi havolani bosing.",
+    "successTitle": "Tayyor!",
+    "successMessage": "Do'kon yaratildi, boshqaruv paneliga darhol kirishingiz mumkin.",
+    "loginButton": "Kirish",
     "errorEmailTaken": "Bu email bilan hisob allaqachon mavjud",
     "errorSubdomainTaken": "Bu subdomen allaqachon band"
-  },
-  "verify": {
-    "verifying": "Email tasdiqlanmoqda…",
-    "successTitle": "Email tasdiqlandi!",
-    "successMessage": "Endi do'kon boshqaruv paneliga kirishingiz mumkin",
-    "loginButton": "Kirish",
-    "errorTitle": "Emailni tasdiqlab bo'lmadi",
-    "errorMessage": "Havola yaroqsiz yoki allaqachon ishlatilgan"
   }
 }

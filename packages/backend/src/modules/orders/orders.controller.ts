@@ -18,8 +18,8 @@ export async function get(req: Request, res: Response): Promise<void> {
 }
 
 export async function updateStatus(req: Request, res: Response): Promise<void> {
-  const { status } = req.body as UpdateOrderStatusInput;
-  const order = await ordersService.updateOrderStatus(req.authUser!.tenantId!, req.authUser!.id, req.params.id, status);
+  const { status, courierName } = req.body as UpdateOrderStatusInput;
+  const order = await ordersService.updateOrderStatus(req.authUser!.tenantId!, req.authUser!.id, req.params.id, status, courierName);
   res.json({ order });
 }
 

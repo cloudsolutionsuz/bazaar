@@ -1,29 +1,21 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as ordersApi from "../../api/orders";
 import { Button } from "../../components/ui/Button";
+import { Input } from "../../components/ui/Input";
 import { Badge } from "../../components/ui/Badge";
 import { Table, Thead, Tbody, Th, Td } from "../../components/ui/Table";
 import { STATUS_COLORS, STATUS_LABEL_KEYS } from "./OrdersListPage";
-import { UZBEKISTAN_REGIONS } from "../../data/uzbekistanRegions";
+import { regionName, districtName } from "../../utils/addressLabels";
 import type { OrderStatus } from "../../types/api";
-
-function regionName(code: string | null): string {
-  if (!code) return "—";
-  return UZBEKISTAN_REGIONS.find((r) => r.code === code)?.name ?? code;
-}
-
-function districtName(regionCode: string | null, districtCode: string | null): string {
-  if (!regionCode || !districtCode) return "—";
-  const region = UZBEKISTAN_REGIONS.find((r) => r.code === regionCode);
-  return region?.districts.find((d) => d.code === districtCode)?.name ?? districtCode;
-}
 
 export function OrderDetailPage() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
+  const [courierName, setCourierName] = useState("");
 
   const query = useQuery({
     queryKey: ["order", id],
@@ -31,7 +23,7 @@ export function OrderDetailPage() {
   });
 
   const statusMutation = useMutation({
-    mutationFn: (status: OrderStatus) => ordersApi.updateOrderStatus(id as string, status),
+    mutationFn: (status: OrderStatus) => ordersApi.updateOrderStatus(id as string, status, courierName || undefined),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["order", id] });
       queryClient.invalidateQueries({ queryKey: ["orders"] });
@@ -81,6 +73,10 @@ export function OrderDetailPage() {
           <div className="text-gray-500">{t("orders.mahalla")}</div>
           <div>{order.addressMahalla ?? "—"}</div>
         </div>
+        <div>
+          <div className="text-gray-500">{t("orders.courier")}</div>
+          <div>{order.courierName ?? "—"}</div>
+        </div>
         <div className="col-span-2">
           <div className="text-gray-500">{t("orders.addressNote")}</div>
           <div>{order.addressNote ?? "—"}</div>
@@ -118,12 +114,22 @@ export function OrderDetailPage() {
         {nextStatuses.length === 0 ? (
           <p className="text-sm text-gray-500">{t("orders.noTransitions")}</p>
         ) : (
-          <div className="flex gap-2">
-            {nextStatuses.map((s) => (
-              <Button key={s} variant="secondary" disabled={statusMutation.isPending} onClick={() => statusMutation.mutate(s)}>
-                {t(STATUS_LABEL_KEYS[s])}
-              </Button>
-            ))}
+          <div className="space-y-3">
+            {nextStatuses.includes("SHIPPED") && (
+              <Input
+                value={courierName}
+                onChange={(e) => setCourierName(e.target.value)}
+                placeholder={t("orders.courierPlaceholder")}
+                className="max-w-xs"
+              />
+            )}
+            <div className="flex gap-2">
+              {nextStatuses.map((s) => (
+                <Button key={s} variant="secondary" disabled={statusMutation.isPending} onClick={() => statusMutation.mutate(s)}>
+                  {t(STATUS_LABEL_KEYS[s])}
+                </Button>
+              ))}
+            </div>
           </div>
         )}
       </section>

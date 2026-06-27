@@ -22,7 +22,3 @@ export interface RegisterInput {
 export function register(input: RegisterInput): Promise<unknown> {
   return apiRequest("/api/auth/register", { method: "POST", body: input });
 }
-
-export function verifyEmail(token: string): Promise<{ verified: boolean }> {
-  return apiRequest("/api/auth/verify-email", { query: { token } });
-}

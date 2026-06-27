@@ -46,6 +46,7 @@ enum OrderStatus {
   DELIVERED
   CANCELLED
   REFUNDED
+  ARCHIVED
 }
 
 enum InvoiceStatus {
@@ -319,6 +320,7 @@ model Order {
   addressMahalla   String?
   addressNote      String?
   status           OrderStatus @default(NEW)
+  courierName      String?
   paymentMethod    String?
   totalAmount      Int
   createdAt        DateTime    @default(now())
