@@ -1,5 +1,5 @@
 import { apiRequest } from "./client";
-import type { AnalyticsResult, FinanceTransaction, Paginated, PnLResult, TransactionType } from "../types/api";
+import type { AnalyticsResult, DailySummary, FinanceTransaction, Paginated, PendingTransaction, PnLResult, TransactionType } from "../types/api";
 
 export function getBalance(): Promise<{ balance: number }> {
   return apiRequest("/api/finance/balance");
@@ -34,4 +34,16 @@ export function getPnL(from: string, to: string): Promise<PnLResult> {
 
 export function getAnalytics(from: string, to: string, granularity: "day" | "week" | "month"): Promise<AnalyticsResult> {
   return apiRequest("/api/finance/analytics", { query: { from, to, granularity } });
+}
+
+export function listPendingTransactions(search?: string): Promise<{ items: PendingTransaction[] }> {
+  return apiRequest("/api/finance/transactions/pending", { query: { search } });
+}
+
+export function confirmTransaction(id: string): Promise<{ transaction: FinanceTransaction }> {
+  return apiRequest(`/api/finance/transactions/${id}/confirm`, { method: "POST" });
+}
+
+export function getDailySummary(date?: string): Promise<DailySummary> {
+  return apiRequest("/api/finance/daily-summary", { query: { date } });
 }

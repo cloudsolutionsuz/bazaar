@@ -151,10 +151,15 @@ export async function createOrder(tenantId: string, userId: string | null, input
       });
     }
 
+    // Starts PENDING, not CONFIRMED: money from a sale doesn't count toward
+    // the real Kassa balance until a cashier actively confirms it by looking
+    // the buyer up (see finance.service.ts's confirmTransaction) - a manual
+    // Kassa entry is its own confirmation and stays CONFIRMED by default.
     await tx.transaction.create({
       data: {
         tenantId,
         type: "INCOME",
+        status: "PENDING",
         category: "Продажа",
         amount: totalAmount,
         orderId: order.id,
@@ -226,18 +231,26 @@ export async function updateOrderStatus(
         });
       }
 
-      // Reverses the INCOME transaction created at order time - the
-      // balance is always a sum over the ledger, never an edited field.
-      await tx.transaction.create({
-        data: {
-          tenantId,
-          type: "EXPENSE",
-          category: "Возврат",
-          amount: order.totalAmount,
-          orderId,
-          createdByUserId: userId,
-        },
-      });
+      // Reverses the INCOME transaction created at order time - but only if
+      // it was actually CONFIRMED (real money the balance already counted).
+      // If the cashier never confirmed it, it was never in the balance, so
+      // reversing it would incorrectly subtract money that was never added -
+      // just delete the still-pending transaction instead.
+      const incomeTransaction = await tx.transaction.findFirst({ where: { orderId, type: "INCOME" } });
+      if (incomeTransaction?.status === "CONFIRMED") {
+        await tx.transaction.create({
+          data: {
+            tenantId,
+            type: "EXPENSE",
+            category: "Возврат",
+            amount: order.totalAmount,
+            orderId,
+            createdByUserId: userId,
+          },
+        });
+      } else if (incomeTransaction) {
+        await tx.transaction.delete({ where: { id: incomeTransaction.id } });
+      }
     }
   });
 

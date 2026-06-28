@@ -24,7 +24,17 @@ export const analyticsQuerySchema = reportQuerySchema.extend({
   granularity: z.enum(["day", "week", "month"]).optional(),
 });
 
+export const listPendingTransactionsQuerySchema = z.object({
+  search: z.string().max(200).optional(),
+});
+
+export const dailySummaryQuerySchema = z.object({
+  date: z.coerce.date().optional(),
+});
+
 export type CreateTransactionInput = z.infer<typeof createTransactionSchema>;
 export type ListTransactionsQuery = z.infer<typeof listTransactionsQuerySchema>;
 export type ReportQuery = z.infer<typeof reportQuerySchema>;
 export type AnalyticsQuery = z.infer<typeof analyticsQuerySchema>;
+export type ListPendingTransactionsQuery = z.infer<typeof listPendingTransactionsQuerySchema>;
+export type DailySummaryQuery = z.infer<typeof dailySummaryQuerySchema>;

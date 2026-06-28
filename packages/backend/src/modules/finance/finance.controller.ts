@@ -1,6 +1,13 @@
 import type { Request, Response } from "express";
 import * as financeService from "./finance.service";
-import type { AnalyticsQuery, CreateTransactionInput, ListTransactionsQuery, ReportQuery } from "./finance.schema";
+import type {
+  AnalyticsQuery,
+  CreateTransactionInput,
+  DailySummaryQuery,
+  ListPendingTransactionsQuery,
+  ListTransactionsQuery,
+  ReportQuery,
+} from "./finance.schema";
 
 export async function getBalance(req: Request, res: Response): Promise<void> {
   const balance = await financeService.getBalance(req.authUser!.tenantId!);
@@ -30,5 +37,23 @@ export async function getPnL(req: Request, res: Response): Promise<void> {
 export async function getAnalytics(req: Request, res: Response): Promise<void> {
   const { from, to, granularity } = req.query as unknown as AnalyticsQuery;
   const result = await financeService.getAnalytics(req.authUser!.tenantId!, from, to, granularity);
+  res.json(result);
+}
+
+export async function listPendingTransactions(req: Request, res: Response): Promise<void> {
+  const items = await financeService.listPendingTransactions(
+    req.authUser!.tenantId!,
+    req.query as unknown as ListPendingTransactionsQuery,
+  );
+  res.json({ items });
+}
+
+export async function confirmTransaction(req: Request, res: Response): Promise<void> {
+  const transaction = await financeService.confirmTransaction(req.authUser!.tenantId!, req.params.id);
+  res.json({ transaction });
+}
+
+export async function getDailySummary(req: Request, res: Response): Promise<void> {
+  const result = await financeService.getDailySummary(req.authUser!.tenantId!, req.query as unknown as DailySummaryQuery);
   res.json(result);
 }

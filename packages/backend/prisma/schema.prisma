@@ -69,6 +69,11 @@ enum TransactionType {
   EXPENSE
 }
 
+enum TransactionStatus {
+  PENDING
+  CONFIRMED
+}
+
 model Plan {
   id                 String   @id @default(uuid())
   code               String   @unique
@@ -143,6 +148,7 @@ model Transaction {
   tenantId        String
   tenant          Tenant          @relation(fields: [tenantId], references: [id])
   type            TransactionType
+  status          TransactionStatus @default(CONFIRMED)
   category        String
   amount          Int
   description     String?

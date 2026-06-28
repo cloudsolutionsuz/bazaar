@@ -1,13 +1,14 @@
 import { Prisma, type OrderStatus } from "@prisma/client";
 import { prisma } from "../../db/prisma";
-import type { CreateTransactionInput, ListTransactionsQuery } from "./finance.schema";
+import { AppError } from "../../middleware/errorHandler";
+import type { CreateTransactionInput, DailySummaryQuery, ListPendingTransactionsQuery, ListTransactionsQuery } from "./finance.schema";
 
 const EXCLUDED_ORDER_STATUSES: OrderStatus[] = ["CANCELLED", "REFUNDED"];
 
 export async function getBalance(tenantId: string): Promise<number> {
   const [income, expense] = await Promise.all([
-    prisma.transaction.aggregate({ where: { tenantId, type: "INCOME" }, _sum: { amount: true } }),
-    prisma.transaction.aggregate({ where: { tenantId, type: "EXPENSE" }, _sum: { amount: true } }),
+    prisma.transaction.aggregate({ where: { tenantId, type: "INCOME", status: "CONFIRMED" }, _sum: { amount: true } }),
+    prisma.transaction.aggregate({ where: { tenantId, type: "EXPENSE", status: "CONFIRMED" }, _sum: { amount: true } }),
   ]);
   return (income._sum.amount ?? 0) - (expense._sum.amount ?? 0);
 }
@@ -25,12 +26,15 @@ export function createTransaction(tenantId: string, userId: string, input: Creat
   });
 }
 
+// The real ledger of what's actually happened - pending sale income gets its
+// own view (listPendingTransactions) rather than mixing into this one.
 export async function listTransactions(tenantId: string, query: ListTransactionsQuery) {
   const page = query.page ?? 1;
   const pageSize = query.pageSize ?? 20;
 
   const where: Prisma.TransactionWhereInput = {
     tenantId,
+    status: "CONFIRMED",
     ...(query.type ? { type: query.type } : {}),
     ...(query.from || query.to
       ? { createdAt: { ...(query.from ? { gte: query.from } : {}), ...(query.to ? { lte: query.to } : {}) } }
@@ -43,6 +47,97 @@ export async function listTransactions(tenantId: string, query: ListTransactions
   ]);
 
   return { items, total, page, pageSize };
+}
+
+export function listPendingTransactions(tenantId: string, query: ListPendingTransactionsQuery) {
+  return prisma.transaction.findMany({
+    where: {
+      tenantId,
+      status: "PENDING",
+      type: "INCOME",
+      ...(query.search
+        ? {
+            order: {
+              OR: [
+                { customerName: { contains: query.search, mode: "insensitive" } },
+                { customerPhone: { contains: query.search, mode: "insensitive" } },
+              ],
+            },
+          }
+        : {}),
+    },
+    include: { order: true },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function confirmTransaction(tenantId: string, transactionId: string) {
+  const transaction = await prisma.transaction.findFirst({ where: { id: transactionId, tenantId } });
+  if (!transaction) {
+    throw new AppError(404, "NOT_FOUND", "Transaction not found");
+  }
+  if (transaction.status !== "PENDING") {
+    throw new AppError(400, "ALREADY_CONFIRMED", "This transaction is not pending");
+  }
+
+  return prisma.transaction.update({ where: { id: transactionId }, data: { status: "CONFIRMED" } });
+}
+
+function startOfDay(date: Date): Date {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function endOfDay(date: Date): Date {
+  const d = new Date(date);
+  d.setHours(23, 59, 59, 999);
+  return d;
+}
+
+// "Баланс начало дня / Приходы / Расходы / Фактический Баланс" - all derived
+// from replaying CONFIRMED transactions, same approach as the inventory
+// daily report. pendingIncome surfaces how much is still awaiting
+// confirmation, which is the whole point of distinguishing "actual" balance.
+export async function getDailySummary(tenantId: string, query: DailySummaryQuery) {
+  const date = query.date ?? new Date();
+  const dayStart = startOfDay(date);
+  const dayEnd = endOfDay(date);
+
+  const [openingIncome, openingExpense, todayIncome, todayExpense, pendingIncome] = await Promise.all([
+    prisma.transaction.aggregate({
+      where: { tenantId, type: "INCOME", status: "CONFIRMED", createdAt: { lt: dayStart } },
+      _sum: { amount: true },
+    }),
+    prisma.transaction.aggregate({
+      where: { tenantId, type: "EXPENSE", status: "CONFIRMED", createdAt: { lt: dayStart } },
+      _sum: { amount: true },
+    }),
+    prisma.transaction.aggregate({
+      where: { tenantId, type: "INCOME", status: "CONFIRMED", createdAt: { gte: dayStart, lte: dayEnd } },
+      _sum: { amount: true },
+    }),
+    prisma.transaction.aggregate({
+      where: { tenantId, type: "EXPENSE", status: "CONFIRMED", createdAt: { gte: dayStart, lte: dayEnd } },
+      _sum: { amount: true },
+    }),
+    prisma.transaction.aggregate({
+      where: { tenantId, type: "INCOME", status: "PENDING", createdAt: { gte: dayStart, lte: dayEnd } },
+      _sum: { amount: true },
+    }),
+  ]);
+
+  const openingBalance = (openingIncome._sum.amount ?? 0) - (openingExpense._sum.amount ?? 0);
+  const income = todayIncome._sum.amount ?? 0;
+  const expense = todayExpense._sum.amount ?? 0;
+
+  return {
+    openingBalance,
+    income,
+    expense,
+    closingBalance: openingBalance + income - expense,
+    pendingIncome: pendingIncome._sum.amount ?? 0,
+  };
 }
 
 interface ProductBreakdown {

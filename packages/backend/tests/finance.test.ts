@@ -65,7 +65,7 @@ describeWithDb("finance (integration)", () => {
     expect(balance.body.balance).toBe(-5000);
   });
 
-  it("auto-creates an income transaction when an order is placed, and reverses it on cancellation", async () => {
+  it("creates a PENDING income transaction on order placement that doesn't affect the balance until confirmed", async () => {
     const order = await request(app).post("/api/orders").set(auth()).send({
       customerName: "Finance Buyer",
       customerPhone: "+998900000111",
@@ -76,19 +76,64 @@ describeWithDb("finance (integration)", () => {
     const orderTotal = order.body.order.totalAmount;
     expect(orderTotal).toBe(salePrice * 2);
 
+    const balanceBeforeBaseline = await request(app).get("/api/finance/balance").set(auth());
+    const baseline = balanceBeforeBaseline.body.balance;
+
     const afterOrder = await request(app).get("/api/finance/balance").set(auth());
-    expect(afterOrder.body.balance).toBe(-5000 + orderTotal);
+    expect(afterOrder.body.balance).toBe(baseline);
+
+    const pendingByName = await request(app).get("/api/finance/transactions/pending").set(auth()).query({ search: "Finance Buyer" });
+    expect(pendingByName.status).toBe(200);
+    const pendingTx = pendingByName.body.items.find((t: { orderId: string }) => t.orderId === order.body.order.id);
+    expect(pendingTx).toBeTruthy();
+    expect(pendingTx.amount).toBe(orderTotal);
+
+    // customerPhone is stored digits-only (normalizePhone strips the "+").
+    const pendingByPhone = await request(app).get("/api/finance/transactions/pending").set(auth()).query({ search: "998900000111" });
+    expect(pendingByPhone.body.items.some((t: { id: string }) => t.id === pendingTx.id)).toBe(true);
+
+    const confirm = await request(app).post(`/api/finance/transactions/${pendingTx.id}/confirm`).set(auth());
+    expect(confirm.status).toBe(200);
+
+    const afterConfirm = await request(app).get("/api/finance/balance").set(auth());
+    expect(afterConfirm.body.balance).toBe(baseline + orderTotal);
 
     const cancel = await request(app).patch(`/api/orders/${order.body.order.id}/status`).set(auth()).send({ status: "CANCELLED" });
     expect(cancel.status).toBe(200);
 
     const afterCancel = await request(app).get("/api/finance/balance").set(auth());
-    expect(afterCancel.body.balance).toBe(-5000);
+    expect(afterCancel.body.balance).toBe(baseline);
 
     const transactions = await request(app).get("/api/finance/transactions").set(auth());
     const categories = transactions.body.items.map((t: { category: string }) => t.category);
     expect(categories).toContain("Продажа");
     expect(categories).toContain("Возврат");
+  });
+
+  it("deletes the still-pending income transaction on cancellation without ever touching the balance", async () => {
+    const balanceBefore = await request(app).get("/api/finance/balance").set(auth());
+    const baseline = balanceBefore.body.balance;
+
+    const order = await request(app).post("/api/orders").set(auth()).send({
+      customerName: "Unconfirmed Buyer",
+      customerPhone: "+998900000666",
+      ...DEFAULT_ADDRESS,
+      items: [{ variantId, quantity: 1 }],
+    });
+    expect(order.status).toBe(201);
+
+    const cancel = await request(app).patch(`/api/orders/${order.body.order.id}/status`).set(auth()).send({ status: "CANCELLED" });
+    expect(cancel.status).toBe(200);
+
+    const afterCancel = await request(app).get("/api/finance/balance").set(auth());
+    expect(afterCancel.body.balance).toBe(baseline);
+
+    const transactions = await request(app).get("/api/finance/transactions").set(auth());
+    const orderTransactions = transactions.body.items.filter((t: { orderId: string | null }) => t.orderId === order.body.order.id);
+    expect(orderTransactions).toHaveLength(0);
+
+    const pending = await request(app).get("/api/finance/transactions/pending").set(auth()).query({ search: "Unconfirmed Buyer" });
+    expect(pending.body.items.some((t: { orderId: string }) => t.orderId === order.body.order.id)).toBe(false);
   });
 
   it("computes P&L cost basis from the purchase price, excluding cancelled orders", async () => {
@@ -231,5 +276,39 @@ describeWithDb("finance (integration)", () => {
 
     const expectedRate = Math.round((analytics.body.orderCount / 2) * 1000) / 10;
     expect(analytics.body.conversionRate).toBe(expectedRate);
+  });
+
+  it("computes a daily summary with opening/closing balance and pending income", async () => {
+    // Everything in this test run happens "today", so openingBalance/income
+    // before this test's own actions is whatever earlier tests in this file
+    // left behind - compare deltas rather than absolute numbers so this
+    // stays correct regardless of what ran before it.
+    const before = await request(app).get("/api/finance/daily-summary").set(auth());
+    expect(before.status).toBe(200);
+
+    const order = await request(app).post("/api/orders").set(auth()).send({
+      customerName: "Summary Buyer",
+      customerPhone: "+998900000777",
+      ...DEFAULT_ADDRESS,
+      items: [{ variantId, quantity: 1 }],
+    });
+    expect(order.status).toBe(201);
+    const orderTotal = order.body.order.totalAmount;
+
+    const expense = await request(app).post("/api/finance/transactions").set(auth()).send({
+      type: "EXPENSE",
+      category: "Транспорт",
+      amount: 1000,
+    });
+    expect(expense.status).toBe(201);
+
+    const after = await request(app).get("/api/finance/daily-summary").set(auth());
+    expect(after.status).toBe(200);
+    // The new order's income is still PENDING, so it doesn't move opening/income/expense.
+    expect(after.body.openingBalance).toBe(before.body.openingBalance);
+    expect(after.body.income).toBe(before.body.income);
+    expect(after.body.expense).toBe(before.body.expense + 1000);
+    expect(after.body.pendingIncome).toBeGreaterThanOrEqual(before.body.pendingIncome + orderTotal);
+    expect(after.body.closingBalance).toBe(after.body.openingBalance + after.body.income - after.body.expense);
   });
 });

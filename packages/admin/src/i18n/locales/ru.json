@@ -206,13 +206,20 @@
   "kassa": {
     "title": "Касса",
     "balance": "Текущий баланс",
+    "openingBalance": "Баланс на начало дня",
+    "actualBalance": "Фактический баланс",
     "addTransaction": "Добавить операцию",
     "income": "Приход",
     "expense": "Расход",
     "category": "Категория",
     "amount": "Сумма",
     "description": "Описание",
-    "type": "Тип"
+    "type": "Тип",
+    "history": "История операций",
+    "pendingTitle": "Ожидание подтверждения",
+    "pendingSearchPlaceholder": "Имя или телефон покупателя",
+    "pendingHint": "В ожидании подтверждения: {{amount}}",
+    "confirm": "Подтвердить"
   },
   "reports": {
     "title": "Отчёты",

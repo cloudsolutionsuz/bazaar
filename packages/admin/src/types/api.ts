@@ -222,15 +222,29 @@ export interface BillingSummary {
 }
 
 export type TransactionType = "INCOME" | "EXPENSE";
+export type TransactionStatus = "PENDING" | "CONFIRMED";
 
 export interface FinanceTransaction {
   id: string;
   type: TransactionType;
+  status: TransactionStatus;
   category: string;
   amount: number;
   description: string | null;
   orderId: string | null;
   createdAt: string;
+}
+
+export interface PendingTransaction extends FinanceTransaction {
+  order: Order | null;
+}
+
+export interface DailySummary {
+  openingBalance: number;
+  income: number;
+  expense: number;
+  closingBalance: number;
+  pendingIncome: number;
 }
 
 export interface ProductBreakdown {

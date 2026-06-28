@@ -206,13 +206,20 @@
   "kassa": {
     "title": "Kassa",
     "balance": "Joriy balans",
+    "openingBalance": "Kun boshidagi balans",
+    "actualBalance": "Haqiqiy balans",
     "addTransaction": "Operatsiya qo'shish",
     "income": "Kirim",
     "expense": "Chiqim",
     "category": "Kategoriya",
     "amount": "Summa",
     "description": "Tavsifi",
-    "type": "Turi"
+    "type": "Turi",
+    "history": "Operatsiyalar tarixi",
+    "pendingTitle": "Tasdiqlash kutilmoqda",
+    "pendingSearchPlaceholder": "Mijoz ismi yoki telefon raqami",
+    "pendingHint": "Tasdiqlash kutilmoqda: {{amount}}",
+    "confirm": "Tasdiqlash"
   },
   "reports": {
     "title": "Hisobotlar",

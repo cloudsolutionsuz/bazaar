@@ -11,6 +11,7 @@ import { Select } from "../../components/ui/Select";
 import { Badge } from "../../components/ui/Badge";
 import { Table, Thead, Tbody, Th, Td } from "../../components/ui/Table";
 import { downloadBlob } from "../../utils/downloadBlob";
+import { todayInputValue } from "../../utils/dateInput";
 import type { InventoryMovementType } from "../../types/api";
 
 type Tab = "lowStock" | "receipt" | "writeOff" | "stocktake" | "stockReport" | "history";
@@ -330,11 +331,6 @@ function StocktakeTab() {
       </Button>
     </form>
   );
-}
-
-function todayInputValue(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 function StockReportTab() {
