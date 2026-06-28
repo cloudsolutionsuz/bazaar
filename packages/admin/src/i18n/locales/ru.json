@@ -286,7 +286,9 @@
     "orderCount": "Заказов",
     "totalSpent": "Потрачено",
     "lastOrderAt": "Последний заказ",
-    "customerSince": "Клиент с"
+    "customerSince": "Клиент с",
+    "balance": "Баланс (потрачено)",
+    "purchases": "Покупки"
   },
   "banners": {
     "title": "Баннеры",

@@ -161,6 +161,16 @@ export interface Customer {
   createdAt: string;
 }
 
+export interface CustomerDetail {
+  id: string;
+  phone: string;
+  name: string;
+  orderCount: number;
+  totalSpent: number;
+  createdAt: string;
+  orders: Order[];
+}
+
 export interface DashboardSummary {
   today: { revenue: number; orderCount: number };
   week: { revenue: number; orderCount: number };

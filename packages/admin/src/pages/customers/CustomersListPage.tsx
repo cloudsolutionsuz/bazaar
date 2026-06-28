@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import * as customersApi from "../../api/customers";
@@ -6,6 +7,7 @@ import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
 import { Table, Thead, Tbody, Th, Td } from "../../components/ui/Table";
 import { useDebouncedValue } from "../../hooks/useDebouncedValue";
+import { downloadBlob } from "../../utils/downloadBlob";
 
 export function CustomersListPage() {
   const { t } = useTranslation();
@@ -23,9 +25,19 @@ export function CustomersListPage() {
   const pageSize = query.data?.pageSize ?? 20;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
+  async function handleExport() {
+    const blob = await customersApi.exportCustomers();
+    downloadBlob(blob, "customers.xlsx");
+  }
+
   return (
     <div>
-      <h1 className="mb-4 text-xl font-semibold text-gray-900">{t("customers.title")}</h1>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-xl font-semibold text-gray-900">{t("customers.title")}</h1>
+        <Button variant="secondary" onClick={handleExport}>
+          {t("common.export")}
+        </Button>
+      </div>
 
       <div className="mb-4">
         <Input
@@ -53,7 +65,11 @@ export function CustomersListPage() {
         <Tbody>
           {customers.map((c) => (
             <tr key={c.id}>
-              <Td>{c.name}</Td>
+              <Td>
+                <Link to={`/customers/${c.id}`} className="text-brand-600 hover:underline">
+                  {c.name}
+                </Link>
+              </Td>
               <Td>{c.phone}</Td>
               <Td>{c.orderCount}</Td>
               <Td>{c.totalSpent.toLocaleString()}</Td>

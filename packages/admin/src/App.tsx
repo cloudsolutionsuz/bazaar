@@ -7,6 +7,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { AcceptInvitePage } from "./pages/AcceptInvitePage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { CustomersListPage } from "./pages/customers/CustomersListPage";
+import { CustomerDetailPage } from "./pages/customers/CustomerDetailPage";
 import { ProductsListPage } from "./pages/products/ProductsListPage";
 import { ProductFormPage } from "./pages/products/ProductFormPage";
 import { InventoryPage } from "./pages/inventory/InventoryPage";
@@ -49,6 +50,7 @@ export function App() {
                 <Route path="/" element={<RoleHome />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/customers" element={<CustomersListPage />} />
+                <Route path="/customers/:id" element={<CustomerDetailPage />} />
                 <Route path="/products" element={<ProductsListPage />} />
                 <Route path="/products/:id" element={<ProductFormPage />} />
                 <Route path="/inventory" element={<InventoryPage />} />

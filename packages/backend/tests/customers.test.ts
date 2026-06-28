@@ -142,4 +142,35 @@ describeWithDb("customers (mini-account by phone, integration)", () => {
     expect(cancelled.body.items[0].orderCount).toBe(0);
     expect(cancelled.body.items[0].totalSpent).toBe(0);
   });
+
+  it("returns a customer's full order history on the detail endpoint, including a cancelled order, while excluding it from the balance", async () => {
+    const list = await request(app).get("/api/customers").set(auth()).query({ search: "Cancels" });
+    const customerId = list.body.items[0].id;
+
+    const res = await request(app).get(`/api/customers/${customerId}`).set(auth());
+    expect(res.status).toBe(200);
+    expect(res.body.customer.orders).toHaveLength(1);
+    expect(res.body.customer.orders[0].status).toBe("CANCELLED");
+    expect(res.body.customer.totalSpent).toBe(0);
+    expect(res.body.customer.orderCount).toBe(0);
+  });
+
+  it("404s for a customer that doesn't exist", async () => {
+    const res = await request(app).get("/api/customers/00000000-0000-0000-0000-000000000000").set(auth());
+    expect(res.status).toBe(404);
+  });
+
+  it("exports customers to an Excel file", async () => {
+    const res = await request(app)
+      .get("/api/customers/export")
+      .set(auth())
+      .buffer()
+      .parse((response, callback) => {
+        const chunks: Buffer[] = [];
+        response.on("data", (chunk: Buffer) => chunks.push(chunk));
+        response.on("end", () => callback(null, Buffer.concat(chunks)));
+      });
+    expect(res.status).toBe(200);
+    expect(res.headers["content-type"]).toContain("spreadsheetml");
+  });
 });

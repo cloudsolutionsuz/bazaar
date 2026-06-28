@@ -286,7 +286,9 @@
     "orderCount": "Buyurtmalar",
     "totalSpent": "Sarflangan",
     "lastOrderAt": "So'nggi buyurtma",
-    "customerSince": "Xaridor bo'lgan sana"
+    "customerSince": "Xaridor bo'lgan sana",
+    "balance": "Balans (sarflangan)",
+    "purchases": "Xaridlar"
   },
   "banners": {
     "title": "Bannerlar",
