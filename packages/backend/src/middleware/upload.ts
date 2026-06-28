@@ -16,7 +16,7 @@ function withMulterErrorHandling(middleware: RequestHandler): RequestHandler {
 
 const imagesUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 8 * 1024 * 1024, files: 10 },
+  limits: { fileSize: 1 * 1024 * 1024, files: 3 },
   fileFilter: (_req, file, cb) => {
     if (!file.mimetype.startsWith("image/")) {
       cb(new Error("Only image files are allowed"));
@@ -24,7 +24,7 @@ const imagesUpload = multer({
     }
     cb(null, true);
   },
-}).array("images", 10);
+}).array("images", 3);
 
 const spreadsheetUpload = multer({
   storage: multer.memoryStorage(),

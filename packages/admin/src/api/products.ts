@@ -29,6 +29,10 @@ export interface CreateProductInput {
   name: string;
   description?: string;
   price: number;
+  brand?: string;
+  color?: string;
+  code?: string;
+  currency?: string;
   categoryId?: string;
   status?: ProductStatus;
   variants?: VariantInput[];

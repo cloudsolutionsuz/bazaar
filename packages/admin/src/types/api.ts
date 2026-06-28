@@ -62,6 +62,10 @@ export interface Product {
   name: string;
   description: string | null;
   price: number;
+  brand: string | null;
+  color: string | null;
+  code: string | null;
+  currency: string;
   status: ProductStatus;
   variants: ProductVariant[];
   images: ProductImage[];

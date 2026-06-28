@@ -1,14 +1,18 @@
-import { useRef, type ChangeEvent } from "react";
+import { useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as productsApi from "../../api/products";
 import { Button } from "../../components/ui/Button";
 import type { ProductImage } from "../../types/api";
 
+const MAX_IMAGES = 3;
+const MAX_FILE_SIZE = 1024 * 1024;
+
 export function ImagesManager({ productId, images }: { productId: string; images: ProductImage[] }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [sizeError, setSizeError] = useState<string | null>(null);
 
   function invalidate() {
     queryClient.invalidateQueries({ queryKey: ["product", productId] });
@@ -31,6 +35,13 @@ export function ImagesManager({ productId, images }: { productId: string; images
 
   function handleFiles(e: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
+    const tooBig = files.find((f) => f.size > MAX_FILE_SIZE);
+    if (tooBig) {
+      setSizeError(t("products.imageTooLarge", { name: tooBig.name }));
+      e.target.value = "";
+      return;
+    }
+    setSizeError(null);
     if (files.length > 0) uploadMutation.mutate(files);
     e.target.value = "";
   }
@@ -66,15 +77,17 @@ export function ImagesManager({ productId, images }: { productId: string; images
         ))}
       </div>
 
+      {sizeError && <p className="mt-2 text-sm text-red-600">{sizeError}</p>}
+
       <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFiles} />
       <Button
         type="button"
         variant="secondary"
         className="mt-3"
-        disabled={images.length >= 10}
+        disabled={images.length >= MAX_IMAGES}
         onClick={() => fileInputRef.current?.click()}
       >
-        {t("products.uploadImages")} ({images.length}/10)
+        {t("products.uploadImages")} ({images.length}/{MAX_IMAGES})
       </Button>
     </div>
   );

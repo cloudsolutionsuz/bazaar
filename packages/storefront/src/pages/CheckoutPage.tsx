@@ -192,7 +192,7 @@ export function CheckoutPage() {
 
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">{t("checkout.paymentMethod")}</label>
-          <div className="flex gap-4 text-sm">
+          <div className="flex flex-wrap gap-4 text-sm">
             <label className="flex items-center gap-2">
               <input type="radio" name="paymentMethod" checked={paymentMethod === "cash"} onChange={() => setPaymentMethod("cash")} />
               {t("checkout.paymentCash")}

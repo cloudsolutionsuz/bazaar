@@ -236,6 +236,10 @@ model Product {
   name        String
   description String?
   price       Int
+  brand       String?
+  color       String?
+  code        String?
+  currency    String        @default("UZS")
   status      ProductStatus @default(ACTIVE)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt

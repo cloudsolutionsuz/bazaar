@@ -107,7 +107,7 @@ export function CatalogPage() {
             resetToFirstPage();
           }}
           placeholder={t("catalog.priceFrom")}
-          className="w-28 rounded-md border border-clay-200 bg-white px-3 py-2 text-sm focus:border-clay-500 focus:outline-none"
+          className="w-24 min-w-0 flex-1 rounded-md border border-clay-200 bg-white px-3 py-2 text-sm focus:border-clay-500 focus:outline-none sm:w-28 sm:flex-none"
         />
         <input
           type="number"
@@ -118,14 +118,14 @@ export function CatalogPage() {
             resetToFirstPage();
           }}
           placeholder={t("catalog.priceTo")}
-          className="w-28 rounded-md border border-clay-200 bg-white px-3 py-2 text-sm focus:border-clay-500 focus:outline-none"
+          className="w-24 min-w-0 flex-1 rounded-md border border-clay-200 bg-white px-3 py-2 text-sm focus:border-clay-500 focus:outline-none sm:w-28 sm:flex-none"
         />
       </div>
 
       {products.length === 0 ? (
         <p className="text-gray-500">{t("common.noData")}</p>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {products.map((p) => {
             const totalStock = p.variants.reduce((sum, v) => sum + v.stockQuantity, 0);
             const cover = p.images[0]?.url;
@@ -144,7 +144,9 @@ export function CatalogPage() {
                 </div>
                 <div className="p-3">
                   <div className="text-sm font-medium text-gray-900">{p.name}</div>
-                  <div className="mt-1 font-display text-lg font-semibold text-clay-700">{p.price.toLocaleString()}</div>
+                  <div className="mt-1 font-display text-lg font-semibold text-clay-700">
+                    {p.price.toLocaleString()} {p.currency}
+                  </div>
                   {totalStock === 0 && <div className="mt-1 text-xs text-red-600">{t("catalog.outOfStock")}</div>}
                 </div>
               </Link>

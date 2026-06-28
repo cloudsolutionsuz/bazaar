@@ -62,7 +62,7 @@ export function ProductPage() {
             )}
           </div>
           {product.images.length > 1 && (
-            <div className="mt-2 flex gap-2">
+            <div className="mt-2 flex flex-wrap gap-2">
               {product.images.map((img, i) => (
                 <button
                   key={img.id}
@@ -78,7 +78,14 @@ export function ProductPage() {
 
         <div>
           <h1 className="font-display text-2xl font-bold text-gray-900">{product.name}</h1>
-          <div className="mt-2 font-display text-2xl font-semibold text-clay-700">{unitPrice.toLocaleString()}</div>
+          {(product.brand || product.color) && (
+            <div className="mt-1 text-sm text-gray-500">
+              {[product.brand, product.color].filter(Boolean).join(" · ")}
+            </div>
+          )}
+          <div className="mt-2 font-display text-2xl font-semibold text-clay-700">
+            {unitPrice.toLocaleString()} {product.currency}
+          </div>
 
           {product.variants.length > 1 && (
             <div className="mt-4">

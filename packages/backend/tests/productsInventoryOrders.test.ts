@@ -82,6 +82,21 @@ describeWithDb("products / inventory / orders (integration)", () => {
       expect(movements.every((m) => m.type === "ADJUSTMENT")).toBe(true);
     });
 
+    it("saves brand/color/code/currency, defaulting currency to UZS", async () => {
+      const branded = await request(app).post("/api/products").set(auth()).send({
+        name: "Branded Item", price: 30000, brand: "Nike", color: "Black", code: "ART-001", currency: "USD",
+      });
+      expect(branded.status).toBe(201);
+      expect(branded.body.product.brand).toBe("Nike");
+      expect(branded.body.product.color).toBe("Black");
+      expect(branded.body.product.code).toBe("ART-001");
+      expect(branded.body.product.currency).toBe("USD");
+
+      const plain = await request(app).post("/api/products").set(auth()).send({ name: "Plain Item", price: 1000 });
+      expect(plain.body.product.currency).toBe("UZS");
+      expect(plain.body.product.brand).toBeNull();
+    });
+
     it("rejects duplicate SKUs within the same tenant", async () => {
       const sku = `DUP-${Date.now()}`;
       const first = await request(app).post("/api/products").set(auth()).send({
@@ -114,6 +129,29 @@ describeWithDb("products / inventory / orders (integration)", () => {
       expect(res.status).toBe(201);
       expect(res.body.product.images).toHaveLength(1);
       expect(res.body.product.images[0].url).toMatch(/^\/uploads\/.+\.jpg$/);
+    });
+
+    it("rejects an image file over 1MB and caps a product at 3 images", async () => {
+      const created = await request(app).post("/api/products").set(auth()).send({ name: "Image Limits", price: 1000 });
+      const productId = created.body.product.id;
+
+      const oversized = Buffer.alloc(2 * 1024 * 1024, 0);
+      const tooLarge = await request(app)
+        .post(`/api/products/${productId}/images`)
+        .set(auth())
+        .attach("images", oversized, "big.png");
+      expect(tooLarge.status).toBe(400);
+
+      await request(app).post(`/api/products/${productId}/images`).set(auth()).attach("images", TINY_PNG, "a.png");
+      await request(app).post(`/api/products/${productId}/images`).set(auth()).attach("images", TINY_PNG, "b.png");
+      await request(app).post(`/api/products/${productId}/images`).set(auth()).attach("images", TINY_PNG, "c.png");
+
+      const fourth = await request(app)
+        .post(`/api/products/${productId}/images`)
+        .set(auth())
+        .attach("images", TINY_PNG, "d.png");
+      expect(fourth.status).toBe(400);
+      expect(fourth.body.error.code).toBe("TOO_MANY_IMAGES");
     });
 
     it("refuses to delete a product once it has been ordered", async () => {

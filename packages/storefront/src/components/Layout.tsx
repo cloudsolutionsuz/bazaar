@@ -23,12 +23,14 @@ export function Layout() {
   return (
     <div className="min-h-screen bg-sand-50">
       <header className="sticky top-0 z-30 border-b border-clay-200 bg-sand-50/95 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-          <Link to="/" className="flex items-center gap-2 font-display text-2xl font-bold text-clay-700">
-            {meta?.logoUrl ? <img src={meta.logoUrl} alt={meta.name} className="h-9 w-9 rounded-full object-cover" /> : null}
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-y-2 px-4 py-3">
+          <Link to="/" className="flex items-center gap-2 font-display text-lg font-bold text-clay-700 sm:text-2xl">
+            {meta?.logoUrl ? (
+              <img src={meta.logoUrl} alt={meta.name} className="h-7 w-7 rounded-full object-cover sm:h-9 sm:w-9" />
+            ) : null}
             {meta?.name ?? "Bazaar"}
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <Link to="/my-orders" className="text-sm text-clay-700 hover:underline">
               {t("myOrders.navLink")}
             </Link>

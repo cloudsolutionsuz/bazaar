@@ -12,7 +12,7 @@ import type {
   UpdateVariantInput,
 } from "./products.schema";
 
-const MAX_IMAGES_PER_PRODUCT = 10;
+const MAX_IMAGES_PER_PRODUCT = 3;
 
 const productInclude = {
   variants: true,
@@ -100,6 +100,10 @@ export async function createProduct(tenantId: string, userId: string, input: Cre
         name: input.name,
         description: input.description,
         price: input.price,
+        brand: input.brand,
+        color: input.color,
+        code: input.code,
+        currency: input.currency ?? "UZS",
         categoryId: input.categoryId,
         status: input.status ?? "ACTIVE",
       },
@@ -153,6 +157,10 @@ export async function updateProduct(tenantId: string, productId: string, input: 
       ...(input.name !== undefined ? { name: input.name } : {}),
       ...(input.description !== undefined ? { description: input.description } : {}),
       ...(input.price !== undefined ? { price: input.price } : {}),
+      ...(input.brand !== undefined ? { brand: input.brand } : {}),
+      ...(input.color !== undefined ? { color: input.color } : {}),
+      ...(input.code !== undefined ? { code: input.code } : {}),
+      ...(input.currency !== undefined ? { currency: input.currency } : {}),
       ...(input.categoryId !== undefined ? { categoryId: input.categoryId } : {}),
       ...(input.status !== undefined ? { status: input.status } : {}),
     },
@@ -287,7 +295,22 @@ export async function reorderImages(tenantId: string, productId: string, imageId
   await prisma.$transaction(imageIds.map((id, position) => prisma.productImage.update({ where: { id }, data: { position } })));
 }
 
-const EXPORT_HEADERS = ["Name", "Category", "Description", "Price", "SKU", "Variant", "PriceOverride", "Stock", "LowStockThreshold", "Status"];
+const EXPORT_HEADERS = [
+  "Name",
+  "Category",
+  "Description",
+  "Price",
+  "Currency",
+  "Brand",
+  "Color",
+  "Code",
+  "SKU",
+  "Variant",
+  "PriceOverride",
+  "Stock",
+  "LowStockThreshold",
+  "Status",
+];
 
 export async function exportProductsToExcel(tenantId: string): Promise<Buffer> {
   const products = await prisma.product.findMany({
@@ -307,6 +330,10 @@ export async function exportProductsToExcel(tenantId: string): Promise<Buffer> {
         product.category?.name ?? "",
         product.description ?? "",
         product.price,
+        product.currency,
+        product.brand ?? "",
+        product.color ?? "",
+        product.code ?? "",
         variant.sku,
         variant.name ?? "",
         variant.priceOverride ?? "",
@@ -349,6 +376,10 @@ export async function importProductsFromExcel(tenantId: string, userId: string, 
   const descriptionIdx = colIndex("description");
   const stockIdx = colIndex("stock");
   const categoryIdx = colIndex("category");
+  const brandIdx = colIndex("brand");
+  const colorIdx = colIndex("color");
+  const codeIdx = colIndex("code");
+  const currencyIdx = colIndex("currency");
 
   if (nameIdx === -1 || skuIdx === -1 || priceIdx === -1) {
     throw new AppError(400, "INVALID_FILE", "File must have Name, SKU and Price columns");
@@ -392,11 +423,19 @@ export async function importProductsFromExcel(tenantId: string, userId: string, 
     const stockQuantity = stockIdx >= 0 ? Number(values[stockIdx]) || 0 : 0;
     const categoryName = categoryIdx >= 0 ? String(values[categoryIdx] ?? "").trim().toLowerCase() : "";
     const categoryId = categoryName ? categoryByName.get(categoryName) : undefined;
+    const brand = brandIdx >= 0 ? String(values[brandIdx] ?? "").trim() || undefined : undefined;
+    const color = colorIdx >= 0 ? String(values[colorIdx] ?? "").trim() || undefined : undefined;
+    const code = codeIdx >= 0 ? String(values[codeIdx] ?? "").trim() || undefined : undefined;
+    const currency = currencyIdx >= 0 ? String(values[currencyIdx] ?? "").trim() || undefined : undefined;
 
     await createProduct(tenantId, userId, {
       name,
       description,
       price,
+      brand,
+      color,
+      code,
+      currency,
       categoryId,
       variants: [{ sku, stockQuantity }],
     });

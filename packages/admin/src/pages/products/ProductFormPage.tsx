@@ -9,7 +9,8 @@ import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
 import { VariantsManager } from "./VariantsManager";
 import { ImagesManager } from "./ImagesManager";
-import { NewVariantsTable, emptyVariantDraft, type VariantDraft } from "./NewVariantsTable";
+import { NewVariantsTable, type VariantDraft } from "./NewVariantsTable";
+import { NumberInput } from "../../components/ui/NumberInput";
 import type { ProductStatus } from "../../types/api";
 
 export function ProductFormPage() {
@@ -29,9 +30,13 @@ export function ProductFormPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [brand, setBrand] = useState("");
+  const [color, setColor] = useState("");
+  const [code, setCode] = useState("");
+  const [currency, setCurrency] = useState("UZS");
   const [categoryId, setCategoryId] = useState("");
   const [status, setStatus] = useState<ProductStatus>("ACTIVE");
-  const [newVariantDrafts, setNewVariantDrafts] = useState<VariantDraft[]>([emptyVariantDraft()]);
+  const [newVariantDrafts, setNewVariantDrafts] = useState<VariantDraft[]>([]);
 
   useEffect(() => {
     const product = productQuery.data?.product;
@@ -39,6 +44,10 @@ export function ProductFormPage() {
       setName(product.name);
       setDescription(product.description ?? "");
       setPrice(String(product.price));
+      setBrand(product.brand ?? "");
+      setColor(product.color ?? "");
+      setCode(product.code ?? "");
+      setCurrency(product.currency);
       setCategoryId(product.categoryId ?? "");
       setStatus(product.status);
     }
@@ -66,6 +75,10 @@ export function ProductFormPage() {
       name,
       description: description || undefined,
       price: Number(price),
+      brand: brand || undefined,
+      color: color || undefined,
+      code: code || undefined,
+      currency: currency || undefined,
       categoryId: categoryId || undefined,
       status,
     };
@@ -115,7 +128,11 @@ export function ProductFormPage() {
         <div className="flex gap-4">
           <div className="flex-1">
             <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.price")}</label>
-            <Input required type="number" min={1} value={price} onChange={(e) => setPrice(e.target.value)} className="w-full" />
+            <NumberInput required min={1} value={price} onChange={(e) => setPrice(e.target.value)} className="w-full" />
+          </div>
+          <div className="w-28">
+            <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.currency")}</label>
+            <Input value={currency} onChange={(e) => setCurrency(e.target.value)} className="w-full" />
           </div>
           <div className="flex-1">
             <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.category")}</label>
@@ -135,6 +152,21 @@ export function ProductFormPage() {
               <option value="HIDDEN">{t("products.statusHidden")}</option>
               <option value="OUT_OF_STOCK">{t("products.statusOutOfStock")}</option>
             </Select>
+          </div>
+        </div>
+
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.brand")}</label>
+            <Input value={brand} onChange={(e) => setBrand(e.target.value)} className="w-full" />
+          </div>
+          <div className="flex-1">
+            <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.color")}</label>
+            <Input value={color} onChange={(e) => setColor(e.target.value)} className="w-full" />
+          </div>
+          <div className="flex-1">
+            <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.code")}</label>
+            <Input value={code} onChange={(e) => setCode(e.target.value)} className="w-full" />
           </div>
         </div>
 
