@@ -41,6 +41,23 @@ function rangeToIso(from: string, to: string) {
   };
 }
 
+// Same-length period immediately before the current one - not literally
+// "last calendar month", since the current range can be any custom dates,
+// but it degenerates to that when the user picks a calendar-month-ish range.
+function previousPeriod(from: string, to: string): { from: string; to: string } {
+  const fromDate = new Date(`${from}T00:00:00`);
+  const toDate = new Date(`${to}T00:00:00`);
+  const durationMs = toDate.getTime() - fromDate.getTime();
+  const prevTo = new Date(fromDate.getTime() - 24 * 60 * 60 * 1000);
+  const prevFrom = new Date(prevTo.getTime() - durationMs);
+  return { from: toDateInputValue(prevFrom), to: toDateInputValue(prevTo) };
+}
+
+function percentDelta(current: number, previous: number): number {
+  if (previous === 0) return current === 0 ? 0 : 100;
+  return Math.round(((current - previous) / Math.abs(previous)) * 100);
+}
+
 export function ReportsPage() {
   const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>("analytics");
@@ -123,6 +140,14 @@ function PnLTab({ from, to }: { from: string; to: string }) {
   const query = useQuery({ queryKey: ["finance", "pnl", fromIso, toIso], queryFn: () => financeApi.getPnL(fromIso, toIso) });
   const data = query.data;
 
+  const previous = previousPeriod(from, to);
+  const { fromIso: prevFromIso, toIso: prevToIso } = rangeToIso(previous.from, previous.to);
+  const previousQuery = useQuery({
+    queryKey: ["finance", "pnl", prevFromIso, prevToIso],
+    queryFn: () => financeApi.getPnL(prevFromIso, prevToIso),
+  });
+  const previousData = previousQuery.data;
+
   async function handleExport() {
     const blob = await financeApi.exportPnL(fromIso, toIso);
     downloadBlob(blob, "pnl.xlsx");
@@ -138,11 +163,35 @@ function PnLTab({ from, to }: { from: string; to: string }) {
         </Button>
       </div>
 
+      {previousData && (
+        <p className="mb-2 text-xs text-gray-400">
+          {t("reports.comparedToPrevious", { from: previous.from, to: previous.to })}
+        </p>
+      )}
       <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard label={t("reports.revenue")} value={data.revenue} />
-        <StatCard label={t("reports.cogs")} value={data.cogs} />
-        <StatCard label={t("reports.expenses")} value={data.expenses} />
-        <StatCard label={t("reports.netProfit")} value={data.netProfit} highlight />
+        <StatCard
+          label={t("reports.revenue")}
+          value={data.revenue}
+          delta={previousData ? percentDelta(data.revenue, previousData.revenue) : undefined}
+        />
+        <StatCard
+          label={t("reports.cogs")}
+          value={data.cogs}
+          delta={previousData ? percentDelta(data.cogs, previousData.cogs) : undefined}
+          lowerIsBetter
+        />
+        <StatCard
+          label={t("reports.expenses")}
+          value={data.expenses}
+          delta={previousData ? percentDelta(data.expenses, previousData.expenses) : undefined}
+          lowerIsBetter
+        />
+        <StatCard
+          label={t("reports.netProfit")}
+          value={data.netProfit}
+          highlight
+          delta={previousData ? percentDelta(data.netProfit, previousData.netProfit) : undefined}
+        />
       </div>
 
       <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("reports.marginByProduct")}</h2>

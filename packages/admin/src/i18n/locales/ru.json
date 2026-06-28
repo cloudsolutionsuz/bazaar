@@ -286,7 +286,8 @@
     "presetToday": "Сегодня",
     "preset7Days": "7 дней",
     "preset30Days": "30 дней",
-    "preset90Days": "90 дней"
+    "preset90Days": "90 дней",
+    "comparedToPrevious": "В сравнении с предыдущим периодом ({{from}} — {{to}})"
   },
   "platform": {
     "tenantsTitle": "Магазины",

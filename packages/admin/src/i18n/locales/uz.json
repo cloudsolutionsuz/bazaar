@@ -286,7 +286,8 @@
     "presetToday": "Bugun",
     "preset7Days": "7 kun",
     "preset30Days": "30 kun",
-    "preset90Days": "90 kun"
+    "preset90Days": "90 kun",
+    "comparedToPrevious": "Oldingi davr bilan solishtirilgan ({{from}} — {{to}})"
   },
   "platform": {
     "tenantsTitle": "Do'konlar",
