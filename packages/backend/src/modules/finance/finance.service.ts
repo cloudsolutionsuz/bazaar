@@ -1,3 +1,4 @@
+import ExcelJS from "exceljs";
 import { Prisma, type OrderStatus } from "@prisma/client";
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
@@ -410,4 +411,129 @@ export async function getAnalytics(tenantId: string, from: Date, to: Date, granu
   const conversionRate = visits > 0 ? Math.round((orderCount / visits) * 1000) / 10 : 0;
 
   return { revenue, orderCount, averageOrderValue, visits, conversionRate, salesOverTime, topProducts };
+}
+
+interface SalesForecastResult {
+  history: { date: string; revenue: number }[];
+  forecast: { date: string; revenue: number }[];
+  totalForecastRevenue: number;
+  dailyAverageForecast: number;
+  slopePerDay: number;
+}
+
+const FORECAST_LOOKBACK_DAYS = 90;
+
+// .toISOString().slice(0, 10) would silently shift every day's label back by
+// one in any UTC+ timezone, since startOfDay() sets *local* midnight but
+// toISOString() renders in UTC - the exact local-time-vs-toISOString mismatch
+// already documented as a recurring footgun in this project. Local date
+// getters avoid it.
+function toDateOnly(d: Date): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+// A deliberately simple tool for a small shop owner, not a data scientist:
+// ordinary least-squares on the last 90 *complete* days of daily revenue
+// (today is excluded - it's not over yet, and including a partial day would
+// drag the trend down), projected forward `horizonDays` more days starting
+// today. No seasonality, no per-product breakdown - just "is revenue
+// trending up or down, and roughly how much." Days with no sales are
+// zero-filled (unlike getAnalytics's salesOverTime, which only returns
+// buckets that have data) because the regression needs evenly spaced points
+// along the x-axis to mean anything.
+export async function getSalesForecast(tenantId: string, horizonDays: 30 | 60): Promise<SalesForecastResult> {
+  const today = startOfDay(new Date());
+  const windowStart = new Date(today);
+  windowStart.setDate(windowStart.getDate() - FORECAST_LOOKBACK_DAYS);
+
+  const orders = await prisma.order.findMany({
+    where: { tenantId, createdAt: { gte: windowStart, lt: today }, status: { notIn: EXCLUDED_ORDER_STATUSES } },
+    select: { totalAmount: true, createdAt: true },
+  });
+
+  const revenueByDay = new Map<string, number>();
+  for (const o of orders) {
+    const key = toDateOnly(o.createdAt);
+    revenueByDay.set(key, (revenueByDay.get(key) ?? 0) + o.totalAmount);
+  }
+
+  const history: { date: string; revenue: number }[] = [];
+  for (let i = FORECAST_LOOKBACK_DAYS; i >= 1; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    history.push({ date: toDateOnly(d), revenue: revenueByDay.get(toDateOnly(d)) ?? 0 });
+  }
+
+  const n = history.length;
+  const meanX = (n - 1) / 2;
+  const meanY = history.reduce((sum, h) => sum + h.revenue, 0) / n;
+  let numerator = 0;
+  let denominator = 0;
+  history.forEach((h, x) => {
+    numerator += (x - meanX) * (h.revenue - meanY);
+    denominator += (x - meanX) ** 2;
+  });
+  const slope = denominator === 0 ? 0 : numerator / denominator;
+  const intercept = meanY - slope * meanX;
+
+  const forecast: { date: string; revenue: number }[] = [];
+  for (let i = 0; i < horizonDays; i++) {
+    const x = n + i;
+    const d = new Date(today);
+    d.setDate(d.getDate() + i);
+    forecast.push({ date: toDateOnly(d), revenue: Math.max(0, Math.round(intercept + slope * x)) });
+  }
+
+  const totalForecastRevenue = forecast.reduce((sum, f) => sum + f.revenue, 0);
+
+  return {
+    history,
+    forecast,
+    totalForecastRevenue,
+    dailyAverageForecast: Math.round(totalForecastRevenue / horizonDays),
+    slopePerDay: Math.round(slope),
+  };
+}
+
+export async function exportAnalyticsToExcel(tenantId: string, from: Date, to: Date, granularity: Granularity): Promise<Buffer> {
+  const data = await getAnalytics(tenantId, from, to, granularity);
+
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet("Analytics");
+  sheet.addRow(["Revenue", data.revenue, "Orders", data.orderCount, "AOV", data.averageOrderValue]);
+  sheet.addRow(["Visits", data.visits, "Conversion %", data.conversionRate]);
+  sheet.addRow([]);
+  sheet.addRow(["Sales over time"]);
+  sheet.addRow(["Period", "Revenue", "Orders"]);
+  for (const row of data.salesOverTime) {
+    sheet.addRow([row.bucket, row.revenue, row.orderCount]);
+  }
+  sheet.addRow([]);
+  sheet.addRow(["Top products"]);
+  sheet.addRow(["Product", "Quantity", "Revenue"]);
+  for (const row of data.topProducts) {
+    sheet.addRow([row.productName, row.quantity, row.revenue]);
+  }
+
+  const arrayBuffer = await workbook.xlsx.writeBuffer();
+  return Buffer.from(arrayBuffer);
+}
+
+export async function exportPnLToExcel(tenantId: string, from: Date, to: Date): Promise<Buffer> {
+  const data = await getPnL(tenantId, from, to);
+
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet("P&L");
+  sheet.addRow(["Revenue", data.revenue, "COGS", data.cogs, "Expenses", data.expenses, "Net Profit", data.netProfit]);
+  sheet.addRow([]);
+  sheet.addRow(["Product", "Revenue", "COGS", "Margin %"]);
+  for (const row of data.byProduct) {
+    sheet.addRow([row.productName, row.revenue, row.cogs, row.margin]);
+  }
+
+  const arrayBuffer = await workbook.xlsx.writeBuffer();
+  return Buffer.from(arrayBuffer);
 }

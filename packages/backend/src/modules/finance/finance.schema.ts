@@ -44,6 +44,12 @@ export const dailySummaryQuerySchema = z.object({
   cashRegisterId: z.string().uuid().optional(),
 });
 
+// horizonDays is an internal UI toggle (30 or 60), not a public contract -
+// the controller clamps anything else to 30 rather than 400ing on it.
+export const forecastQuerySchema = z.object({
+  horizonDays: z.coerce.number().int().optional(),
+});
+
 export type CreateTransactionInput = z.infer<typeof createTransactionSchema>;
 export type ListTransactionsQuery = z.infer<typeof listTransactionsQuerySchema>;
 export type ReportQuery = z.infer<typeof reportQuerySchema>;
@@ -52,3 +58,4 @@ export type ListPendingTransactionsQuery = z.infer<typeof listPendingTransaction
 export type DailySummaryQuery = z.infer<typeof dailySummaryQuerySchema>;
 export type ConfirmTransactionInput = z.infer<typeof confirmTransactionSchema>;
 export type BalanceQuery = z.infer<typeof balanceQuerySchema>;
+export type ForecastQuery = z.infer<typeof forecastQuerySchema>;

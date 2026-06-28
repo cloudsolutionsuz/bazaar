@@ -272,7 +272,21 @@
     "visits": "Визиты",
     "conversionRate": "Конверсия",
     "salesOverTime": "Динамика продаж",
-    "topProducts": "Топ товаров"
+    "topProducts": "Топ товаров",
+    "forecast": "Прогноз",
+    "forecastHorizon": "Горизонт прогноза",
+    "days30": "30 дней",
+    "days60": "60 дней",
+    "totalForecastRevenue": "Прогноз выручки",
+    "dailyAverageForecast": "Среднее в день",
+    "trendUp": "Тренд продаж растёт",
+    "trendDown": "Тренд продаж снижается",
+    "trendFlat": "Тренд продаж стабилен",
+    "forecastDisclaimer": "Базовый прогноз по линейному тренду за последние 90 дней — не учитывает сезонность, акции и другие факторы",
+    "presetToday": "Сегодня",
+    "preset7Days": "7 дней",
+    "preset30Days": "30 дней",
+    "preset90Days": "90 дней"
   },
   "platform": {
     "tenantsTitle": "Магазины",

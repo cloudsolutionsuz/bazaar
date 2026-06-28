@@ -6,6 +6,7 @@ import type {
   ConfirmTransactionInput,
   CreateTransactionInput,
   DailySummaryQuery,
+  ForecastQuery,
   ListPendingTransactionsQuery,
   ListTransactionsQuery,
   ReportQuery,
@@ -40,6 +41,28 @@ export async function getPnL(req: Request, res: Response): Promise<void> {
 export async function getAnalytics(req: Request, res: Response): Promise<void> {
   const { from, to, granularity } = req.query as unknown as AnalyticsQuery;
   const result = await financeService.getAnalytics(req.authUser!.tenantId!, from, to, granularity);
+  res.json(result);
+}
+
+export async function exportAnalytics(req: Request, res: Response): Promise<void> {
+  const { from, to, granularity } = req.query as unknown as AnalyticsQuery;
+  const buffer = await financeService.exportAnalyticsToExcel(req.authUser!.tenantId!, from, to, granularity ?? "day");
+  res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+  res.setHeader("Content-Disposition", "attachment; filename=analytics.xlsx");
+  res.send(buffer);
+}
+
+export async function exportPnL(req: Request, res: Response): Promise<void> {
+  const { from, to } = req.query as unknown as ReportQuery;
+  const buffer = await financeService.exportPnLToExcel(req.authUser!.tenantId!, from, to);
+  res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+  res.setHeader("Content-Disposition", "attachment; filename=pnl.xlsx");
+  res.send(buffer);
+}
+
+export async function getForecast(req: Request, res: Response): Promise<void> {
+  const { horizonDays } = req.query as unknown as ForecastQuery;
+  const result = await financeService.getSalesForecast(req.authUser!.tenantId!, horizonDays === 60 ? 60 : 30);
   res.json(result);
 }
 

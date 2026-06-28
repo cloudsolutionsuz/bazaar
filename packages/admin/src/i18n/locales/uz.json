@@ -272,7 +272,21 @@
     "visits": "Tashriflar",
     "conversionRate": "Konversiya",
     "salesOverTime": "Sotuvlar dinamikasi",
-    "topProducts": "Top tovarlar"
+    "topProducts": "Top tovarlar",
+    "forecast": "Prognoz",
+    "forecastHorizon": "Prognoz gorizonti",
+    "days30": "30 kun",
+    "days60": "60 kun",
+    "totalForecastRevenue": "Tushum prognozi",
+    "dailyAverageForecast": "Kunlik o'rtacha",
+    "trendUp": "Sotuvlar trendi o'sib bormoqda",
+    "trendDown": "Sotuvlar trendi pasayib bormoqda",
+    "trendFlat": "Sotuvlar trendi barqaror",
+    "forecastDisclaimer": "So'nggi 90 kunlik chiziqli trendga asoslangan oddiy prognoz — fasllik, aksiyalar va boshqa omillarni hisobga olmaydi",
+    "presetToday": "Bugun",
+    "preset7Days": "7 kun",
+    "preset30Days": "30 kun",
+    "preset90Days": "90 kun"
   },
   "platform": {
     "tenantsTitle": "Do'konlar",

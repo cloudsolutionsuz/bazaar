@@ -386,4 +386,62 @@ describeWithDb("finance (integration)", () => {
     const transactionsForSecond = await request(app).get("/api/finance/transactions").set(auth()).query({ cashRegisterId: secondRegisterId });
     expect(transactionsForSecond.body.items.every((t: { cashRegisterId: string }) => t.cashRegisterId === secondRegisterId)).toBe(true);
   });
+
+  it("computes a sales forecast with the right array lengths and a consistent total", async () => {
+    const res30 = await request(app).get("/api/finance/forecast").set(auth()).query({ horizonDays: 30 });
+    expect(res30.status).toBe(200);
+    expect(res30.body.history).toHaveLength(90);
+    expect(res30.body.forecast).toHaveLength(30);
+    const sum30 = res30.body.forecast.reduce((s: number, f: { revenue: number }) => s + f.revenue, 0);
+    expect(res30.body.totalForecastRevenue).toBe(sum30);
+    expect(res30.body.dailyAverageForecast).toBe(Math.round(sum30 / 30));
+    expect(res30.body.forecast.every((f: { revenue: number }) => f.revenue >= 0)).toBe(true);
+
+    // history must stop the day before forecast starts - no overlap, no gap.
+    const lastHistoryDate = new Date(res30.body.history[89].date);
+    const firstForecastDate = new Date(res30.body.forecast[0].date);
+    const dayMs = 24 * 60 * 60 * 1000;
+    expect(firstForecastDate.getTime() - lastHistoryDate.getTime()).toBe(dayMs);
+    const allDates = [...res30.body.history.map((h: { date: string }) => h.date), ...res30.body.forecast.map((f: { date: string }) => f.date)];
+    expect(new Set(allDates).size).toBe(allDates.length);
+
+    const res60 = await request(app).get("/api/finance/forecast").set(auth()).query({ horizonDays: 60 });
+    expect(res60.body.forecast).toHaveLength(60);
+
+    // Garbage horizonDays clamps to 30 rather than 400ing - it's an internal UI toggle, not a strict public contract.
+    const resGarbage = await request(app).get("/api/finance/forecast").set(auth()).query({ horizonDays: 999 });
+    expect(resGarbage.status).toBe(200);
+    expect(resGarbage.body.forecast).toHaveLength(30);
+  });
+
+  it("exports analytics and P&L as valid xlsx buffers", async () => {
+    const from = isoDate(new Date(Date.now() - 60 * 60 * 1000));
+    const to = isoDate(new Date(Date.now() + 60 * 60 * 1000));
+
+    const analyticsExport = await request(app)
+      .get("/api/finance/analytics/export")
+      .set(auth())
+      .query({ from, to })
+      .buffer()
+      .parse((response, callback) => {
+        const chunks: Buffer[] = [];
+        response.on("data", (chunk: Buffer) => chunks.push(chunk));
+        response.on("end", () => callback(null, Buffer.concat(chunks)));
+      });
+    expect(analyticsExport.status).toBe(200);
+    expect(analyticsExport.headers["content-type"]).toContain("spreadsheetml");
+
+    const pnlExport = await request(app)
+      .get("/api/finance/pnl/export")
+      .set(auth())
+      .query({ from, to })
+      .buffer()
+      .parse((response, callback) => {
+        const chunks: Buffer[] = [];
+        response.on("data", (chunk: Buffer) => chunks.push(chunk));
+        response.on("end", () => callback(null, Buffer.concat(chunks)));
+      });
+    expect(pnlExport.status).toBe(200);
+    expect(pnlExport.headers["content-type"]).toContain("spreadsheetml");
+  });
 });

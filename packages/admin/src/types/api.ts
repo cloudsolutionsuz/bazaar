@@ -320,6 +320,19 @@ export interface AnalyticsResult {
   topProducts: TopProduct[];
 }
 
+export interface SalesForecastPoint {
+  date: string;
+  revenue: number;
+}
+
+export interface SalesForecastResult {
+  history: SalesForecastPoint[];
+  forecast: SalesForecastPoint[];
+  totalForecastRevenue: number;
+  dailyAverageForecast: number;
+  slopePerDay: number;
+}
+
 export interface TenantWithRelations extends Tenant {
   plan: Plan;
   users: User[];

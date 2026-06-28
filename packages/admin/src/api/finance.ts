@@ -1,5 +1,14 @@
 import { apiRequest } from "./client";
-import type { AnalyticsResult, DailySummary, FinanceTransaction, Paginated, PendingTransaction, PnLResult, TransactionType } from "../types/api";
+import type {
+  AnalyticsResult,
+  DailySummary,
+  FinanceTransaction,
+  Paginated,
+  PendingTransaction,
+  PnLResult,
+  SalesForecastResult,
+  TransactionType,
+} from "../types/api";
 
 export function getBalance(cashRegisterId?: string): Promise<{ balance: number }> {
   return apiRequest("/api/finance/balance", { query: { cashRegisterId } });
@@ -36,6 +45,18 @@ export function getPnL(from: string, to: string): Promise<PnLResult> {
 
 export function getAnalytics(from: string, to: string, granularity: "day" | "week" | "month"): Promise<AnalyticsResult> {
   return apiRequest("/api/finance/analytics", { query: { from, to, granularity } });
+}
+
+export function exportAnalytics(from: string, to: string, granularity: "day" | "week" | "month"): Promise<Blob> {
+  return apiRequest("/api/finance/analytics/export", { query: { from, to, granularity }, responseType: "blob" });
+}
+
+export function exportPnL(from: string, to: string): Promise<Blob> {
+  return apiRequest("/api/finance/pnl/export", { query: { from, to }, responseType: "blob" });
+}
+
+export function getForecast(horizonDays: 30 | 60): Promise<SalesForecastResult> {
+  return apiRequest("/api/finance/forecast", { query: { horizonDays } });
 }
 
 export function listPendingTransactions(search?: string): Promise<{ items: PendingTransaction[] }> {
