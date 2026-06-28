@@ -18,6 +18,7 @@ import { platformRouter } from "./modules/platform/platform.routes";
 import { bannersRouter } from "./modules/banners/banners.routes";
 import { dashboardRouter } from "./modules/dashboard/dashboard.routes";
 import { customersRouter } from "./modules/customers/customers.routes";
+import { suppliersRouter } from "./modules/suppliers/suppliers.routes";
 
 export function createApp(): Express {
   const app = express();
@@ -46,6 +47,7 @@ export function createApp(): Express {
   app.use("/api/banners", bannersRouter);
   app.use("/api/dashboard", dashboardRouter);
   app.use("/api/customers", customersRouter);
+  app.use("/api/suppliers", suppliersRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

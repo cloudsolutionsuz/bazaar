@@ -92,7 +92,12 @@ async function computeFifoCogs(
       tenantId,
       variantId: { in: variantIds },
       createdAt: { lte: to },
-      OR: [{ type: "RECEIPT" }, { type: "SALE", order: { status: { notIn: EXCLUDED_ORDER_STATUSES } } }],
+      OR: [
+        { type: "RECEIPT" },
+        { type: "SALE", order: { status: { notIn: EXCLUDED_ORDER_STATUSES } } },
+        { type: "WRITE_OFF" },
+        { type: "STOCKTAKE" },
+      ],
     },
     orderBy: { createdAt: "asc" },
   });
@@ -110,7 +115,24 @@ async function computeFifoCogs(
       continue;
     }
 
-    // SALE: m.quantity is negative.
+    if (m.type === "STOCKTAKE" && m.quantity > 0) {
+      // Found more stock than recorded - treat it as a free lot (cost 0).
+      // Conservative simplification: we have no real purchase price for
+      // untracked stock, and crediting it at 0 cost never overstates COGS.
+      const lots = lotsByVariant.get(m.variantId) ?? [];
+      lots.push({ remainingQty: m.quantity, purchasePrice: 0 });
+      lotsByVariant.set(m.variantId, lots);
+      continue;
+    }
+
+    if (m.quantity === 0) continue; // STOCKTAKE that confirmed no discrepancy - nothing to consume.
+
+    // SALE, WRITE_OFF, or a STOCKTAKE shortfall: m.quantity is negative for
+    // all three, and all three consume FIFO lots so the remaining-lot
+    // bookkeeping stays correct for whatever sale comes next. Only a SALE's
+    // cost gets attributed to an order below - write-offs/stocktakes have no
+    // orderId, so they silently fall out of the per-order P&L breakdown
+    // while still correctly draining the lots they actually used up.
     let qtyToConsume = -m.quantity;
     const lots = lotsByVariant.get(m.variantId) ?? [];
     let cost = 0;
@@ -129,7 +151,7 @@ async function computeFifoCogs(
       cost += qtyToConsume * (lastPriceByVariant.get(m.variantId) ?? 0);
     }
 
-    if (m.createdAt >= from && m.createdAt <= to && m.orderId) {
+    if (m.type === "SALE" && m.createdAt >= from && m.createdAt <= to && m.orderId) {
       const key = `${m.orderId}:${m.variantId}`;
       costByOrderVariant.set(key, (costByOrderVariant.get(key) ?? 0) + cost);
     }

@@ -12,6 +12,8 @@ export async function deleteTenantCompletely(tenantId: string): Promise<void> {
   await prisma.orderItem.deleteMany({ where: { orderId: { in: orderIds } } });
   await prisma.orderStatusHistory.deleteMany({ where: { orderId: { in: orderIds } } });
   await prisma.inventoryMovement.deleteMany({ where: { tenantId } });
+  // Must come after inventoryMovement - InventoryMovement.supplierId references Supplier.
+  await prisma.supplier.deleteMany({ where: { tenantId } });
   await prisma.transaction.deleteMany({ where: { tenantId } });
   await prisma.pageView.deleteMany({ where: { tenantId } });
   await prisma.order.deleteMany({ where: { tenantId } });

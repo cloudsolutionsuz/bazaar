@@ -10,6 +10,7 @@ import { CustomersListPage } from "./pages/customers/CustomersListPage";
 import { ProductsListPage } from "./pages/products/ProductsListPage";
 import { ProductFormPage } from "./pages/products/ProductFormPage";
 import { InventoryPage } from "./pages/inventory/InventoryPage";
+import { SuppliersListPage } from "./pages/suppliers/SuppliersListPage";
 import { BannersPage } from "./pages/banners/BannersPage";
 import { OrdersListPage } from "./pages/orders/OrdersListPage";
 import { OrderDetailPage } from "./pages/orders/OrderDetailPage";
@@ -51,6 +52,7 @@ export function App() {
                 <Route path="/products" element={<ProductsListPage />} />
                 <Route path="/products/:id" element={<ProductFormPage />} />
                 <Route path="/inventory" element={<InventoryPage />} />
+                <Route path="/suppliers" element={<SuppliersListPage />} />
                 <Route path="/banners" element={<BannersPage />} />
                 <Route path="/orders" element={<OrdersListPage />} />
                 <Route path="/orders/:id" element={<OrderDetailPage />} />

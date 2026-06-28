@@ -170,6 +170,47 @@ describeWithDb("finance (integration)", () => {
     expect(fifoBreakdown.revenue).toBe(fifoPrice * (7 + 2));
   });
 
+  it("has a write-off consume the oldest FIFO lot so a later sale costs correctly from what's left", async () => {
+    const price = 9000;
+    const product = await request(app).post("/api/products").set(auth()).send({
+      name: "FIFO WriteOff Test Product",
+      price,
+      variants: [{ sku: `FIFOWO-${Date.now()}`, stockQuantity: 0 }],
+    });
+    const variant = product.body.product.variants[0].id;
+
+    // Two lots: 5 @ 1000, then 5 @ 2000.
+    await request(app).post("/api/inventory/receipts").set(auth()).send({ variantId: variant, quantity: 5, purchasePrice: 1000 });
+    await request(app).post("/api/inventory/receipts").set(auth()).send({ variantId: variant, quantity: 5, purchasePrice: 2000 });
+
+    // Write off 3 units - should consume 3 from the first (oldest) lot,
+    // leaving it with 2 remaining, not touching the second lot at all.
+    const writeOff = await request(app).post("/api/inventory/write-offs").set(auth()).send({
+      variantId: variant,
+      quantity: 3,
+      note: "Damaged in storage",
+    });
+    expect(writeOff.status).toBe(201);
+
+    // Selling 4 should now draw 2 from the (depleted) first lot @1000 + 2
+    // from the second lot @2000 = 6000 - NOT 4*1000=4000, which is what it'd
+    // be if the write-off hadn't been replayed into the FIFO lot queue.
+    const sale = await request(app).post("/api/orders").set(auth()).send({
+      customerName: "FIFO WriteOff Buyer",
+      customerPhone: "+998900000555",
+      ...DEFAULT_ADDRESS,
+      items: [{ variantId: variant, quantity: 4 }],
+    });
+    expect(sale.status).toBe(201);
+
+    const from = isoDate(new Date(Date.now() - 60 * 60 * 1000));
+    const to = isoDate(new Date(Date.now() + 60 * 60 * 1000));
+    const pnl = await request(app).get("/api/finance/pnl").set(auth()).query({ from, to });
+    const breakdown = pnl.body.byProduct.find((p: { productName: string }) => p.productName === "FIFO WriteOff Test Product");
+    expect(breakdown.cogs).toBe(2 * 1000 + 2 * 2000);
+    expect(breakdown.revenue).toBe(price * 4);
+  });
+
   it("computes visits as distinct sessions and conversion rate as orders/visits", async () => {
     const host = `${seller.subdomain}.localhost`;
 

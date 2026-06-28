@@ -1,5 +1,5 @@
 export type ProductStatus = "ACTIVE" | "HIDDEN" | "OUT_OF_STOCK";
-export type InventoryMovementType = "RECEIPT" | "SALE" | "RETURN" | "ADJUSTMENT";
+export type InventoryMovementType = "RECEIPT" | "SALE" | "RETURN" | "ADJUSTMENT" | "WRITE_OFF" | "STOCKTAKE";
 export type OrderStatus = "NEW" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "REFUNDED" | "ARCHIVED";
 
 export type TenantStatus = "TRIAL" | "ACTIVE" | "PAST_DUE" | "BLOCKED";
@@ -73,6 +73,16 @@ export interface Product {
   updatedAt: string;
 }
 
+export interface Supplier {
+  id: string;
+  name: string;
+  contactPerson: string | null;
+  phone: string | null;
+  address: string | null;
+  note: string | null;
+  createdAt: string;
+}
+
 export interface InventoryMovement {
   id: string;
   tenantId: string;
@@ -83,8 +93,23 @@ export interface InventoryMovement {
   purchasePrice: number | null;
   note: string | null;
   orderId: string | null;
+  supplierId: string | null;
+  supplier?: Supplier | null;
   createdByUserId: string;
   createdAt: string;
+}
+
+export interface DailyReportRow {
+  variantId: string;
+  productName: string;
+  sku: string;
+  openingStock: number;
+  receipts: number;
+  sales: number;
+  writeOffs: number;
+  stocktakeAdjustments: number;
+  closingStock: number;
+  actualStock: number | null;
 }
 
 export interface OrderItem {
