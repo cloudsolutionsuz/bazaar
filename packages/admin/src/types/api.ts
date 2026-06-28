@@ -1,5 +1,5 @@
 export type ProductStatus = "ACTIVE" | "HIDDEN" | "OUT_OF_STOCK";
-export type InventoryMovementType = "RECEIPT" | "SALE" | "RETURN" | "ADJUSTMENT" | "WRITE_OFF" | "STOCKTAKE";
+export type InventoryMovementType = "RECEIPT" | "SALE" | "RETURN" | "ADJUSTMENT" | "WRITE_OFF" | "STOCKTAKE" | "SUPPLIER_RETURN";
 export type OrderStatus = "NEW" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "REFUNDED" | "ARCHIVED";
 
 export type TenantStatus = "TRIAL" | "ACTIVE" | "PAST_DUE" | "BLOCKED";
@@ -83,6 +83,29 @@ export interface Supplier {
   createdAt: string;
 }
 
+// listSuppliers replays receipts/returns/payments to attach a current debt
+// figure - create/update don't compute this, so it's a separate type rather
+// than a field on the base Supplier.
+export interface SupplierWithBalance extends Supplier {
+  balance: number;
+}
+
+export interface SupplierStatementEntry {
+  date: string;
+  type: "RECEIPT" | "SUPPLIER_RETURN" | "PAYMENT";
+  description: string;
+  debit: number;
+  credit: number;
+  balanceAfter: number;
+}
+
+export interface SupplierStatement {
+  supplier: Supplier;
+  openingBalance: number;
+  entries: SupplierStatementEntry[];
+  closingBalance: number;
+}
+
 export interface InventoryMovement {
   id: string;
   tenantId: string;
@@ -107,6 +130,7 @@ export interface DailyReportRow {
   receipts: number;
   sales: number;
   writeOffs: number;
+  supplierReturns: number;
   stocktakeAdjustments: number;
   closingStock: number;
   actualStock: number | null;
@@ -241,6 +265,7 @@ export interface FinanceTransaction {
   description: string | null;
   orderId: string | null;
   cashRegisterId: string | null;
+  supplierId: string | null;
   createdAt: string;
 }
 

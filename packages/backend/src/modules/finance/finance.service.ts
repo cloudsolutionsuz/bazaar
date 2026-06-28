@@ -29,6 +29,12 @@ export async function getBalance(tenantId: string, cashRegisterId?: string): Pro
 
 export async function createTransaction(tenantId: string, userId: string, input: CreateTransactionInput) {
   await getActiveCashRegisterOrThrow(tenantId, input.cashRegisterId);
+  if (input.supplierId) {
+    const supplier = await prisma.supplier.findFirst({ where: { id: input.supplierId, tenantId } });
+    if (!supplier) {
+      throw new AppError(404, "SUPPLIER_NOT_FOUND", "Supplier not found");
+    }
+  }
 
   return prisma.transaction.create({
     data: {
@@ -38,6 +44,7 @@ export async function createTransaction(tenantId: string, userId: string, input:
       amount: input.amount,
       description: input.description,
       cashRegisterId: input.cashRegisterId,
+      supplierId: input.supplierId,
       createdByUserId: userId,
     },
   });
@@ -216,6 +223,7 @@ async function computeFifoCogs(
         { type: "RECEIPT" },
         { type: "SALE", order: { status: { notIn: EXCLUDED_ORDER_STATUSES } } },
         { type: "WRITE_OFF" },
+        { type: "SUPPLIER_RETURN" },
         { type: "STOCKTAKE" },
       ],
     },
@@ -247,11 +255,11 @@ async function computeFifoCogs(
 
     if (m.quantity === 0) continue; // STOCKTAKE that confirmed no discrepancy - nothing to consume.
 
-    // SALE, WRITE_OFF, or a STOCKTAKE shortfall: m.quantity is negative for
-    // all three, and all three consume FIFO lots so the remaining-lot
-    // bookkeeping stays correct for whatever sale comes next. Only a SALE's
-    // cost gets attributed to an order below - write-offs/stocktakes have no
-    // orderId, so they silently fall out of the per-order P&L breakdown
+    // SALE, WRITE_OFF, SUPPLIER_RETURN, or a STOCKTAKE shortfall: m.quantity
+    // is negative for all of these, and all of them consume FIFO lots so the
+    // remaining-lot bookkeeping stays correct for whatever sale comes next.
+    // Only a SALE's cost gets attributed to an order below - the others have
+    // no orderId, so they silently fall out of the per-order P&L breakdown
     // while still correctly draining the lots they actually used up.
     let qtyToConsume = -m.quantity;
     const lots = lotsByVariant.get(m.variantId) ?? [];

@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import type {
   CreateReceiptInput,
   CreateStocktakeInput,
+  CreateSupplierReturnInput,
   CreateWriteOffInput,
   DailyReportQuery,
   ListMovementsQuery,
@@ -15,6 +16,15 @@ export async function createReceipt(req: Request, res: Response): Promise<void> 
 
 export async function createWriteOff(req: Request, res: Response): Promise<void> {
   const movement = await inventoryService.createWriteOff(req.authUser!.tenantId!, req.authUser!.id, req.body as CreateWriteOffInput);
+  res.status(201).json({ movement });
+}
+
+export async function createSupplierReturn(req: Request, res: Response): Promise<void> {
+  const movement = await inventoryService.createSupplierReturn(
+    req.authUser!.tenantId!,
+    req.authUser!.id,
+    req.body as CreateSupplierReturnInput,
+  );
   res.status(201).json({ movement });
 }
 

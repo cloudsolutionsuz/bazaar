@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as suppliersApi from "../../api/suppliers";
@@ -72,16 +73,22 @@ export function SuppliersListPage() {
             <Th>{t("suppliers.contactPerson")}</Th>
             <Th>{t("suppliers.phone")}</Th>
             <Th>{t("suppliers.address")}</Th>
+            <Th>{t("suppliers.balance")}</Th>
             <Th>{t("common.actions")}</Th>
           </tr>
         </Thead>
         <Tbody>
           {suppliers.map((s) => (
             <tr key={s.id}>
-              <Td>{s.name}</Td>
+              <Td>
+                <Link to={`/suppliers/${s.id}`} className="text-brand-600 hover:underline">
+                  {s.name}
+                </Link>
+              </Td>
               <Td>{s.contactPerson ?? "—"}</Td>
               <Td>{s.phone ?? "—"}</Td>
               <Td>{s.address ?? "—"}</Td>
+              <Td className={s.balance > 0 ? "font-medium text-red-600" : ""}>{s.balance.toLocaleString()}</Td>
               <Td>
                 <div className="flex gap-3">
                   <button onClick={() => setEditingSupplier(s)} className="text-brand-600 hover:underline">
@@ -101,7 +108,7 @@ export function SuppliersListPage() {
           ))}
           {suppliers.length === 0 && (
             <tr>
-              <Td colSpan={5} className="text-center text-gray-400">
+              <Td colSpan={6} className="text-center text-gray-400">
                 {t("common.noData")}
               </Td>
             </tr>

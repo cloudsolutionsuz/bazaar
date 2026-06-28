@@ -1,6 +1,12 @@
 import type { Request, Response } from "express";
 import * as suppliersService from "./suppliers.service";
-import type { CreateSupplierInput, ListSuppliersQuery, UpdateSupplierInput } from "./suppliers.schema";
+import type {
+  CreateSupplierInput,
+  CreateSupplierPaymentInput,
+  ListSuppliersQuery,
+  SupplierStatementQuery,
+  UpdateSupplierInput,
+} from "./suppliers.schema";
 
 export async function list(req: Request, res: Response): Promise<void> {
   const result = await suppliersService.listSuppliers(req.authUser!.tenantId!, req.query as unknown as ListSuppliersQuery);
@@ -20,4 +26,34 @@ export async function update(req: Request, res: Response): Promise<void> {
 export async function remove(req: Request, res: Response): Promise<void> {
   await suppliersService.deleteSupplier(req.authUser!.tenantId!, req.params.id);
   res.status(204).send();
+}
+
+export async function getStatement(req: Request, res: Response): Promise<void> {
+  const statement = await suppliersService.getSupplierStatement(
+    req.authUser!.tenantId!,
+    req.params.id,
+    req.query as unknown as SupplierStatementQuery,
+  );
+  res.json(statement);
+}
+
+export async function exportStatement(req: Request, res: Response): Promise<void> {
+  const buffer = await suppliersService.exportSupplierStatementToExcel(
+    req.authUser!.tenantId!,
+    req.params.id,
+    req.query as unknown as SupplierStatementQuery,
+  );
+  res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+  res.setHeader("Content-Disposition", "attachment; filename=supplier-statement.xlsx");
+  res.send(buffer);
+}
+
+export async function createPayment(req: Request, res: Response): Promise<void> {
+  const transaction = await suppliersService.createSupplierPayment(
+    req.authUser!.tenantId!,
+    req.authUser!.id,
+    req.params.id,
+    req.body as CreateSupplierPaymentInput,
+  );
+  res.status(201).json({ transaction });
 }

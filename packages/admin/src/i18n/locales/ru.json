@@ -132,7 +132,11 @@
     "typeAdjustment": "Корректировка",
     "typeWriteOff": "Списание",
     "typeStocktake": "Инвентаризация",
-    "noLowStock": "Нет товаров с низким остатком"
+    "typeSupplierReturn": "Возврат поставщику",
+    "noLowStock": "Нет товаров с низким остатком",
+    "tabSupplierReturn": "Возврат поставщику",
+    "submitSupplierReturn": "Оформить возврат",
+    "supplierReturns": "Возвраты пост."
   },
   "suppliers": {
     "title": "Поставщики",
@@ -144,7 +148,20 @@
     "address": "Адрес",
     "note": "Заметка",
     "searchPlaceholder": "Название или телефон",
-    "confirmDelete": "Удалить этого поставщика?"
+    "confirmDelete": "Удалить этого поставщика?",
+    "balance": "Долг",
+    "statement": "Акт сверки",
+    "openingBalance": "Долг на начало периода",
+    "closingBalance": "Текущий долг",
+    "payment": "Оплатить поставщику",
+    "payAmount": "Сумма оплаты",
+    "pay": "Оплатить",
+    "description": "Описание",
+    "debit": "Начислено",
+    "credit": "Оплачено/возврат",
+    "entryReceipt": "Приход",
+    "entrySupplierReturn": "Возврат",
+    "entryPayment": "Оплата"
   },
   "orders": {
     "title": "Заказы",

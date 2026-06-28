@@ -2,7 +2,6 @@ import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as financeApi from "../../api/finance";
-import * as cashRegistersApi from "../../api/cashRegisters";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
@@ -10,16 +9,9 @@ import { Badge } from "../../components/ui/Badge";
 import { StatCard } from "../../components/ui/StatCard";
 import { Table, Thead, Tbody, Th, Td } from "../../components/ui/Table";
 import { todayInputValue } from "../../utils/dateInput";
+import { useActiveCashRegisters } from "../../hooks/useActiveCashRegisters";
 import { CashRegistersModal } from "./CashRegistersModal";
 import type { CashRegister, TransactionType } from "../../types/api";
-
-function useActiveCashRegisters() {
-  const query = useQuery({ queryKey: ["finance", "cash-registers"], queryFn: cashRegistersApi.listCashRegisters });
-  const registers = query.data?.items ?? [];
-  const activeRegisters = registers.filter((r) => r.isActive);
-  const defaultRegisterId = registers.find((r) => r.isDefault)?.id ?? activeRegisters[0]?.id ?? "";
-  return { registers, activeRegisters, defaultRegisterId };
-}
 
 export function KassaPage() {
   const { t } = useTranslation();

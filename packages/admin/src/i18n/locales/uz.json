@@ -132,7 +132,11 @@
     "typeAdjustment": "Tuzatish",
     "typeWriteOff": "Chiqim",
     "typeStocktake": "Inventarizatsiya",
-    "noLowStock": "Past qoldiqli tovarlar yo'q"
+    "typeSupplierReturn": "Yetkazib beruvchiga qaytarish",
+    "noLowStock": "Past qoldiqli tovarlar yo'q",
+    "tabSupplierReturn": "Yetkazib beruvchiga qaytarish",
+    "submitSupplierReturn": "Qaytarishni rasmiylashtirish",
+    "supplierReturns": "Qaytarishlar"
   },
   "suppliers": {
     "title": "Yetkazib beruvchilar",
@@ -144,7 +148,20 @@
     "address": "Manzil",
     "note": "Izoh",
     "searchPlaceholder": "Nomi yoki telefon",
-    "confirmDelete": "Bu yetkazib beruvchini o'chirishni tasdiqlaysizmi?"
+    "confirmDelete": "Bu yetkazib beruvchini o'chirishni tasdiqlaysizmi?",
+    "balance": "Qarz",
+    "statement": "Sverka akti",
+    "openingBalance": "Davr boshidagi qarz",
+    "closingBalance": "Joriy qarz",
+    "payment": "Yetkazib beruvchiga to'lov",
+    "payAmount": "To'lov summasi",
+    "pay": "To'lash",
+    "description": "Tavsifi",
+    "debit": "Hisoblangan",
+    "credit": "To'langan/qaytarilgan",
+    "entryReceipt": "Kirim",
+    "entrySupplierReturn": "Qaytarish",
+    "entryPayment": "To'lov"
   },
   "orders": {
     "title": "Buyurtmalar",

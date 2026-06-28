@@ -24,6 +24,18 @@ export function createWriteOff(input: CreateWriteOffInput): Promise<{ movement: 
   return apiRequest("/api/inventory/write-offs", { method: "POST", body: input });
 }
 
+export interface CreateSupplierReturnInput {
+  variantId: string;
+  quantity: number;
+  supplierId: string;
+  unitCost: number;
+  note?: string;
+}
+
+export function createSupplierReturn(input: CreateSupplierReturnInput): Promise<{ movement: InventoryMovement }> {
+  return apiRequest("/api/inventory/supplier-returns", { method: "POST", body: input });
+}
+
 export interface CreateStocktakeInput {
   variantId: string;
   actualQuantity: number;

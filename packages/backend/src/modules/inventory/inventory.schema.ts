@@ -8,7 +8,15 @@ export const createReceiptSchema = z.object({
   note: z.string().max(500).optional(),
 });
 
-export const movementTypeValues = ["RECEIPT", "SALE", "RETURN", "ADJUSTMENT", "WRITE_OFF", "STOCKTAKE"] as const;
+export const movementTypeValues = [
+  "RECEIPT",
+  "SALE",
+  "RETURN",
+  "ADJUSTMENT",
+  "WRITE_OFF",
+  "STOCKTAKE",
+  "SUPPLIER_RETURN",
+] as const;
 
 export const listMovementsQuerySchema = z.object({
   variantId: z.string().uuid().optional(),
@@ -32,6 +40,16 @@ export const createStocktakeSchema = z.object({
   note: z.string().max(500).optional(),
 });
 
+// Unlike a write-off, a supplier return always needs both a supplier (whose
+// debt it credits) and a cost (without one there's nothing to credit).
+export const createSupplierReturnSchema = z.object({
+  variantId: z.string().uuid(),
+  quantity: z.number().int().positive(),
+  supplierId: z.string().uuid(),
+  unitCost: z.number().int().positive(),
+  note: z.string().max(500).optional(),
+});
+
 export const dailyReportQuerySchema = z.object({
   date: z.coerce.date().optional(),
 });
@@ -41,3 +59,4 @@ export type ListMovementsQuery = z.infer<typeof listMovementsQuerySchema>;
 export type CreateWriteOffInput = z.infer<typeof createWriteOffSchema>;
 export type CreateStocktakeInput = z.infer<typeof createStocktakeSchema>;
 export type DailyReportQuery = z.infer<typeof dailyReportQuerySchema>;
+export type CreateSupplierReturnInput = z.infer<typeof createSupplierReturnSchema>;

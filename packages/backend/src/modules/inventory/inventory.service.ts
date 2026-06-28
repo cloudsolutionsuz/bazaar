@@ -5,6 +5,7 @@ import { AppError } from "../../middleware/errorHandler";
 import type {
   CreateReceiptInput,
   CreateStocktakeInput,
+  CreateSupplierReturnInput,
   CreateWriteOffInput,
   DailyReportQuery,
   ListMovementsQuery,
@@ -91,6 +92,48 @@ export async function createWriteOff(tenantId: string, userId: string, input: Cr
         },
       });
     }
+
+    return movement;
+  });
+}
+
+// Sending stock back to a supplier - unlike a write-off, this always credits
+// the supplier's debt (computed from this movement's cost by
+// suppliers.service.ts), so both the supplier and a cost are required. No
+// Transaction/Kassa effect here - no cash actually changes hands, only what's
+// owed changes, which the supplier statement picks up directly from this
+// movement.
+export async function createSupplierReturn(tenantId: string, userId: string, input: CreateSupplierReturnInput) {
+  const variant = await prisma.productVariant.findFirst({ where: { id: input.variantId, tenantId } });
+  if (!variant) {
+    throw new AppError(404, "NOT_FOUND", "Variant not found");
+  }
+  if (variant.stockQuantity < input.quantity) {
+    throw new AppError(400, "INSUFFICIENT_STOCK", "Cannot return more than the current stock");
+  }
+  const supplier = await prisma.supplier.findFirst({ where: { id: input.supplierId, tenantId } });
+  if (!supplier) {
+    throw new AppError(400, "INVALID_SUPPLIER", "Supplier not found");
+  }
+
+  return prisma.$transaction(async (tx) => {
+    const movement = await tx.inventoryMovement.create({
+      data: {
+        tenantId,
+        variantId: variant.id,
+        type: "SUPPLIER_RETURN",
+        quantity: -input.quantity,
+        purchasePrice: input.unitCost,
+        supplierId: input.supplierId,
+        note: input.note,
+        createdByUserId: userId,
+      },
+    });
+
+    await tx.productVariant.update({
+      where: { id: variant.id },
+      data: { stockQuantity: { decrement: input.quantity } },
+    });
 
     return movement;
   });
@@ -185,6 +228,7 @@ export interface DailyReportRow {
   receipts: number;
   sales: number;
   writeOffs: number;
+  supplierReturns: number;
   stocktakeAdjustments: number;
   closingStock: number;
   actualStock: number | null;
@@ -230,6 +274,7 @@ export async function getDailyReport(tenantId: string, query: DailyReportQuery):
     let receipts = 0;
     let sales = 0;
     let writeOffs = 0;
+    let supplierReturns = 0;
     let stocktakeAdjustments = 0;
     let actualStock: number | null = null;
 
@@ -238,6 +283,7 @@ export async function getDailyReport(tenantId: string, query: DailyReportQuery):
       if (m.type === "RECEIPT") receipts += m.quantity;
       else if (m.type === "SALE") sales += Math.abs(m.quantity);
       else if (m.type === "WRITE_OFF") writeOffs += Math.abs(m.quantity);
+      else if (m.type === "SUPPLIER_RETURN") supplierReturns += Math.abs(m.quantity);
       else if (m.type === "STOCKTAKE") {
         stocktakeAdjustments += m.quantity;
         actualStock = running;
@@ -252,6 +298,7 @@ export async function getDailyReport(tenantId: string, query: DailyReportQuery):
       receipts,
       sales,
       writeOffs,
+      supplierReturns,
       stocktakeAdjustments,
       closingStock: running,
       actualStock,
@@ -264,7 +311,7 @@ export async function exportInventoryToExcel(tenantId: string): Promise<Buffer> 
 
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet("Inventory");
-  sheet.addRow(["Product", "SKU", "Opening Stock", "Receipts", "Sales", "Write-offs", "Closing Stock", "Actual Stock"]);
+  sheet.addRow(["Product", "SKU", "Opening Stock", "Receipts", "Sales", "Write-offs", "Supplier Returns", "Closing Stock", "Actual Stock"]);
 
   for (const row of report) {
     sheet.addRow([
@@ -274,6 +321,7 @@ export async function exportInventoryToExcel(tenantId: string): Promise<Buffer> 
       row.receipts,
       row.sales,
       row.writeOffs,
+      row.supplierReturns,
       row.closingStock,
       row.actualStock ?? "",
     ]);

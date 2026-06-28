@@ -39,6 +39,7 @@ enum InventoryMovementType {
   ADJUSTMENT
   WRITE_OFF
   STOCKTAKE
+  SUPPLIER_RETURN
 }
 
 enum OrderStatus {
@@ -157,6 +158,8 @@ model Transaction {
   order           Order?          @relation(fields: [orderId], references: [id])
   cashRegisterId  String?
   cashRegister    CashRegister?   @relation(fields: [cashRegisterId], references: [id])
+  supplierId      String?
+  supplier        Supplier?       @relation(fields: [supplierId], references: [id])
   createdByUserId String?
   createdAt       DateTime        @default(now())
 
@@ -333,6 +336,7 @@ model Supplier {
   updatedAt     DateTime @updatedAt
 
   inventoryMovements InventoryMovement[]
+  transactions       Transaction[]
 
   @@index([tenantId])
   @@map("suppliers")

@@ -14,7 +14,7 @@ import { downloadBlob } from "../../utils/downloadBlob";
 import { todayInputValue } from "../../utils/dateInput";
 import type { InventoryMovementType } from "../../types/api";
 
-type Tab = "lowStock" | "receipt" | "writeOff" | "stocktake" | "stockReport" | "history";
+type Tab = "lowStock" | "receipt" | "writeOff" | "supplierReturn" | "stocktake" | "stockReport" | "history";
 
 const MOVEMENT_LABEL_KEYS: Record<InventoryMovementType, string> = {
   RECEIPT: "inventory.typeReceipt",
@@ -23,6 +23,7 @@ const MOVEMENT_LABEL_KEYS: Record<InventoryMovementType, string> = {
   ADJUSTMENT: "inventory.typeAdjustment",
   WRITE_OFF: "inventory.typeWriteOff",
   STOCKTAKE: "inventory.typeStocktake",
+  SUPPLIER_RETURN: "inventory.typeSupplierReturn",
 };
 
 const MOVEMENT_COLORS: Record<InventoryMovementType, "green" | "red" | "blue" | "gray" | "yellow"> = {
@@ -32,6 +33,7 @@ const MOVEMENT_COLORS: Record<InventoryMovementType, "green" | "red" | "blue" | 
   ADJUSTMENT: "gray",
   WRITE_OFF: "red",
   STOCKTAKE: "yellow",
+  SUPPLIER_RETURN: "blue",
 };
 
 export function InventoryPage() {
@@ -55,6 +57,9 @@ export function InventoryPage() {
         <button className={tabClass(tab === "writeOff")} onClick={() => setTab("writeOff")}>
           {t("inventory.tabWriteOff")}
         </button>
+        <button className={tabClass(tab === "supplierReturn")} onClick={() => setTab("supplierReturn")}>
+          {t("inventory.tabSupplierReturn")}
+        </button>
         <button className={tabClass(tab === "stocktake")} onClick={() => setTab("stocktake")}>
           {t("inventory.tabStocktake")}
         </button>
@@ -69,6 +74,7 @@ export function InventoryPage() {
       {tab === "lowStock" && <LowStockTab />}
       {tab === "receipt" && <ReceiptTab />}
       {tab === "writeOff" && <WriteOffTab />}
+      {tab === "supplierReturn" && <SupplierReturnTab />}
       {tab === "stocktake" && <StocktakeTab />}
       {tab === "stockReport" && <StockReportTab />}
       {tab === "history" && <HistoryTab />}
@@ -276,6 +282,92 @@ function WriteOffTab() {
   );
 }
 
+function SupplierReturnTab() {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const { options } = useVariantOptions();
+  const suppliersQuery = useQuery({ queryKey: ["suppliers", "for-select"], queryFn: () => suppliersApi.listSuppliers({ pageSize: 100 }) });
+
+  const [variantId, setVariantId] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [supplierId, setSupplierId] = useState("");
+  const [unitCost, setUnitCost] = useState("");
+  const [note, setNote] = useState("");
+
+  const mutation = useMutation({
+    mutationFn: inventoryApi.createSupplierReturn,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["suppliers"] });
+      setQuantity("");
+      setUnitCost("");
+      setNote("");
+    },
+  });
+
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    mutation.mutate({
+      variantId,
+      quantity: Number(quantity),
+      supplierId,
+      unitCost: Number(unitCost),
+      note: note || undefined,
+    });
+  }
+
+  const selected = options.find((o) => o.id === variantId);
+
+  return (
+    <form onSubmit={handleSubmit} className="max-w-lg space-y-4 rounded-xl border border-gray-200 bg-white p-6">
+      <div>
+        <label className="mb-1 block text-sm font-medium text-gray-700">{t("inventory.variant")}</label>
+        <Select required value={variantId} onChange={(e) => setVariantId(e.target.value)} className="w-full">
+          <option value="" disabled>
+            —
+          </option>
+          {options.map((o) => (
+            <option key={o.id} value={o.id}>
+              {o.label}
+            </option>
+          ))}
+        </Select>
+        {selected && <p className="mt-1 text-xs text-gray-500">{t("inventory.currentStock", { count: selected.stockQuantity })}</p>}
+      </div>
+      <div>
+        <label className="mb-1 block text-sm font-medium text-gray-700">{t("inventory.supplier")}</label>
+        <Select required value={supplierId} onChange={(e) => setSupplierId(e.target.value)} className="w-full">
+          <option value="" disabled>
+            —
+          </option>
+          {(suppliersQuery.data?.items ?? []).map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
+            </option>
+          ))}
+        </Select>
+      </div>
+      <div>
+        <label className="mb-1 block text-sm font-medium text-gray-700">{t("inventory.quantity")}</label>
+        <NumberInput required min={1} value={quantity} onChange={(e) => setQuantity(e.target.value)} className="w-full" />
+      </div>
+      <div>
+        <label className="mb-1 block text-sm font-medium text-gray-700">{t("inventory.unitCost")}</label>
+        <NumberInput required min={1} value={unitCost} onChange={(e) => setUnitCost(e.target.value)} className="w-full" />
+      </div>
+      <div>
+        <label className="mb-1 block text-sm font-medium text-gray-700">{t("inventory.note")}</label>
+        <Input value={note} onChange={(e) => setNote(e.target.value)} className="w-full" />
+      </div>
+      {mutation.isError && <p className="text-sm text-red-600">{(mutation.error as Error).message}</p>}
+      <Button type="submit" disabled={mutation.isPending || !variantId || !supplierId}>
+        {t("inventory.submitSupplierReturn")}
+      </Button>
+    </form>
+  );
+}
+
 function StocktakeTab() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -370,6 +462,7 @@ function StockReportTab() {
             <Th>{t("inventory.typeReceipt")}</Th>
             <Th>{t("inventory.typeSale")}</Th>
             <Th>{t("inventory.typeWriteOff")}</Th>
+            <Th>{t("inventory.supplierReturns")}</Th>
             <Th>{t("inventory.closingStock")}</Th>
             <Th>{t("inventory.actualStock")}</Th>
           </tr>
@@ -383,13 +476,14 @@ function StockReportTab() {
               <Td>{r.receipts}</Td>
               <Td>{r.sales}</Td>
               <Td>{r.writeOffs}</Td>
+              <Td>{r.supplierReturns}</Td>
               <Td className="font-medium">{r.closingStock}</Td>
               <Td>{r.actualStock ?? "—"}</Td>
             </tr>
           ))}
           {rows.length === 0 && (
             <tr>
-              <Td colSpan={8} className="text-center text-gray-400">
+              <Td colSpan={9} className="text-center text-gray-400">
                 {t("common.noData")}
               </Td>
             </tr>

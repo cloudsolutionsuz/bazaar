@@ -16,6 +16,19 @@ export const listSuppliersQuerySchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(100).optional(),
 });
 
+export const supplierStatementQuerySchema = z.object({
+  from: z.coerce.date().optional(),
+  to: z.coerce.date().optional(),
+});
+
+export const createSupplierPaymentSchema = z.object({
+  amount: z.number().int().positive(),
+  cashRegisterId: z.string().uuid(),
+  description: z.string().max(500).optional(),
+});
+
 export type CreateSupplierInput = z.infer<typeof createSupplierSchema>;
 export type UpdateSupplierInput = z.infer<typeof updateSupplierSchema>;
 export type ListSuppliersQuery = z.infer<typeof listSuppliersQuerySchema>;
+export type SupplierStatementQuery = z.infer<typeof supplierStatementQuerySchema>;
+export type CreateSupplierPaymentInput = z.infer<typeof createSupplierPaymentSchema>;
