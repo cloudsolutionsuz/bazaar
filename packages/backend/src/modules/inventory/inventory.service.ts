@@ -77,12 +77,16 @@ export async function createWriteOff(tenantId: string, userId: string, input: Cr
     });
 
     if (input.unitCost) {
+      // No cashier is present at write-off time to pick a till, so it always
+      // lands in the tenant's default register.
+      const defaultRegister = await tx.cashRegister.findFirst({ where: { tenantId, isDefault: true } });
       await tx.transaction.create({
         data: {
           tenantId,
           type: "EXPENSE",
           category: "Списание",
           amount: input.quantity * input.unitCost,
+          cashRegisterId: defaultRegister?.id,
           createdByUserId: userId,
         },
       });

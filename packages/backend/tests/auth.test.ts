@@ -46,6 +46,11 @@ describeWithDb("auth flow (integration)", () => {
       await prisma.verificationToken.deleteMany({ where: { userId: user.id } });
       await prisma.user.delete({ where: { id: user.id } });
     }
+    const tenant = await prisma.tenant.findUnique({ where: { subdomain: `selleshop${suffix}` } });
+    if (tenant) {
+      // registerSeller auto-creates a default CashRegister - must go before the tenant.
+      await prisma.cashRegister.deleteMany({ where: { tenantId: tenant.id } });
+    }
     await prisma.tenant.deleteMany({ where: { subdomain: `selleshop${suffix}` } });
     await prisma.$disconnect();
   });

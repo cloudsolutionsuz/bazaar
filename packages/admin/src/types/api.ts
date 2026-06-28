@@ -224,6 +224,14 @@ export interface BillingSummary {
 export type TransactionType = "INCOME" | "EXPENSE";
 export type TransactionStatus = "PENDING" | "CONFIRMED";
 
+export interface CashRegister {
+  id: string;
+  name: string;
+  isDefault: boolean;
+  isActive: boolean;
+  createdAt: string;
+}
+
 export interface FinanceTransaction {
   id: string;
   type: TransactionType;
@@ -232,6 +240,7 @@ export interface FinanceTransaction {
   amount: number;
   description: string | null;
   orderId: string | null;
+  cashRegisterId: string | null;
   createdAt: string;
 }
 

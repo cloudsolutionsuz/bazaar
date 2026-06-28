@@ -5,15 +5,31 @@ import type { CreateTransactionInput, DailySummaryQuery, ListPendingTransactions
 
 const EXCLUDED_ORDER_STATUSES: OrderStatus[] = ["CANCELLED", "REFUNDED"];
 
-export async function getBalance(tenantId: string): Promise<number> {
+async function getActiveCashRegisterOrThrow(tenantId: string, cashRegisterId: string) {
+  const register = await prisma.cashRegister.findFirst({ where: { id: cashRegisterId, tenantId, isActive: true } });
+  if (!register) {
+    throw new AppError(404, "REGISTER_NOT_FOUND", "Cash register not found or inactive");
+  }
+  return register;
+}
+
+export async function getBalance(tenantId: string, cashRegisterId?: string): Promise<number> {
   const [income, expense] = await Promise.all([
-    prisma.transaction.aggregate({ where: { tenantId, type: "INCOME", status: "CONFIRMED" }, _sum: { amount: true } }),
-    prisma.transaction.aggregate({ where: { tenantId, type: "EXPENSE", status: "CONFIRMED" }, _sum: { amount: true } }),
+    prisma.transaction.aggregate({
+      where: { tenantId, type: "INCOME", status: "CONFIRMED", ...(cashRegisterId ? { cashRegisterId } : {}) },
+      _sum: { amount: true },
+    }),
+    prisma.transaction.aggregate({
+      where: { tenantId, type: "EXPENSE", status: "CONFIRMED", ...(cashRegisterId ? { cashRegisterId } : {}) },
+      _sum: { amount: true },
+    }),
   ]);
   return (income._sum.amount ?? 0) - (expense._sum.amount ?? 0);
 }
 
-export function createTransaction(tenantId: string, userId: string, input: CreateTransactionInput) {
+export async function createTransaction(tenantId: string, userId: string, input: CreateTransactionInput) {
+  await getActiveCashRegisterOrThrow(tenantId, input.cashRegisterId);
+
   return prisma.transaction.create({
     data: {
       tenantId,
@@ -21,6 +37,7 @@ export function createTransaction(tenantId: string, userId: string, input: Creat
       category: input.category,
       amount: input.amount,
       description: input.description,
+      cashRegisterId: input.cashRegisterId,
       createdByUserId: userId,
     },
   });
@@ -36,6 +53,7 @@ export async function listTransactions(tenantId: string, query: ListTransactions
     tenantId,
     status: "CONFIRMED",
     ...(query.type ? { type: query.type } : {}),
+    ...(query.cashRegisterId ? { cashRegisterId: query.cashRegisterId } : {}),
     ...(query.from || query.to
       ? { createdAt: { ...(query.from ? { gte: query.from } : {}), ...(query.to ? { lte: query.to } : {}) } }
       : {}),
@@ -71,7 +89,7 @@ export function listPendingTransactions(tenantId: string, query: ListPendingTran
   });
 }
 
-export async function confirmTransaction(tenantId: string, transactionId: string) {
+export async function confirmTransaction(tenantId: string, transactionId: string, cashRegisterId: string) {
   const transaction = await prisma.transaction.findFirst({ where: { id: transactionId, tenantId } });
   if (!transaction) {
     throw new AppError(404, "NOT_FOUND", "Transaction not found");
@@ -79,8 +97,9 @@ export async function confirmTransaction(tenantId: string, transactionId: string
   if (transaction.status !== "PENDING") {
     throw new AppError(400, "ALREADY_CONFIRMED", "This transaction is not pending");
   }
+  await getActiveCashRegisterOrThrow(tenantId, cashRegisterId);
 
-  return prisma.transaction.update({ where: { id: transactionId }, data: { status: "CONFIRMED" } });
+  return prisma.transaction.update({ where: { id: transactionId }, data: { status: "CONFIRMED", cashRegisterId } });
 }
 
 function startOfDay(date: Date): Date {
@@ -103,28 +122,34 @@ export async function getDailySummary(tenantId: string, query: DailySummaryQuery
   const date = query.date ?? new Date();
   const dayStart = startOfDay(date);
   const dayEnd = endOfDay(date);
+  const registerFilter = query.cashRegisterId ? { cashRegisterId: query.cashRegisterId } : {};
 
   const [openingIncome, openingExpense, todayIncome, todayExpense, pendingIncome] = await Promise.all([
     prisma.transaction.aggregate({
-      where: { tenantId, type: "INCOME", status: "CONFIRMED", createdAt: { lt: dayStart } },
+      where: { tenantId, type: "INCOME", status: "CONFIRMED", createdAt: { lt: dayStart }, ...registerFilter },
       _sum: { amount: true },
     }),
     prisma.transaction.aggregate({
-      where: { tenantId, type: "EXPENSE", status: "CONFIRMED", createdAt: { lt: dayStart } },
+      where: { tenantId, type: "EXPENSE", status: "CONFIRMED", createdAt: { lt: dayStart }, ...registerFilter },
       _sum: { amount: true },
     }),
     prisma.transaction.aggregate({
-      where: { tenantId, type: "INCOME", status: "CONFIRMED", createdAt: { gte: dayStart, lte: dayEnd } },
+      where: { tenantId, type: "INCOME", status: "CONFIRMED", createdAt: { gte: dayStart, lte: dayEnd }, ...registerFilter },
       _sum: { amount: true },
     }),
     prisma.transaction.aggregate({
-      where: { tenantId, type: "EXPENSE", status: "CONFIRMED", createdAt: { gte: dayStart, lte: dayEnd } },
+      where: { tenantId, type: "EXPENSE", status: "CONFIRMED", createdAt: { gte: dayStart, lte: dayEnd }, ...registerFilter },
       _sum: { amount: true },
     }),
-    prisma.transaction.aggregate({
-      where: { tenantId, type: "INCOME", status: "PENDING", createdAt: { gte: dayStart, lte: dayEnd } },
-      _sum: { amount: true },
-    }),
+    // Pending sale income has no register yet by definition, so a
+    // register-filtered summary can't meaningfully show "its" pending
+    // amount - only the tenant-wide view (no filter) surfaces this.
+    query.cashRegisterId
+      ? Promise.resolve({ _sum: { amount: 0 } })
+      : prisma.transaction.aggregate({
+          where: { tenantId, type: "INCOME", status: "PENDING", createdAt: { gte: dayStart, lte: dayEnd } },
+          _sum: { amount: true },
+        }),
   ]);
 
   const openingBalance = (openingIncome._sum.amount ?? 0) - (openingExpense._sum.amount ?? 0);

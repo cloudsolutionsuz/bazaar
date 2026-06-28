@@ -1,8 +1,8 @@
 import { apiRequest } from "./client";
 import type { AnalyticsResult, DailySummary, FinanceTransaction, Paginated, PendingTransaction, PnLResult, TransactionType } from "../types/api";
 
-export function getBalance(): Promise<{ balance: number }> {
-  return apiRequest("/api/finance/balance");
+export function getBalance(cashRegisterId?: string): Promise<{ balance: number }> {
+  return apiRequest("/api/finance/balance", { query: { cashRegisterId } });
 }
 
 export interface ListTransactionsParams {
@@ -11,6 +11,7 @@ export interface ListTransactionsParams {
   to?: string;
   page?: number;
   pageSize?: number;
+  cashRegisterId?: string;
 }
 
 export function listTransactions(params: ListTransactionsParams = {}): Promise<Paginated<FinanceTransaction>> {
@@ -22,6 +23,7 @@ export interface CreateTransactionInput {
   category: string;
   amount: number;
   description?: string;
+  cashRegisterId: string;
 }
 
 export function createTransaction(input: CreateTransactionInput): Promise<{ transaction: FinanceTransaction }> {
@@ -40,10 +42,10 @@ export function listPendingTransactions(search?: string): Promise<{ items: Pendi
   return apiRequest("/api/finance/transactions/pending", { query: { search } });
 }
 
-export function confirmTransaction(id: string): Promise<{ transaction: FinanceTransaction }> {
-  return apiRequest(`/api/finance/transactions/${id}/confirm`, { method: "POST" });
+export function confirmTransaction(id: string, cashRegisterId: string): Promise<{ transaction: FinanceTransaction }> {
+  return apiRequest(`/api/finance/transactions/${id}/confirm`, { method: "POST", body: { cashRegisterId } });
 }
 
-export function getDailySummary(date?: string): Promise<DailySummary> {
-  return apiRequest("/api/finance/daily-summary", { query: { date } });
+export function getDailySummary(date?: string, cashRegisterId?: string): Promise<DailySummary> {
+  return apiRequest("/api/finance/daily-summary", { query: { date, cashRegisterId } });
 }

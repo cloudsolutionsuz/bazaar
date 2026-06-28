@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as financeApi from "../../api/finance";
+import * as cashRegistersApi from "../../api/cashRegisters";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
@@ -9,28 +10,46 @@ import { Badge } from "../../components/ui/Badge";
 import { StatCard } from "../../components/ui/StatCard";
 import { Table, Thead, Tbody, Th, Td } from "../../components/ui/Table";
 import { todayInputValue } from "../../utils/dateInput";
-import type { TransactionType } from "../../types/api";
+import { CashRegistersModal } from "./CashRegistersModal";
+import type { CashRegister, TransactionType } from "../../types/api";
+
+function useActiveCashRegisters() {
+  const query = useQuery({ queryKey: ["finance", "cash-registers"], queryFn: cashRegistersApi.listCashRegisters });
+  const registers = query.data?.items ?? [];
+  const activeRegisters = registers.filter((r) => r.isActive);
+  const defaultRegisterId = registers.find((r) => r.isDefault)?.id ?? activeRegisters[0]?.id ?? "";
+  return { registers, activeRegisters, defaultRegisterId };
+}
 
 export function KassaPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [date, setDate] = useState(todayInputValue());
   const [filterType, setFilterType] = useState<TransactionType | "">("");
+  const [filterRegisterId, setFilterRegisterId] = useState("");
+  const [managingRegisters, setManagingRegisters] = useState(false);
   const [adding, setAdding] = useState(false);
   const [formType, setFormType] = useState<TransactionType>("EXPENSE");
   const [category, setCategory] = useState("");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
+  const [formRegisterId, setFormRegisterId] = useState("");
 
-  const summaryQuery = useQuery({ queryKey: ["finance", "daily-summary", date], queryFn: () => financeApi.getDailySummary(date) });
+  const { activeRegisters, defaultRegisterId } = useActiveCashRegisters();
+
+  const summaryQuery = useQuery({
+    queryKey: ["finance", "daily-summary", date, filterRegisterId],
+    queryFn: () => financeApi.getDailySummary(date, filterRegisterId || undefined),
+  });
   const transactionsQuery = useQuery({
-    queryKey: ["finance", "transactions", { type: filterType, date }],
+    queryKey: ["finance", "transactions", { type: filterType, date, filterRegisterId }],
     queryFn: () =>
       financeApi.listTransactions({
         type: filterType || undefined,
         from: `${date}T00:00:00`,
         to: `${date}T23:59:59`,
         pageSize: 50,
+        cashRegisterId: filterRegisterId || undefined,
       }),
   });
 
@@ -45,9 +64,20 @@ export function KassaPage() {
     },
   });
 
+  function openAddForm() {
+    setFormRegisterId(filterRegisterId || defaultRegisterId);
+    setAdding(true);
+  }
+
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    createMutation.mutate({ type: formType, category, amount: Number(amount), description: description || undefined });
+    createMutation.mutate({
+      type: formType,
+      category,
+      amount: Number(amount),
+      description: description || undefined,
+      cashRegisterId: formRegisterId,
+    });
   }
 
   const summary = summaryQuery.data;
@@ -57,7 +87,24 @@ export function KassaPage() {
     <div className="max-w-3xl">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-semibold text-gray-900">{t("kassa.title")}</h1>
-        {!adding && <Button onClick={() => setAdding(true)}>{t("kassa.addTransaction")}</Button>}
+        {!adding && <Button onClick={openAddForm}>{t("kassa.addTransaction")}</Button>}
+      </div>
+
+      <div className="mb-6 flex flex-wrap items-end gap-3">
+        <div>
+          <label className="mb-1 block text-xs text-gray-500">{t("kassa.register")}</label>
+          <Select value={filterRegisterId} onChange={(e) => setFilterRegisterId(e.target.value)}>
+            <option value="">{t("kassa.allRegisters")}</option>
+            {activeRegisters.map((register) => (
+              <option key={register.id} value={register.id}>
+                {register.name}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <Button variant="secondary" onClick={() => setManagingRegisters(true)}>
+          {t("kassa.manageRegisters")}
+        </Button>
       </div>
 
       {summary && (
@@ -85,6 +132,16 @@ export function KassaPage() {
             </label>
           </div>
           <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">{t("kassa.register")}</label>
+            <Select required value={formRegisterId} onChange={(e) => setFormRegisterId(e.target.value)} className="w-full">
+              {activeRegisters.map((register) => (
+                <option key={register.id} value={register.id}>
+                  {register.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">{t("kassa.category")}</label>
             <Input required value={category} onChange={(e) => setCategory(e.target.value)} className="w-full" />
           </div>
@@ -107,7 +164,7 @@ export function KassaPage() {
         </form>
       )}
 
-      <PendingSection />
+      <PendingSection activeRegisters={activeRegisters} defaultRegisterId={defaultRegisterId} />
 
       <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("kassa.history")}</h2>
       <div className="mb-4 flex flex-wrap items-end gap-3">
@@ -161,14 +218,17 @@ export function KassaPage() {
           )}
         </Tbody>
       </Table>
+
+      <CashRegistersModal open={managingRegisters} onClose={() => setManagingRegisters(false)} />
     </div>
   );
 }
 
-function PendingSection() {
+function PendingSection({ activeRegisters, defaultRegisterId }: { activeRegisters: CashRegister[]; defaultRegisterId: string }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
+  const [selectedRegisterByTx, setSelectedRegisterByTx] = useState<Record<string, string>>({});
 
   const query = useQuery({
     queryKey: ["finance", "pending", search],
@@ -176,7 +236,7 @@ function PendingSection() {
   });
 
   const confirmMutation = useMutation({
-    mutationFn: financeApi.confirmTransaction,
+    mutationFn: ({ id, cashRegisterId }: { id: string; cashRegisterId: string }) => financeApi.confirmTransaction(id, cashRegisterId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["finance"] }),
   });
 
@@ -198,26 +258,46 @@ function PendingSection() {
             <Th>{t("orders.customer")}</Th>
             <Th>{t("orders.phone")}</Th>
             <Th>{t("kassa.amount")}</Th>
+            <Th>{t("kassa.register")}</Th>
             <Th>{t("common.actions")}</Th>
           </tr>
         </Thead>
         <Tbody>
-          {items.map((tx) => (
-            <tr key={tx.id}>
-              <Td>{new Date(tx.createdAt).toLocaleString()}</Td>
-              <Td>{tx.order?.customerName ?? "—"}</Td>
-              <Td>{tx.order?.customerPhone ?? "—"}</Td>
-              <Td className="text-green-600">+{tx.amount.toLocaleString()}</Td>
-              <Td>
-                <Button variant="secondary" disabled={confirmMutation.isPending} onClick={() => confirmMutation.mutate(tx.id)}>
-                  {t("kassa.confirm")}
-                </Button>
-              </Td>
-            </tr>
-          ))}
+          {items.map((tx) => {
+            const selectedRegisterId = selectedRegisterByTx[tx.id] ?? defaultRegisterId;
+            return (
+              <tr key={tx.id}>
+                <Td>{new Date(tx.createdAt).toLocaleString()}</Td>
+                <Td>{tx.order?.customerName ?? "—"}</Td>
+                <Td>{tx.order?.customerPhone ?? "—"}</Td>
+                <Td className="text-green-600">+{tx.amount.toLocaleString()}</Td>
+                <Td>
+                  <Select
+                    value={selectedRegisterId}
+                    onChange={(e) => setSelectedRegisterByTx((prev) => ({ ...prev, [tx.id]: e.target.value }))}
+                  >
+                    {activeRegisters.map((register) => (
+                      <option key={register.id} value={register.id}>
+                        {register.name}
+                      </option>
+                    ))}
+                  </Select>
+                </Td>
+                <Td>
+                  <Button
+                    variant="secondary"
+                    disabled={confirmMutation.isPending || !selectedRegisterId}
+                    onClick={() => confirmMutation.mutate({ id: tx.id, cashRegisterId: selectedRegisterId })}
+                  >
+                    {t("kassa.confirm")}
+                  </Button>
+                </Td>
+              </tr>
+            );
+          })}
           {items.length === 0 && (
             <tr>
-              <Td colSpan={5} className="text-center text-gray-400">
+              <Td colSpan={6} className="text-center text-gray-400">
                 {t("common.noData")}
               </Td>
             </tr>

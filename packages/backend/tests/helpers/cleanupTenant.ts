@@ -15,6 +15,8 @@ export async function deleteTenantCompletely(tenantId: string): Promise<void> {
   // Must come after inventoryMovement - InventoryMovement.supplierId references Supplier.
   await prisma.supplier.deleteMany({ where: { tenantId } });
   await prisma.transaction.deleteMany({ where: { tenantId } });
+  // Must come after transaction - Transaction.cashRegisterId references CashRegister.
+  await prisma.cashRegister.deleteMany({ where: { tenantId } });
   await prisma.pageView.deleteMany({ where: { tenantId } });
   await prisma.order.deleteMany({ where: { tenantId } });
   // Must come after orders - Order.customerId references Customer.

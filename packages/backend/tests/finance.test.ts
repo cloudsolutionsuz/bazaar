@@ -16,6 +16,7 @@ describeWithDb("finance (integration)", () => {
   const app = createApp();
   let seller: TestSeller;
   let variantId: string;
+  let defaultRegisterId: string;
   const purchasePrice = 6000;
   const salePrice = 10000;
 
@@ -38,6 +39,9 @@ describeWithDb("finance (integration)", () => {
       quantity: 20,
       purchasePrice,
     });
+
+    const registers = await request(app).get("/api/cash-registers").set(auth());
+    defaultRegisterId = registers.body.items.find((r: { isDefault: boolean }) => r.isDefault).id;
   });
 
   afterAll(async () => {
@@ -58,11 +62,37 @@ describeWithDb("finance (integration)", () => {
       type: "EXPENSE",
       category: "Аренда",
       amount: 5000,
+      cashRegisterId: defaultRegisterId,
     });
     expect(res.status).toBe(201);
 
     const balance = await request(app).get("/api/finance/balance").set(auth());
     expect(balance.body.balance).toBe(-5000);
+  });
+
+  it("rejects a manual transaction without a cash register, and one for another tenant's register", async () => {
+    const missingRegister = await request(app).post("/api/finance/transactions").set(auth()).send({
+      type: "EXPENSE",
+      category: "Без кассы",
+      amount: 100,
+    });
+    expect(missingRegister.status).toBe(400);
+
+    const otherTenant = await registerAndLoginSeller(app);
+    const otherRegisters = await request(app)
+      .get("/api/cash-registers")
+      .set({ Authorization: `Bearer ${otherTenant.accessToken}` });
+    const foreignRegisterId = otherRegisters.body.items[0].id;
+
+    const wrongTenant = await request(app).post("/api/finance/transactions").set(auth()).send({
+      type: "EXPENSE",
+      category: "Чужая касса",
+      amount: 100,
+      cashRegisterId: foreignRegisterId,
+    });
+    expect(wrongTenant.status).toBe(404);
+
+    await deleteTenantCompletely(otherTenant.tenantId);
   });
 
   it("creates a PENDING income transaction on order placement that doesn't affect the balance until confirmed", async () => {
@@ -92,8 +122,12 @@ describeWithDb("finance (integration)", () => {
     const pendingByPhone = await request(app).get("/api/finance/transactions/pending").set(auth()).query({ search: "998900000111" });
     expect(pendingByPhone.body.items.some((t: { id: string }) => t.id === pendingTx.id)).toBe(true);
 
-    const confirm = await request(app).post(`/api/finance/transactions/${pendingTx.id}/confirm`).set(auth());
+    const confirm = await request(app)
+      .post(`/api/finance/transactions/${pendingTx.id}/confirm`)
+      .set(auth())
+      .send({ cashRegisterId: defaultRegisterId });
     expect(confirm.status).toBe(200);
+    expect(confirm.body.transaction.cashRegisterId).toBe(defaultRegisterId);
 
     const afterConfirm = await request(app).get("/api/finance/balance").set(auth());
     expect(afterConfirm.body.balance).toBe(baseline + orderTotal);
@@ -108,6 +142,9 @@ describeWithDb("finance (integration)", () => {
     const categories = transactions.body.items.map((t: { category: string }) => t.category);
     expect(categories).toContain("Продажа");
     expect(categories).toContain("Возврат");
+    const refund = transactions.body.items.find((t: { category: string }) => t.category === "Возврат");
+    // The reversal lands in the same register the sale was confirmed into.
+    expect(refund.cashRegisterId).toBe(defaultRegisterId);
   });
 
   it("deletes the still-pending income transaction on cancellation without ever touching the balance", async () => {
@@ -299,6 +336,7 @@ describeWithDb("finance (integration)", () => {
       type: "EXPENSE",
       category: "Транспорт",
       amount: 1000,
+      cashRegisterId: defaultRegisterId,
     });
     expect(expense.status).toBe(201);
 
@@ -310,5 +348,42 @@ describeWithDb("finance (integration)", () => {
     expect(after.body.expense).toBe(before.body.expense + 1000);
     expect(after.body.pendingIncome).toBeGreaterThanOrEqual(before.body.pendingIncome + orderTotal);
     expect(after.body.closingBalance).toBe(after.body.openingBalance + after.body.income - after.body.expense);
+  });
+
+  it("keeps a second cash register's balance separate from the default register and the tenant-wide total", async () => {
+    const createRegister = await request(app).post("/api/cash-registers").set(auth()).send({ name: "Точка на рынке" });
+    expect(createRegister.status).toBe(201);
+    const secondRegisterId = createRegister.body.cashRegister.id;
+
+    const beforeTotal = await request(app).get("/api/finance/balance").set(auth());
+    const beforeDefault = await request(app).get("/api/finance/balance").set(auth()).query({ cashRegisterId: defaultRegisterId });
+    const beforeSecond = await request(app).get("/api/finance/balance").set(auth()).query({ cashRegisterId: secondRegisterId });
+    expect(beforeSecond.body.balance).toBe(0);
+
+    const income = await request(app).post("/api/finance/transactions").set(auth()).send({
+      type: "INCOME",
+      category: "Прочее",
+      amount: 7000,
+      cashRegisterId: secondRegisterId,
+    });
+    expect(income.status).toBe(201);
+
+    const afterTotal = await request(app).get("/api/finance/balance").set(auth());
+    const afterDefault = await request(app).get("/api/finance/balance").set(auth()).query({ cashRegisterId: defaultRegisterId });
+    const afterSecond = await request(app).get("/api/finance/balance").set(auth()).query({ cashRegisterId: secondRegisterId });
+
+    expect(afterSecond.body.balance).toBe(7000);
+    expect(afterDefault.body.balance).toBe(beforeDefault.body.balance);
+    expect(afterTotal.body.balance).toBe(beforeTotal.body.balance + 7000);
+
+    const summaryForSecond = await request(app).get("/api/finance/daily-summary").set(auth()).query({ cashRegisterId: secondRegisterId });
+    expect(summaryForSecond.body.income).toBe(7000);
+    expect(summaryForSecond.body.closingBalance).toBe(7000);
+    // Pending income has no register assigned yet, so a register-filtered
+    // summary can't attribute it to this specific register.
+    expect(summaryForSecond.body.pendingIncome).toBe(0);
+
+    const transactionsForSecond = await request(app).get("/api/finance/transactions").set(auth()).query({ cashRegisterId: secondRegisterId });
+    expect(transactionsForSecond.body.items.every((t: { cashRegisterId: string }) => t.cashRegisterId === secondRegisterId)).toBe(true);
   });
 });

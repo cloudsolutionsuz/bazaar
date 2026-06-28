@@ -219,7 +219,20 @@
     "pendingTitle": "Ожидание подтверждения",
     "pendingSearchPlaceholder": "Имя или телефон покупателя",
     "pendingHint": "В ожидании подтверждения: {{amount}}",
-    "confirm": "Подтвердить"
+    "confirm": "Подтвердить",
+    "register": "Касса",
+    "allRegisters": "Все кассы",
+    "manageRegisters": "Управление кассами",
+    "addRegister": "Добавить кассу",
+    "registerName": "Название кассы",
+    "setDefault": "Сделать основной",
+    "defaultBadge": "По умолчанию",
+    "active": "Активна",
+    "inactive": "Отключена",
+    "activate": "Включить",
+    "deactivate": "Отключить",
+    "errorCannotDeactivateDefault": "Сначала сделайте другую кассу основной, потом отключите эту",
+    "errorInactiveCannotBeDefault": "Отключённая касса не может быть основной"
   },
   "reports": {
     "title": "Отчёты",

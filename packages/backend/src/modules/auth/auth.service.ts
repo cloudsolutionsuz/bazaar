@@ -54,6 +54,10 @@ export async function registerSeller(input: RegisterInput): Promise<{ tenant: Te
       },
     });
 
+    await tx.cashRegister.create({
+      data: { tenantId: tenant.id, name: "Основная касса", isDefault: true, isActive: true },
+    });
+
     // No email-verification step by design (matches the buyer mini-account
     // trade-off elsewhere in this project): a seller can log in immediately
     // after registering, no real SMTP needed.

@@ -2,6 +2,8 @@ import type { Request, Response } from "express";
 import * as financeService from "./finance.service";
 import type {
   AnalyticsQuery,
+  BalanceQuery,
+  ConfirmTransactionInput,
   CreateTransactionInput,
   DailySummaryQuery,
   ListPendingTransactionsQuery,
@@ -10,7 +12,8 @@ import type {
 } from "./finance.schema";
 
 export async function getBalance(req: Request, res: Response): Promise<void> {
-  const balance = await financeService.getBalance(req.authUser!.tenantId!);
+  const { cashRegisterId } = req.query as unknown as BalanceQuery;
+  const balance = await financeService.getBalance(req.authUser!.tenantId!, cashRegisterId);
   res.json({ balance });
 }
 
@@ -49,7 +52,8 @@ export async function listPendingTransactions(req: Request, res: Response): Prom
 }
 
 export async function confirmTransaction(req: Request, res: Response): Promise<void> {
-  const transaction = await financeService.confirmTransaction(req.authUser!.tenantId!, req.params.id);
+  const { cashRegisterId } = req.body as ConfirmTransactionInput;
+  const transaction = await financeService.confirmTransaction(req.authUser!.tenantId!, req.params.id, cashRegisterId);
   res.json({ transaction });
 }
 

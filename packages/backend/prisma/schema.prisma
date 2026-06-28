@@ -117,6 +117,7 @@ model Tenant {
   customers          Customer[]
   banners            Banner[]
   suppliers          Supplier[]
+  cashRegisters      CashRegister[]
 
   @@map("tenants")
 }
@@ -154,12 +155,35 @@ model Transaction {
   description     String?
   orderId         String?
   order           Order?          @relation(fields: [orderId], references: [id])
+  cashRegisterId  String?
+  cashRegister    CashRegister?   @relation(fields: [cashRegisterId], references: [id])
   createdByUserId String?
   createdAt       DateTime        @default(now())
 
   @@index([tenantId])
   @@index([tenantId, createdAt])
   @@map("transactions")
+}
+
+// Lightweight "till" a confirmed transaction is assigned to - not a stock
+// warehouse. A PENDING sale's income has no register yet (no cashier has
+// touched it); cashRegisterId gets set the moment it's confirmed or created.
+// Soft-disable only (isActive) - never hard-deleted, since transactions
+// reference it indefinitely.
+model CashRegister {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  name      String
+  isDefault Boolean  @default(false)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions Transaction[]
+
+  @@index([tenantId])
+  @@map("cash_registers")
 }
 
 model PageView {

@@ -245,6 +245,7 @@ export async function updateOrderStatus(
             category: "Возврат",
             amount: order.totalAmount,
             orderId,
+            cashRegisterId: incomeTransaction.cashRegisterId,
             createdByUserId: userId,
           },
         });

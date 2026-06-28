@@ -219,7 +219,20 @@
     "pendingTitle": "Tasdiqlash kutilmoqda",
     "pendingSearchPlaceholder": "Mijoz ismi yoki telefon raqami",
     "pendingHint": "Tasdiqlash kutilmoqda: {{amount}}",
-    "confirm": "Tasdiqlash"
+    "confirm": "Tasdiqlash",
+    "register": "Kassa",
+    "allRegisters": "Barcha kassalar",
+    "manageRegisters": "Kassalarni boshqarish",
+    "addRegister": "Kassa qo'shish",
+    "registerName": "Kassa nomi",
+    "setDefault": "Asosiy qilish",
+    "defaultBadge": "Asosiy",
+    "active": "Faol",
+    "inactive": "O'chirilgan",
+    "activate": "Yoqish",
+    "deactivate": "O'chirish",
+    "errorCannotDeactivateDefault": "Avval boshqa kassani asosiy qiling, keyin buni o'chiring",
+    "errorInactiveCannotBeDefault": "O'chirilgan kassa asosiy bo'la olmaydi"
   },
   "reports": {
     "title": "Hisobotlar",
