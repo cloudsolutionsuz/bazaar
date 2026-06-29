@@ -200,6 +200,10 @@ export interface DashboardSummary {
   week: { revenue: number; orderCount: number };
   lowStockCount: number;
   recentOrders: Order[];
+  salesOverTime: SalesBucket[];
+  topProducts: TopProduct[];
+  kassaBalance: number;
+  unreadChatCount: number;
 }
 
 export interface Paginated<T> {

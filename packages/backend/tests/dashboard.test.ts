@@ -60,4 +60,38 @@ describeWithDb("dashboard summary (integration)", () => {
     expect(res.body.recentOrders).toHaveLength(1);
     expect(res.body.recentOrders[0].customerName).toBe("Dashboard Buyer");
   });
+
+  it("includes the last 30 days' sales chart data and top products", async () => {
+    const res = await request(app).get("/api/dashboard/summary").set(auth());
+    expect(res.status).toBe(200);
+    expect(res.body.salesOverTime.length).toBeGreaterThan(0);
+    expect(res.body.salesOverTime[0]).toMatchObject({ revenue: 20000, orderCount: 1 });
+    expect(res.body.topProducts[0]).toMatchObject({ productName: "Dashboard Test Product", revenue: 20000 });
+  });
+
+  it("matches the live Kassa balance from /api/finance/balance", async () => {
+    const dashboard = await request(app).get("/api/dashboard/summary").set(auth());
+    const balance = await request(app).get("/api/finance/balance").set(auth());
+    expect(dashboard.body.kassaBalance).toBe(balance.body.balance);
+  });
+
+  it("counts unread buyer chat messages, which clears after a staff member opens the thread", async () => {
+    const before = await request(app).get("/api/dashboard/summary").set(auth());
+
+    const chatMessage = await request(app)
+      .post("/api/storefront/chat")
+      .set("Host", host)
+      .send({ phone: "+998900005555", name: "Chat Buyer", text: "Вопрос про доставку" });
+    expect(chatMessage.status).toBe(201);
+
+    const afterMessage = await request(app).get("/api/dashboard/summary").set(auth());
+    expect(afterMessage.body.unreadChatCount).toBe(before.body.unreadChatCount + 1);
+
+    const threads = await request(app).get("/api/chat/threads").set(auth());
+    const thread = threads.body.items.find((t: { customerName: string }) => t.customerName === "Chat Buyer");
+    await request(app).get(`/api/chat/threads/${thread.customerId}/messages`).set(auth());
+
+    const afterRead = await request(app).get("/api/dashboard/summary").set(auth());
+    expect(afterRead.body.unreadChatCount).toBe(before.body.unreadChatCount);
+  });
 });

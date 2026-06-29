@@ -328,6 +328,10 @@
     "revenueWeek": "Haftalik tushum",
     "ordersWeek": "Haftalik buyurtmalar",
     "lowStockWarning": "{{count}} tovarda qoldiq kam",
+    "unreadChatsWarning": "{{count}} xaridordan o'qilmagan xabar bor",
+    "kassaBalance": "Kassa balansi",
+    "salesOverTime": "Sotuvlar dinamikasi (30 kun)",
+    "topProducts": "Top tovarlar",
     "recentOrders": "So'nggi buyurtmalar",
     "allOrders": "Barcha buyurtmalar"
   },

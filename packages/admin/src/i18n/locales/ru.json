@@ -328,6 +328,10 @@
     "revenueWeek": "Выручка за неделю",
     "ordersWeek": "Заказов за неделю",
     "lowStockWarning": "Низкий остаток у {{count}} товаров",
+    "unreadChatsWarning": "Непрочитанные сообщения от {{count}} покупателей",
+    "kassaBalance": "Баланс кассы",
+    "salesOverTime": "Динамика продаж (30 дней)",
+    "topProducts": "Топ товаров",
     "recentOrders": "Последние заказы",
     "allOrders": "Все заказы"
   },

@@ -33,6 +33,12 @@ export async function listThreads(tenantId: string) {
   }));
 }
 
+// Cheaper than listThreads() when the dashboard just needs a number, not
+// every thread's preview.
+export function getUnreadCount(tenantId: string): Promise<number> {
+  return prisma.chatMessage.count({ where: { tenantId, sender: "CUSTOMER", readAt: null } });
+}
+
 async function getCustomerOrThrow(tenantId: string, customerId: string) {
   const customer = await prisma.customer.findFirst({ where: { id: customerId, tenantId } });
   if (!customer) {
