@@ -24,4 +24,10 @@ export const env = {
 
   superadminEmail: process.env.SUPERADMIN_EMAIL ?? "superadmin@bazaar.uz",
   superadminPassword: process.env.SUPERADMIN_PASSWORD ?? "change-me-super-secret",
+
+  // Optional by design, unlike the required() vars above - the AI advisor
+  // feature degrades to a friendly 503 without crashing the whole server
+  // when this isn't configured yet.
+  anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? null,
+  anthropicModel: process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6",
 };

@@ -30,6 +30,7 @@
     "employees": "Xodimlar",
     "kassa": "Kassa",
     "reports": "Hisobotlar",
+    "aiAdvisor": "AI-maslahatchi",
     "tenants": "Do'konlar",
     "plans": "Tariflar",
     "settings": "Sozlamalar",
@@ -364,5 +365,14 @@
     "selectThread": "Chapdan suhbatni tanlang",
     "messagePlaceholder": "Xabar...",
     "send": "Yuborish"
+  },
+  "aiAdvisor": {
+    "title": "AI-maslahatchi",
+    "hint": "Do'koningiz haqida savol bering — masalan, «qaysi tovarlar yaxshi sotilmoqda?» yoki «oylik foydam qancha?»",
+    "placeholder": "Savolingiz...",
+    "send": "So'rash",
+    "thinking": "O'ylayapman...",
+    "notConfigured": "Bu funksiya hali platforma administratori tomonidan sozlanmagan",
+    "errorGeneric": "Javob olinmadi. Qayta urinib ko'ring."
   }
 }

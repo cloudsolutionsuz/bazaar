@@ -22,6 +22,7 @@ import { EmployeesPage } from "./pages/employees/EmployeesPage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { KassaPage } from "./pages/finance/KassaPage";
 import { ReportsPage } from "./pages/finance/ReportsPage";
+import { AiAdvisorPage } from "./pages/AiAdvisorPage";
 import { TenantsListPage } from "./pages/platform/TenantsListPage";
 import { TenantDetailPage } from "./pages/platform/TenantDetailPage";
 import { PlansPage } from "./pages/platform/PlansPage";
@@ -67,6 +68,7 @@ export function App() {
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/kassa" element={<KassaPage />} />
                 <Route path="/reports" element={<ReportsPage />} />
+                <Route path="/ai-advisor" element={<AiAdvisorPage />} />
                 <Route path="/platform/tenants" element={<TenantsListPage />} />
                 <Route path="/platform/tenants/:id" element={<TenantDetailPage />} />
                 <Route path="/platform/plans" element={<PlansPage />} />
