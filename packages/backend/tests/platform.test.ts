@@ -8,6 +8,10 @@ import { deleteTenantCompletely } from "./helpers/cleanupTenant";
 
 const describeWithDb = process.env.SKIP_DB_TESTS ? describe.skip : describe;
 
+function daysAgo(days: number): Date {
+  return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+}
+
 describeWithDb("platform (super admin, integration)", () => {
   const app = createApp();
   let seller: TestSeller;
@@ -104,5 +108,67 @@ describeWithDb("platform (super admin, integration)", () => {
     } finally {
       await deleteTenantCompletely(another.tenantId);
     }
+  });
+
+  it("reflects a paid invoice as LTV on the tenant list, detail, and platform-wide totalLtv", async () => {
+    await prisma.tenant.update({ where: { id: seller.tenantId }, data: { trialEndsAt: daysAgo(1) } });
+    await request(app).post("/api/billing/run-cycle").set(auth());
+
+    const invoice = await prisma.billingInvoice.findFirstOrThrow({ where: { tenantId: seller.tenantId } });
+    const statsBefore = await request(app).get("/api/platform/stats").set(auth());
+    const ltvBeforePayment = statsBefore.body.totalLtv;
+
+    await prisma.billingInvoice.update({ where: { id: invoice.id }, data: { status: "PAID", paidAt: new Date() } });
+
+    const list = await request(app).get("/api/platform/tenants").set(auth()).query({ search: seller.subdomain });
+    expect(list.body.items[0].ltv).toBe(invoice.amount);
+
+    const detail = await request(app).get(`/api/platform/tenants/${seller.tenantId}`).set(auth());
+    expect(detail.body.tenant.ltv).toBe(invoice.amount);
+
+    const statsAfter = await request(app).get("/api/platform/stats").set(auth());
+    expect(statsAfter.body.totalLtv).toBe(ltvBeforePayment + invoice.amount);
+  });
+
+  it("marking a tenant VIP unblocks it immediately, and the billing cycle leaves it alone afterward", async () => {
+    // Drive the same tenant to BLOCKED first, mirroring billing.test.ts's exact sequence.
+    const invoice = await prisma.billingInvoice.findFirstOrThrow({ where: { tenantId: seller.tenantId } });
+    await prisma.billingInvoice.update({ where: { id: invoice.id }, data: { status: "PENDING", dueDate: daysAgo(10) } });
+    await request(app).post("/api/billing/run-cycle").set(auth());
+
+    const blocked = await prisma.tenant.findUniqueOrThrow({ where: { id: seller.tenantId } });
+    expect(blocked.status).toBe("BLOCKED");
+
+    const vipRes = await request(app).patch(`/api/platform/tenants/${seller.tenantId}/vip`).set(auth()).send({ isVip: true });
+    expect(vipRes.status).toBe(200);
+    expect(vipRes.body.tenant.isVip).toBe(true);
+    expect(vipRes.body.tenant.status).toBe("ACTIVE");
+
+    const invoiceCountBefore = await prisma.billingInvoice.count({ where: { tenantId: seller.tenantId } });
+    // Make the existing invoice look overdue again and let the period lapse - none of this should touch a VIP tenant.
+    await prisma.billingInvoice.update({
+      where: { id: invoice.id },
+      data: { status: "PENDING", dueDate: daysAgo(10), periodEnd: daysAgo(1) },
+    });
+    await request(app).post("/api/billing/run-cycle").set(auth());
+
+    const afterCycle = await prisma.tenant.findUniqueOrThrow({ where: { id: seller.tenantId } });
+    expect(afterCycle.status).toBe("ACTIVE");
+    expect(afterCycle.isVip).toBe(true);
+    const invoiceCountAfter = await prisma.billingInvoice.count({ where: { tenantId: seller.tenantId } });
+    expect(invoiceCountAfter).toBe(invoiceCountBefore);
+    const untouchedInvoice = await prisma.billingInvoice.findUniqueOrThrow({ where: { id: invoice.id } });
+    expect(untouchedInvoice.status).toBe("PENDING");
+  });
+
+  it("returns billing timeline segments covering the tenant's trial and invoice history", async () => {
+    const res = await request(app).get("/api/platform/billing-timeline").set(auth()).query({ search: seller.subdomain });
+    expect(res.status).toBe(200);
+    const tenantTimeline = res.body.items.find((t: { tenantId: string }) => t.tenantId === seller.tenantId);
+    expect(tenantTimeline).toBeTruthy();
+    expect(tenantTimeline.isVip).toBe(true);
+    expect(tenantTimeline.segments.length).toBeGreaterThan(0);
+    expect(tenantTimeline.segments.some((s: { status: string }) => s.status === "TRIAL")).toBe(true);
+    expect(tenantTimeline.segments.some((s: { status: string }) => s.status === "PENDING")).toBe(true);
   });
 });

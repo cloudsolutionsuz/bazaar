@@ -15,6 +15,7 @@ export interface Tenant {
   logoUrl: string | null;
   themeColor: string | null;
   description: string | null;
+  isVip: boolean;
   createdAt: string;
 }
 
@@ -341,6 +342,21 @@ export interface TenantWithRelations extends Tenant {
   plan: Plan;
   users: User[];
   invoices: BillingInvoice[];
+  ltv: number;
+}
+
+export interface BillingTimelineSegment {
+  start: string;
+  end: string;
+  status: string;
+  label: string;
+}
+
+export interface BillingTimelineTenant {
+  tenantId: string;
+  tenantName: string;
+  isVip: boolean;
+  segments: BillingTimelineSegment[];
 }
 
 export interface Banner {
@@ -355,6 +371,7 @@ export interface PlatformStats {
   totalTenants: number;
   byStatus: Record<TenantStatus, number>;
   mrr: number;
+  totalLtv: number;
 }
 
 export type ChatMessageSender = "CUSTOMER" | "STAFF";

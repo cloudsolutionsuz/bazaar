@@ -103,6 +103,7 @@ model Tenant {
   logoUrl      String?
   themeColor   String?
   description  String?
+  isVip        Boolean      @default(false)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 

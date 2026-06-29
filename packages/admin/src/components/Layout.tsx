@@ -90,6 +90,9 @@ export function Layout() {
               <NavLink to="/platform/plans" className={navItemClass}>
                 {t("nav.plans")}
               </NavLink>
+              <NavLink to="/platform/billing-timeline" className={navItemClass}>
+                {t("nav.billingTimeline")}
+              </NavLink>
             </>
           )}
         </nav>

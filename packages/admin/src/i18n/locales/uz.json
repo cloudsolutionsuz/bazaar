@@ -33,6 +33,7 @@
     "aiAdvisor": "AI-maslahatchi",
     "tenants": "Do'konlar",
     "plans": "Tariflar",
+    "billingTimeline": "Vaqt jadvali",
     "settings": "Sozlamalar",
     "logout": "Chiqish"
   },
@@ -309,7 +310,15 @@
     "maxProducts": "Tovarlar chegarasi",
     "maxOrdersPerMonth": "Oylik buyurtmalar chegarasi",
     "maxEmployees": "Xodimlar chegarasi",
-    "unlimited": "Cheklanmagan"
+    "unlimited": "Cheklanmagan",
+    "ltv": "LTV",
+    "totalLtv": "Jami ishlab topilgan",
+    "vipBadge": "VIP",
+    "makeVip": "VIP qilish",
+    "removeVip": "VIP'ni olib tashlash",
+    "confirmVip": "Bu do'konni VIP qilasizmi? Billing endi unga hisob-faktura chiqarmaydi va bloklamaydi, holati darhol «Faol»ga o'tadi.",
+    "confirmRemoveVip": "Bu do'kondan VIP holatini olib tashlaysizmi? Billing yana odatdagi qoidalar bo'yicha hisob-fakturalarni tekshira boshlaydi.",
+    "billingTimeline": "Billing vaqt jadvali"
   },
   "settings": {
     "title": "Sozlamalar",

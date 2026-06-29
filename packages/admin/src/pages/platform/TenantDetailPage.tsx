@@ -62,6 +62,14 @@ export function TenantDetailPage() {
     },
   });
 
+  const vipMutation = useMutation({
+    mutationFn: (isVip: boolean) => platformApi.updateTenantVip(id as string, isVip),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["platform", "tenant", id] });
+      queryClient.invalidateQueries({ queryKey: ["platform", "tenants"] });
+    },
+  });
+
   const tenant = tenantQuery.data?.tenant;
   const plans = plansQuery.data?.plans ?? [];
   if (!tenant) return null;
@@ -75,8 +83,23 @@ export function TenantDetailPage() {
       </Link>
 
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-gray-900">{tenant.name}</h1>
-        <Badge color={TENANT_STATUS_COLORS[tenant.status]}>{t(TENANT_STATUS_KEYS[tenant.status])}</Badge>
+        <h1 className="flex items-center gap-2 text-xl font-semibold text-gray-900">
+          {tenant.name}
+          {tenant.isVip && <Badge color="yellow">{t("platform.vipBadge")}</Badge>}
+        </h1>
+        <div className="flex items-center gap-3">
+          <Badge color={TENANT_STATUS_COLORS[tenant.status]}>{t(TENANT_STATUS_KEYS[tenant.status])}</Badge>
+          <Button
+            variant="secondary"
+            disabled={vipMutation.isPending}
+            onClick={() => {
+              const confirmKey = tenant.isVip ? "platform.confirmRemoveVip" : "platform.confirmVip";
+              if (window.confirm(t(confirmKey))) vipMutation.mutate(!tenant.isVip);
+            }}
+          >
+            {t(tenant.isVip ? "platform.removeVip" : "platform.makeVip")}
+          </Button>
+        </div>
       </div>
 
       <div className="mb-6 grid grid-cols-2 gap-4 rounded-xl border border-gray-200 bg-white p-6 text-sm">
@@ -95,6 +118,10 @@ export function TenantDetailPage() {
         <div>
           <div className="text-gray-500">{t("billing.currentPlan")}</div>
           <div>{tenant.plan.name}</div>
+        </div>
+        <div>
+          <div className="text-gray-500">{t("platform.ltv")}</div>
+          <div>{tenant.ltv.toLocaleString()}</div>
         </div>
       </div>
 

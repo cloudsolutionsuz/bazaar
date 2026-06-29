@@ -26,6 +26,7 @@ import { AiAdvisorPage } from "./pages/AiAdvisorPage";
 import { TenantsListPage } from "./pages/platform/TenantsListPage";
 import { TenantDetailPage } from "./pages/platform/TenantDetailPage";
 import { PlansPage } from "./pages/platform/PlansPage";
+import { BillingTimelinePage } from "./pages/platform/BillingTimelinePage";
 
 const queryClient = new QueryClient();
 
@@ -72,6 +73,7 @@ export function App() {
                 <Route path="/platform/tenants" element={<TenantsListPage />} />
                 <Route path="/platform/tenants/:id" element={<TenantDetailPage />} />
                 <Route path="/platform/plans" element={<PlansPage />} />
+                <Route path="/platform/billing-timeline" element={<BillingTimelinePage />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

@@ -11,5 +11,10 @@ export const updateTenantPlanSchema = z.object({
   planId: z.string().uuid(),
 });
 
+export const updateTenantVipSchema = z.object({
+  isVip: z.boolean(),
+});
+
 export type ListTenantsQuery = z.infer<typeof listTenantsQuerySchema>;
 export type UpdateTenantPlanInput = z.infer<typeof updateTenantPlanSchema>;
+export type UpdateTenantVipInput = z.infer<typeof updateTenantVipSchema>;

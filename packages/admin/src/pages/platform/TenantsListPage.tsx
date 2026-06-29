@@ -56,12 +56,13 @@ export function TenantsListPage() {
       <h1 className="mb-4 text-xl font-semibold text-gray-900">{t("platform.tenantsTitle")}</h1>
 
       {stats && (
-        <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-5">
+        <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-6">
           <StatCard label={t("platform.totalTenants")} value={stats.totalTenants} />
           <StatCard label={t("billing.statusTrial")} value={stats.byStatus.TRIAL} />
           <StatCard label={t("billing.statusActive")} value={stats.byStatus.ACTIVE} />
           <StatCard label={t("billing.statusBlocked")} value={stats.byStatus.BLOCKED} />
           <StatCard label={t("platform.mrr")} value={stats.mrr.toLocaleString()} />
+          <StatCard label={t("platform.totalLtv")} value={stats.totalLtv.toLocaleString()} />
         </div>
       )}
 
@@ -104,6 +105,7 @@ export function TenantsListPage() {
             <Th>{t("common.status")}</Th>
             <Th>{t("billing.currentPlan")}</Th>
             <Th>{t("platform.owner")}</Th>
+            <Th>{t("platform.ltv")}</Th>
             <Th>{t("platform.registeredAt")}</Th>
           </tr>
         </Thead>
@@ -111,9 +113,12 @@ export function TenantsListPage() {
           {tenants.map((tenant) => (
             <tr key={tenant.id}>
               <Td>
-                <Link to={`/platform/tenants/${tenant.id}`} className="text-brand-600 hover:underline">
-                  {tenant.name}
-                </Link>
+                <span className="flex items-center gap-2">
+                  <Link to={`/platform/tenants/${tenant.id}`} className="text-brand-600 hover:underline">
+                    {tenant.name}
+                  </Link>
+                  {tenant.isVip && <Badge color="yellow">{t("platform.vipBadge")}</Badge>}
+                </span>
               </Td>
               <Td>{tenant.subdomain}</Td>
               <Td>
@@ -121,12 +126,13 @@ export function TenantsListPage() {
               </Td>
               <Td>{tenant.plan.name}</Td>
               <Td>{tenant.users[0]?.email ?? "—"}</Td>
+              <Td>{tenant.ltv.toLocaleString()}</Td>
               <Td>{new Date(tenant.createdAt).toLocaleDateString()}</Td>
             </tr>
           ))}
           {tenants.length === 0 && (
             <tr>
-              <Td colSpan={6} className="text-center text-gray-400">
+              <Td colSpan={7} className="text-center text-gray-400">
                 {t("common.noData")}
               </Td>
             </tr>

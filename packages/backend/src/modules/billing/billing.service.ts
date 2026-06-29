@@ -20,7 +20,7 @@ function addMonths(date: Date, months: number): Date {
 
 async function startFirstBillingPeriod(now: Date): Promise<void> {
   const endingTrials = await prisma.tenant.findMany({
-    where: { status: "TRIAL", trialEndsAt: { lte: now } },
+    where: { status: "TRIAL", trialEndsAt: { lte: now }, isVip: false },
     include: { plan: true },
   });
 
@@ -47,7 +47,7 @@ async function startFirstBillingPeriod(now: Date): Promise<void> {
 }
 
 async function renewExpiredPeriods(now: Date): Promise<void> {
-  const activeTenants = await prisma.tenant.findMany({ where: { status: "ACTIVE" }, include: { plan: true } });
+  const activeTenants = await prisma.tenant.findMany({ where: { status: "ACTIVE", isVip: false }, include: { plan: true } });
 
   for (const tenant of activeTenants) {
     const latestInvoice = await prisma.billingInvoice.findFirst({
@@ -75,7 +75,13 @@ async function renewExpiredPeriods(now: Date): Promise<void> {
 }
 
 async function markOverdueInvoices(now: Date): Promise<void> {
-  const overdue = await prisma.billingInvoice.findMany({ where: { status: "PENDING", dueDate: { lt: now } } });
+  // tenant: {isVip: false} is defense in depth - a tenant marked VIP after a
+  // PENDING invoice was already created shouldn't have that invoice flip to
+  // overdue/push them to PAST_DUE just because the cycle ran before the flag
+  // was set.
+  const overdue = await prisma.billingInvoice.findMany({
+    where: { status: "PENDING", dueDate: { lt: now }, tenant: { isVip: false } },
+  });
 
   for (const invoice of overdue) {
     await prisma.$transaction([
@@ -88,7 +94,7 @@ async function markOverdueInvoices(now: Date): Promise<void> {
 async function blockUnpaidPastGracePeriod(now: Date): Promise<void> {
   const cutoff = addDays(now, -BLOCK_GRACE_DAYS);
   const blockCandidates = await prisma.billingInvoice.findMany({
-    where: { status: "OVERDUE", dueDate: { lt: cutoff } },
+    where: { status: "OVERDUE", dueDate: { lt: cutoff }, tenant: { isVip: false } },
     include: { tenant: true },
   });
 

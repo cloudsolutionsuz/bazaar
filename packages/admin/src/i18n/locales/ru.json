@@ -33,6 +33,7 @@
     "aiAdvisor": "AI-советник",
     "tenants": "Магазины",
     "plans": "Тарифы",
+    "billingTimeline": "Таймлайн",
     "settings": "Настройки",
     "logout": "Выйти"
   },
@@ -309,7 +310,15 @@
     "maxProducts": "Лимит товаров",
     "maxOrdersPerMonth": "Лимит заказов/мес",
     "maxEmployees": "Лимит сотрудников",
-    "unlimited": "Без лимита"
+    "unlimited": "Без лимита",
+    "ltv": "LTV",
+    "totalLtv": "Всего заработано",
+    "vipBadge": "VIP",
+    "makeVip": "Сделать VIP",
+    "removeVip": "Снять VIP",
+    "confirmVip": "Сделать этот магазин VIP? Биллинг перестанет создавать и блокировать счета для него, статус сразу станет «Активен».",
+    "confirmRemoveVip": "Снять VIP с этого магазина? Биллинг снова начнёт выставлять и проверять счета по обычным правилам.",
+    "billingTimeline": "Таймлайн биллинга"
   },
   "settings": {
     "title": "Настройки",
