@@ -71,5 +71,15 @@
     "statusDelivered": "Доставлен",
     "statusCancelled": "Отменён",
     "statusRefunded": "Возврат"
+  },
+  "chat": {
+    "navLink": "Чат с магазином",
+    "title": "Чат с магазином",
+    "hint": "Напишите нам вопрос — продавец ответит в этом чате",
+    "namePlaceholder": "Ваше имя",
+    "start": "Начать чат",
+    "empty": "Сообщений пока нет",
+    "messagePlaceholder": "Ваше сообщение...",
+    "send": "Отправить"
   }
 }

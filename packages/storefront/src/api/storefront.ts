@@ -1,6 +1,6 @@
 import { apiRequest } from "./client";
 import { getSessionId } from "../utils/session";
-import type { Banner, Category, OrderResult, Paginated, Product, TenantMeta } from "../types/api";
+import type { Banner, Category, ChatMessage, OrderResult, Paginated, Product, TenantMeta } from "../types/api";
 
 export function listCategories(): Promise<{ categories: Category[] }> {
   return apiRequest("/api/storefront/categories");
@@ -59,4 +59,12 @@ export function listBanners(): Promise<{ banners: Banner[] }> {
 
 export function getMeta(): Promise<TenantMeta> {
   return apiRequest("/api/storefront/meta");
+}
+
+export function getChatMessages(phone: string): Promise<{ messages: ChatMessage[] }> {
+  return apiRequest("/api/storefront/chat", { query: { phone } });
+}
+
+export function sendChatMessage(phone: string, name: string, text: string): Promise<{ message: ChatMessage }> {
+  return apiRequest("/api/storefront/chat", { method: "POST", body: { phone, name, text } });
 }

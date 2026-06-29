@@ -19,7 +19,8 @@ export async function deleteTenantCompletely(tenantId: string): Promise<void> {
   await prisma.cashRegister.deleteMany({ where: { tenantId } });
   await prisma.pageView.deleteMany({ where: { tenantId } });
   await prisma.order.deleteMany({ where: { tenantId } });
-  // Must come after orders - Order.customerId references Customer.
+  // Must come after orders - Order.customerId references Customer. ChatMessage.customerId is also Restrict, so it must go first too.
+  await prisma.chatMessage.deleteMany({ where: { tenantId } });
   await prisma.customer.deleteMany({ where: { tenantId } });
   await prisma.banner.deleteMany({ where: { tenantId } });
   await prisma.productImage.deleteMany({ where: { productId: { in: productIds } } });

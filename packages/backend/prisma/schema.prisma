@@ -119,6 +119,7 @@ model Tenant {
   banners            Banner[]
   suppliers          Supplier[]
   cashRegisters      CashRegister[]
+  chatMessages       ChatMessage[]
 
   @@map("tenants")
 }
@@ -408,10 +409,36 @@ model Customer {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  orders Order[]
+  orders       Order[]
+  chatMessages ChatMessage[]
 
   @@unique([tenantId, phone])
   @@map("customers")
+}
+
+enum ChatMessageSender {
+  CUSTOMER
+  STAFF
+}
+
+// readAt only ever gets set on CUSTOMER-sent messages - the customer has no
+// persistent UI to mark anything read, they just see the thread when they
+// reopen it, so there's nothing meaningful to track in the other direction.
+model ChatMessage {
+  id              String            @id @default(uuid())
+  tenantId        String
+  tenant          Tenant            @relation(fields: [tenantId], references: [id])
+  customerId      String
+  customer        Customer          @relation(fields: [customerId], references: [id])
+  sender          ChatMessageSender
+  text            String
+  readAt          DateTime?
+  createdByUserId String?
+  createdAt       DateTime          @default(now())
+
+  @@index([tenantId, customerId])
+  @@index([tenantId, customerId, createdAt])
+  @@map("chat_messages")
 }
 
 model Banner {

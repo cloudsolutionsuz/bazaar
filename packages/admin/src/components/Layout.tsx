@@ -47,9 +47,14 @@ export function Layout() {
             </>
           )}
           {ALL_STAFF_ROLES.has(role) && (
-            <NavLink to="/orders" className={navItemClass}>
-              {t("nav.orders")}
-            </NavLink>
+            <>
+              <NavLink to="/orders" className={navItemClass}>
+                {t("nav.orders")}
+              </NavLink>
+              <NavLink to="/chat" className={navItemClass}>
+                {t("nav.chat")}
+              </NavLink>
+            </>
           )}
           {STAFF_AND_MANAGEMENT_ROLES.has(role) && (
             <>

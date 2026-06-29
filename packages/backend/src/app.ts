@@ -20,6 +20,7 @@ import { dashboardRouter } from "./modules/dashboard/dashboard.routes";
 import { customersRouter } from "./modules/customers/customers.routes";
 import { suppliersRouter } from "./modules/suppliers/suppliers.routes";
 import { cashRegistersRouter } from "./modules/cashRegisters/cashRegisters.routes";
+import { chatRouter } from "./modules/chat/chat.routes";
 
 export function createApp(): Express {
   const app = express();
@@ -50,6 +51,7 @@ export function createApp(): Express {
   app.use("/api/customers", customersRouter);
   app.use("/api/suppliers", suppliersRouter);
   app.use("/api/cash-registers", cashRegistersRouter);
+  app.use("/api/chat", chatRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

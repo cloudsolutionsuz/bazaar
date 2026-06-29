@@ -25,6 +25,7 @@
     "banners": "Баннеры",
     "customers": "Покупатели",
     "orders": "Заказы",
+    "chat": "Чат",
     "billing": "Биллинг",
     "employees": "Сотрудники",
     "kassa": "Касса",
@@ -352,5 +353,12 @@
     "inactive": "Скрыт",
     "activate": "Включить",
     "deactivate": "Скрыть"
+  },
+  "chat": {
+    "title": "Чат",
+    "noThreads": "Пока нет сообщений от покупателей",
+    "selectThread": "Выберите диалог слева",
+    "messagePlaceholder": "Сообщение...",
+    "send": "Отправить"
   }
 }

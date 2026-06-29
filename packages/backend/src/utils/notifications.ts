@@ -9,3 +9,8 @@ export async function notifyLowStock(chatId: string | null, sku: string, stockQu
   if (!chatId) return;
   await sendTelegramMessage(chatId, `Низкий остаток: ${sku} — осталось ${stockQuantity} шт.`);
 }
+
+export async function notifyNewChatMessage(chatId: string | null, customerName: string, text: string): Promise<void> {
+  if (!chatId) return;
+  await sendTelegramMessage(chatId, `Новое сообщение от ${customerName}: "${text}"`);
+}

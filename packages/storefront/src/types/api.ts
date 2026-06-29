@@ -84,3 +84,10 @@ export interface TenantMeta {
 export interface ApiErrorBody {
   error: { code: string; message: string };
 }
+
+export interface ChatMessage {
+  id: string;
+  sender: "CUSTOMER" | "STAFF";
+  text: string;
+  createdAt: string;
+}

@@ -34,6 +34,9 @@ export function Layout() {
             <Link to="/my-orders" className="text-sm text-clay-700 hover:underline">
               {t("myOrders.navLink")}
             </Link>
+            <Link to="/chat" className="text-sm text-clay-700 hover:underline">
+              {t("chat.navLink")}
+            </Link>
             <select
               value={i18n.language}
               onChange={(e) => changeLanguage(e.target.value as "ru" | "uz")}

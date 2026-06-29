@@ -1,8 +1,9 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
+import { notifyNewChatMessage } from "../../utils/notifications";
 import { normalizePhone } from "../../utils/phone";
-import type { ListStorefrontProductsQuery, TrackPageViewInput } from "./storefront.schema";
+import type { ListStorefrontProductsQuery, SendChatMessageInput, TrackPageViewInput } from "./storefront.schema";
 
 const productInclude = {
   variants: true,
@@ -85,4 +86,37 @@ export async function getMyOrders(tenantId: string, rawPhone: string) {
     },
   });
   return customer?.orders ?? [];
+}
+
+export async function getChatMessages(tenantId: string, rawPhone: string) {
+  const phone = normalizePhone(rawPhone);
+  const customer = await prisma.customer.findUnique({
+    where: { tenantId_phone: { tenantId, phone } },
+    include: { chatMessages: { orderBy: { createdAt: "asc" } } },
+  });
+  return customer?.chatMessages ?? [];
+}
+
+// Same phone-only "mini-account" identity as orders - starting a chat is
+// itself a customer-acquisition action, so it upserts a Customer exactly
+// like checkout does, rather than requiring a prior order to exist first.
+export async function sendChatMessage(tenantId: string, input: SendChatMessageInput) {
+  const phone = normalizePhone(input.phone);
+
+  const message = await prisma.$transaction(async (tx) => {
+    const customer = await tx.customer.upsert({
+      where: { tenantId_phone: { tenantId, phone } },
+      update: { name: input.name },
+      create: { tenantId, phone, name: input.name },
+    });
+
+    return tx.chatMessage.create({
+      data: { tenantId, customerId: customer.id, sender: "CUSTOMER", text: input.text },
+    });
+  });
+
+  const tenant = await prisma.tenant.findUnique({ where: { id: tenantId }, select: { telegramChatId: true } });
+  await notifyNewChatMessage(tenant?.telegramChatId ?? null, input.name, input.text);
+
+  return message;
 }

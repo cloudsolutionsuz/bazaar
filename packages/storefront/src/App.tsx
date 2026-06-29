@@ -7,6 +7,7 @@ import { ProductPage } from "./pages/ProductPage";
 import { CheckoutPage } from "./pages/CheckoutPage";
 import { OrderConfirmationPage } from "./pages/OrderConfirmationPage";
 import { MyOrdersPage } from "./pages/MyOrdersPage";
+import { ChatPage } from "./pages/ChatPage";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ export function App() {
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
               <Route path="/my-orders" element={<MyOrdersPage />} />
+              <Route path="/chat" element={<ChatPage />} />
             </Route>
           </Routes>
         </BrowserRouter>

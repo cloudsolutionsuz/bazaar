@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import * as storefrontService from "./storefront.service";
 import * as ordersService from "../orders/orders.service";
 import * as bannersService from "../banners/banners.service";
-import type { ListStorefrontProductsQuery, MyOrdersQuery, TrackPageViewInput } from "./storefront.schema";
+import type { ListStorefrontProductsQuery, MyOrdersQuery, SendChatMessageInput, TrackPageViewInput } from "./storefront.schema";
 import type { CreateOrderInput } from "../orders/orders.schema";
 
 export async function listCategories(req: Request, res: Response): Promise<void> {
@@ -34,6 +34,17 @@ export async function getMyOrders(req: Request, res: Response): Promise<void> {
   const { phone } = req.query as unknown as MyOrdersQuery;
   const orders = await storefrontService.getMyOrders(req.tenant!.id, phone);
   res.json({ orders });
+}
+
+export async function getChatMessages(req: Request, res: Response): Promise<void> {
+  const { phone } = req.query as unknown as MyOrdersQuery;
+  const messages = await storefrontService.getChatMessages(req.tenant!.id, phone);
+  res.json({ messages });
+}
+
+export async function sendChatMessage(req: Request, res: Response): Promise<void> {
+  const message = await storefrontService.sendChatMessage(req.tenant!.id, req.body as SendChatMessageInput);
+  res.status(201).json({ message });
 }
 
 export async function listBanners(req: Request, res: Response): Promise<void> {

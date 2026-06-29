@@ -24,3 +24,11 @@ export const myOrdersQuerySchema = z.object({
 });
 
 export type MyOrdersQuery = z.infer<typeof myOrdersQuerySchema>;
+
+export const sendChatMessageSchema = z.object({
+  phone: z.string().min(3).max(30),
+  name: z.string().min(1).max(200),
+  text: z.string().min(1).max(2000),
+});
+
+export type SendChatMessageInput = z.infer<typeof sendChatMessageSchema>;

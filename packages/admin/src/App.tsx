@@ -15,6 +15,7 @@ import { SuppliersListPage } from "./pages/suppliers/SuppliersListPage";
 import { SupplierDetailPage } from "./pages/suppliers/SupplierDetailPage";
 import { BannersPage } from "./pages/banners/BannersPage";
 import { OrdersListPage } from "./pages/orders/OrdersListPage";
+import { ChatPage } from "./pages/chat/ChatPage";
 import { OrderDetailPage } from "./pages/orders/OrderDetailPage";
 import { BillingPage } from "./pages/billing/BillingPage";
 import { EmployeesPage } from "./pages/employees/EmployeesPage";
@@ -60,6 +61,7 @@ export function App() {
                 <Route path="/banners" element={<BannersPage />} />
                 <Route path="/orders" element={<OrdersListPage />} />
                 <Route path="/orders/:id" element={<OrderDetailPage />} />
+                <Route path="/chat" element={<ChatPage />} />
                 <Route path="/billing" element={<BillingPage />} />
                 <Route path="/employees" element={<EmployeesPage />} />
                 <Route path="/settings" element={<SettingsPage />} />

@@ -25,6 +25,7 @@
     "banners": "Bannerlar",
     "customers": "Xaridorlar",
     "orders": "Buyurtmalar",
+    "chat": "Chat",
     "billing": "Billing",
     "employees": "Xodimlar",
     "kassa": "Kassa",
@@ -352,5 +353,12 @@
     "inactive": "Yashirilgan",
     "activate": "Yoqish",
     "deactivate": "Yashirish"
+  },
+  "chat": {
+    "title": "Chat",
+    "noThreads": "Hozircha xaridorlardan xabar yo'q",
+    "selectThread": "Chapdan suhbatni tanlang",
+    "messagePlaceholder": "Xabar...",
+    "send": "Yuborish"
   }
 }

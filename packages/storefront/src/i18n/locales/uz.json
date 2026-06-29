@@ -71,5 +71,15 @@
     "statusDelivered": "Yetkazildi",
     "statusCancelled": "Bekor qilindi",
     "statusRefunded": "Qaytarildi"
+  },
+  "chat": {
+    "navLink": "Do'kon bilan chat",
+    "title": "Do'kon bilan chat",
+    "hint": "Savolingizni yozing — sotuvchi shu yerda javob beradi",
+    "namePlaceholder": "Ismingiz",
+    "start": "Chatni boshlash",
+    "empty": "Hozircha xabar yo'q",
+    "messagePlaceholder": "Xabaringiz...",
+    "send": "Yuborish"
   }
 }

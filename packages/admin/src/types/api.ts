@@ -352,3 +352,34 @@ export interface PlatformStats {
   byStatus: Record<TenantStatus, number>;
   mrr: number;
 }
+
+export type ChatMessageSender = "CUSTOMER" | "STAFF";
+
+// Just the identity fields a thread header needs - not the full Customer
+// type, which carries computed fields (orderCount/totalSpent) this endpoint
+// doesn't return.
+export interface ChatCustomerRef {
+  id: string;
+  name: string;
+  phone: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  customerId: string;
+  sender: ChatMessageSender;
+  text: string;
+  readAt: string | null;
+  createdByUserId: string | null;
+  createdAt: string;
+}
+
+export interface ChatThread {
+  customerId: string;
+  customerName: string;
+  customerPhone: string;
+  lastMessageText: string;
+  lastMessageSender: ChatMessageSender;
+  lastMessageAt: string;
+  unreadCount: number;
+}

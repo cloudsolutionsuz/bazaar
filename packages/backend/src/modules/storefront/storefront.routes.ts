@@ -2,7 +2,7 @@ import { Router } from "express";
 import { asyncHandler } from "../../utils/asyncHandler";
 import { requireActiveTenant, requireResolvedTenant } from "../../middleware/requireTenant";
 import { validateBody, validateQuery } from "../../middleware/validate";
-import { listStorefrontProductsQuerySchema, myOrdersQuerySchema, trackPageViewSchema } from "./storefront.schema";
+import { listStorefrontProductsQuerySchema, myOrdersQuerySchema, sendChatMessageSchema, trackPageViewSchema } from "./storefront.schema";
 import { createOrderSchema } from "../orders/orders.schema";
 import * as storefrontController from "./storefront.controller";
 
@@ -15,6 +15,8 @@ storefrontRouter.get("/products", validateQuery(listStorefrontProductsQuerySchem
 storefrontRouter.get("/products/:id", asyncHandler(storefrontController.getProduct));
 storefrontRouter.post("/orders", validateBody(createOrderSchema), asyncHandler(storefrontController.createOrder));
 storefrontRouter.get("/orders/by-phone", validateQuery(myOrdersQuerySchema), asyncHandler(storefrontController.getMyOrders));
+storefrontRouter.get("/chat", validateQuery(myOrdersQuerySchema), asyncHandler(storefrontController.getChatMessages));
+storefrontRouter.post("/chat", validateBody(sendChatMessageSchema), asyncHandler(storefrontController.sendChatMessage));
 storefrontRouter.get("/banners", asyncHandler(storefrontController.listBanners));
 storefrontRouter.get("/meta", asyncHandler(storefrontController.getMeta));
 storefrontRouter.post(
