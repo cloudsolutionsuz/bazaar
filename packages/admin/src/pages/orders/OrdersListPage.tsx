@@ -32,8 +32,8 @@ export const STATUS_LABEL_KEYS: Record<OrderStatus, string> = {
   ARCHIVED: "orders.statusArchived",
 };
 
-export function productNames(order: { items: { variant: { product: { name: string } } }[] }): string {
-  return [...new Set(order.items.map((i) => i.variant.product.name))].join(", ") || "—";
+export function productNames(order: { items: { variant?: { product?: { name: string } } | null }[] }): string {
+  return [...new Set(order.items.map((i) => i.variant?.product?.name).filter(Boolean))].join(", ") || "—";
 }
 
 interface Props {

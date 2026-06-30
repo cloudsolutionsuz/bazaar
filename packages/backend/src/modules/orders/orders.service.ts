@@ -57,7 +57,7 @@ export async function listOrders(tenantId: string, query: ListOrdersQuery) {
   const [items, total] = await Promise.all([
     prisma.order.findMany({
       where,
-      include: { items: true },
+      include: { items: { include: { variant: { include: { product: { select: { name: true } } } } } } },
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
