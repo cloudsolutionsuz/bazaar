@@ -88,6 +88,13 @@ export async function exportProducts(req: Request, res: Response): Promise<void>
   res.send(buffer);
 }
 
+export async function importTemplate(_req: Request, res: Response): Promise<void> {
+  const buffer = await productsService.exportProductImportTemplate();
+  res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+  res.setHeader("Content-Disposition", "attachment; filename=products-import-template.xlsx");
+  res.send(buffer);
+}
+
 export async function importProducts(req: Request, res: Response): Promise<void> {
   const file = req.file as Express.Multer.File | undefined;
   if (!file) {

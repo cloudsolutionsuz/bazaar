@@ -6,7 +6,7 @@ import * as storefrontApi from "../api/storefront";
 import { useCart } from "../cart/CartContext";
 
 export function ProductPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addItem } = useCart();
@@ -22,7 +22,12 @@ export function ProductPage() {
   if (!product) return null;
 
   const variant = product.variants.find((v) => v.id === selectedVariantId) ?? product.variants[0];
-  const unitPrice = variant.priceOverride ?? product.price;
+  const basePrice = variant.priceOverride ?? product.price;
+  const hasDiscount = !!product.discountPercent && product.discountPercent > 0;
+  const unitPrice = hasDiscount ? Math.round(basePrice * (1 - product.discountPercent! / 100)) : basePrice;
+  const localizedDescription =
+    (i18n.language === "ru" ? product.descriptionRu : i18n.language === "uz" ? product.descriptionUz : null) ||
+    product.description;
 
   function selectVariant(variantId: string) {
     setSelectedVariantId(variantId);
@@ -48,6 +53,11 @@ export function ProductPage() {
 
   return (
     <div>
+      {added && (
+        <div className="fixed left-1/2 top-4 z-50 -translate-x-1/2 rounded-full bg-clay-600 px-4 py-2 text-sm font-medium text-white shadow-lg">
+          ✓ {t("product.added")}
+        </div>
+      )}
       <button onClick={() => navigate(-1)} className="mb-4 text-sm text-clay-700 hover:underline">
         ← {t("common.back")}
       </button>
@@ -83,8 +93,20 @@ export function ProductPage() {
               {[product.brand, product.color].filter(Boolean).join(" · ")}
             </div>
           )}
-          <div className="mt-2 font-display text-2xl font-semibold text-clay-700">
-            {unitPrice.toLocaleString()} {product.currency}
+          <div className="mt-2 flex items-baseline gap-3">
+            <span className="font-display text-2xl font-semibold text-clay-700">
+              {unitPrice.toLocaleString()} {product.currency}
+            </span>
+            {hasDiscount && (
+              <>
+                <span className="text-base text-gray-400 line-through">
+                  {basePrice.toLocaleString()} {product.currency}
+                </span>
+                <span className="rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold text-white">
+                  {t("product.discountPercent", { percent: product.discountPercent })}
+                </span>
+              </>
+            )}
           </div>
 
           {product.variants.length > 1 && (
@@ -127,10 +149,10 @@ export function ProductPage() {
             {variant.stockQuantity === 0 ? t("catalog.outOfStock") : added ? t("product.added") : t("product.addToCart")}
           </button>
 
-          {product.description && (
+          {localizedDescription && (
             <div className="mt-6">
               <h2 className="mb-1 text-sm font-semibold text-gray-700">{t("product.description")}</h2>
-              <p className="text-sm text-gray-600">{product.description}</p>
+              <p className="text-sm text-gray-600">{localizedDescription}</p>
             </div>
           )}
         </div>

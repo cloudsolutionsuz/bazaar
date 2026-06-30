@@ -15,14 +15,26 @@ export function listCategories(tenantId: string) {
   return prisma.category.findMany({ where: { tenantId }, orderBy: { name: "asc" } });
 }
 
+export async function listBrands(tenantId: string): Promise<string[]> {
+  const rows = await prisma.product.findMany({
+    where: { tenantId, status: { not: "HIDDEN" }, brand: { not: null } },
+    select: { brand: true },
+    distinct: ["brand"],
+    orderBy: { brand: "asc" },
+  });
+  return rows.map((r) => r.brand!).filter(Boolean);
+}
+
 export async function listProducts(tenantId: string, query: ListStorefrontProductsQuery) {
   const page = query.page ?? 1;
   const pageSize = query.pageSize ?? 20;
+  const now = new Date();
 
   const where: Prisma.ProductWhereInput = {
     tenantId,
     status: { not: "HIDDEN" },
     ...(query.categoryId ? { categoryId: query.categoryId } : {}),
+    ...(query.brand ? { brand: query.brand } : {}),
     ...(query.search
       ? {
           OR: [
@@ -33,6 +45,22 @@ export async function listProducts(tenantId: string, query: ListStorefrontProduc
       : {}),
     ...(query.minPrice !== undefined || query.maxPrice !== undefined
       ? { price: { ...(query.minPrice !== undefined ? { gte: query.minPrice } : {}), ...(query.maxPrice !== undefined ? { lte: query.maxPrice } : {}) } }
+      : {}),
+    ...(query.discountedOnly ? { discountPercent: { not: null } } : {}),
+    ...(query.promotedOnly
+      ? {
+          promotions: {
+            some: {
+              promotion: {
+                isActive: true,
+                AND: [
+                  { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
+                  { OR: [{ endsAt: null }, { endsAt: { gte: now } }] },
+                ],
+              },
+            },
+          },
+        }
       : {}),
   };
 

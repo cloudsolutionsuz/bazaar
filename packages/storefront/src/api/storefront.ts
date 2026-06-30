@@ -8,16 +8,23 @@ export function listCategories(): Promise<{ categories: Category[] }> {
 
 export interface ListProductsParams {
   categoryId?: string;
+  brand?: string;
   search?: string;
   sort?: "newest" | "price_asc" | "price_desc";
   minPrice?: number;
   maxPrice?: number;
+  discountedOnly?: boolean;
+  promotedOnly?: boolean;
   page?: number;
   pageSize?: number;
 }
 
 export function listProducts(params: ListProductsParams = {}): Promise<Paginated<Product>> {
   return apiRequest("/api/storefront/products", { query: params });
+}
+
+export function listBrands(): Promise<{ brands: string[] }> {
+  return apiRequest("/api/storefront/brands");
 }
 
 export function getProduct(id: string): Promise<{ product: Product }> {

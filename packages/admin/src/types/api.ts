@@ -44,8 +44,11 @@ export interface ProductVariant {
   name: string | null;
   sku: string;
   priceOverride: number | null;
+  costPrice: number | null;
   stockQuantity: number;
   lowStockThreshold: number | null;
+  supplierId: string | null;
+  supplier?: Supplier | null;
 }
 
 export interface ProductImage {
@@ -62,7 +65,10 @@ export interface Product {
   category: Category | null;
   name: string;
   description: string | null;
+  descriptionRu: string | null;
+  descriptionUz: string | null;
   price: number;
+  discountPercent: number | null;
   brand: string | null;
   color: string | null;
   code: string | null;
@@ -180,8 +186,13 @@ export interface Customer {
   id: string;
   phone: string;
   name: string;
+  addressRegion: string | null;
+  addressDistrict: string | null;
+  addressMahalla: string | null;
   orderCount: number;
-  totalSpent: number;
+  purchaseAmount: number;
+  paidAmount: number;
+  balance: number;
   lastOrderAt: string | null;
   createdAt: string;
 }
@@ -190,10 +201,32 @@ export interface CustomerDetail {
   id: string;
   phone: string;
   name: string;
+  addressRegion: string | null;
+  addressDistrict: string | null;
+  addressMahalla: string | null;
   orderCount: number;
-  totalSpent: number;
+  purchaseAmount: number;
+  paidAmount: number;
+  balance: number;
   createdAt: string;
   orders: Order[];
+}
+
+export interface Promotion {
+  id: string;
+  tenantId: string;
+  name: string;
+  discountPercent: number | null;
+  startsAt: string | null;
+  endsAt: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  _count?: { products: number };
+}
+
+export interface PromotionDetail extends Promotion {
+  products: { promotionId: string; productId: string; product: Product }[];
 }
 
 export interface DashboardSummary {
@@ -377,7 +410,7 @@ export interface PlatformStats {
 export type ChatMessageSender = "CUSTOMER" | "STAFF";
 
 // Just the identity fields a thread header needs - not the full Customer
-// type, which carries computed fields (orderCount/totalSpent) this endpoint
+// type, which carries computed fields (orderCount/purchaseAmount) this endpoint
 // doesn't return.
 export interface ChatCustomerRef {
   id: string;

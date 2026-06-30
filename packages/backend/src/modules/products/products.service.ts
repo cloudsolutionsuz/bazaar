@@ -15,7 +15,7 @@ import type {
 const MAX_IMAGES_PER_PRODUCT = 3;
 
 const productInclude = {
-  variants: true,
+  variants: { include: { supplier: true } },
   images: { orderBy: { position: "asc" as const } },
   category: true,
 };
@@ -92,6 +92,13 @@ export async function createProduct(tenantId: string, userId: string, input: Cre
   for (const sku of skus) {
     await assertSkuAvailable(tenantId, sku);
   }
+  const supplierIds = [...new Set(variantsInput.map((v) => v.supplierId).filter((id): id is string => !!id))];
+  if (supplierIds.length > 0) {
+    const count = await prisma.supplier.count({ where: { id: { in: supplierIds }, tenantId } });
+    if (count !== supplierIds.length) {
+      throw new AppError(400, "INVALID_SUPPLIER", "Supplier not found");
+    }
+  }
 
   const productId = await prisma.$transaction(async (tx) => {
     const product = await tx.product.create({
@@ -99,7 +106,10 @@ export async function createProduct(tenantId: string, userId: string, input: Cre
         tenantId,
         name: input.name,
         description: input.description,
+        descriptionRu: input.descriptionRu,
+        descriptionUz: input.descriptionUz,
         price: input.price,
+        discountPercent: input.discountPercent,
         brand: input.brand,
         color: input.color,
         code: input.code,
@@ -119,22 +129,42 @@ export async function createProduct(tenantId: string, userId: string, input: Cre
           name: v.name,
           sku: v.sku,
           priceOverride: v.priceOverride,
+          costPrice: v.costPrice,
           stockQuantity: v.stockQuantity ?? 0,
           lowStockThreshold: v.lowStockThreshold,
+          supplierId: v.supplierId,
         },
       });
 
       if (v.stockQuantity && v.stockQuantity > 0) {
-        await tx.inventoryMovement.create({
-          data: {
-            tenantId,
-            variantId: variant.id,
-            type: "ADJUSTMENT",
-            quantity: v.stockQuantity,
-            note: "Initial stock at creation",
-            createdByUserId: userId,
-          },
-        });
+        // A supplier+cost on the initial stock is a real purchase, not a
+        // shapeless adjustment - book it as a RECEIPT so it feeds supplier
+        // debt (computeSupplierBalances) and FIFO COGS like any other receipt.
+        if (v.supplierId && v.costPrice) {
+          await tx.inventoryMovement.create({
+            data: {
+              tenantId,
+              variantId: variant.id,
+              type: "RECEIPT",
+              quantity: v.stockQuantity,
+              purchasePrice: v.costPrice,
+              supplierId: v.supplierId,
+              note: "Initial stock at creation",
+              createdByUserId: userId,
+            },
+          });
+        } else {
+          await tx.inventoryMovement.create({
+            data: {
+              tenantId,
+              variantId: variant.id,
+              type: "ADJUSTMENT",
+              quantity: v.stockQuantity,
+              note: "Initial stock at creation",
+              createdByUserId: userId,
+            },
+          });
+        }
       }
     }
 
@@ -156,7 +186,10 @@ export async function updateProduct(tenantId: string, productId: string, input: 
     data: {
       ...(input.name !== undefined ? { name: input.name } : {}),
       ...(input.description !== undefined ? { description: input.description } : {}),
+      ...(input.descriptionRu !== undefined ? { descriptionRu: input.descriptionRu } : {}),
+      ...(input.descriptionUz !== undefined ? { descriptionUz: input.descriptionUz } : {}),
       ...(input.price !== undefined ? { price: input.price } : {}),
+      ...(input.discountPercent !== undefined ? { discountPercent: input.discountPercent } : {}),
       ...(input.brand !== undefined ? { brand: input.brand } : {}),
       ...(input.color !== undefined ? { color: input.color } : {}),
       ...(input.code !== undefined ? { code: input.code } : {}),
@@ -196,6 +229,13 @@ export async function createVariant(tenantId: string, userId: string, productId:
   await getProduct(tenantId, productId);
   await assertSkuAvailable(tenantId, input.sku);
 
+  if (input.supplierId) {
+    const supplier = await prisma.supplier.findFirst({ where: { id: input.supplierId, tenantId } });
+    if (!supplier) {
+      throw new AppError(400, "INVALID_SUPPLIER", "Supplier not found");
+    }
+  }
+
   const variant = await prisma.productVariant.create({
     data: {
       tenantId,
@@ -203,22 +243,42 @@ export async function createVariant(tenantId: string, userId: string, productId:
       name: input.name,
       sku: input.sku,
       priceOverride: input.priceOverride,
+      costPrice: input.costPrice,
       stockQuantity: input.stockQuantity ?? 0,
       lowStockThreshold: input.lowStockThreshold,
+      supplierId: input.supplierId,
     },
   });
 
   if (input.stockQuantity && input.stockQuantity > 0) {
-    await prisma.inventoryMovement.create({
-      data: {
-        tenantId,
-        variantId: variant.id,
-        type: "ADJUSTMENT",
-        quantity: input.stockQuantity,
-        note: "Initial stock at creation",
-        createdByUserId: userId,
-      },
-    });
+    // Same receipt-vs-adjustment split as createProduct's initial-variant path:
+    // a supplier+cost turns the opening stock into a real purchase that owes
+    // the supplier money, not a shapeless count adjustment.
+    if (input.supplierId && input.costPrice) {
+      await prisma.inventoryMovement.create({
+        data: {
+          tenantId,
+          variantId: variant.id,
+          type: "RECEIPT",
+          quantity: input.stockQuantity,
+          purchasePrice: input.costPrice,
+          supplierId: input.supplierId,
+          note: "Initial stock at creation",
+          createdByUserId: userId,
+        },
+      });
+    } else {
+      await prisma.inventoryMovement.create({
+        data: {
+          tenantId,
+          variantId: variant.id,
+          type: "ADJUSTMENT",
+          quantity: input.stockQuantity,
+          note: "Initial stock at creation",
+          createdByUserId: userId,
+        },
+      });
+    }
   }
 
   return variant;
@@ -231,13 +291,22 @@ export async function updateVariant(tenantId: string, productId: string, variant
     await assertSkuAvailable(tenantId, input.sku, variantId);
   }
 
+  if (input.supplierId) {
+    const supplier = await prisma.supplier.findFirst({ where: { id: input.supplierId, tenantId } });
+    if (!supplier) {
+      throw new AppError(400, "INVALID_SUPPLIER", "Supplier not found");
+    }
+  }
+
   return prisma.productVariant.update({
     where: { id: variantId },
     data: {
       ...(input.name !== undefined ? { name: input.name } : {}),
       ...(input.sku !== undefined ? { sku: input.sku } : {}),
       ...(input.priceOverride !== undefined ? { priceOverride: input.priceOverride } : {}),
+      ...(input.costPrice !== undefined ? { costPrice: input.costPrice } : {}),
       ...(input.lowStockThreshold !== undefined ? { lowStockThreshold: input.lowStockThreshold } : {}),
+      ...(input.supplierId !== undefined ? { supplierId: input.supplierId } : {}),
     },
   });
 }
@@ -300,6 +369,7 @@ const EXPORT_HEADERS = [
   "Category",
   "Description",
   "Price",
+  "DiscountPercent",
   "Currency",
   "Brand",
   "Color",
@@ -307,6 +377,8 @@ const EXPORT_HEADERS = [
   "SKU",
   "Variant",
   "PriceOverride",
+  "CostPrice",
+  "Supplier",
   "Stock",
   "LowStockThreshold",
   "Status",
@@ -315,7 +387,7 @@ const EXPORT_HEADERS = [
 export async function exportProductsToExcel(tenantId: string): Promise<Buffer> {
   const products = await prisma.product.findMany({
     where: { tenantId },
-    include: { variants: true, category: true },
+    include: { variants: { include: { supplier: true } }, category: true },
     orderBy: { createdAt: "asc" },
   });
 
@@ -330,6 +402,7 @@ export async function exportProductsToExcel(tenantId: string): Promise<Buffer> {
         product.category?.name ?? "",
         product.description ?? "",
         product.price,
+        product.discountPercent ?? "",
         product.currency,
         product.brand ?? "",
         product.color ?? "",
@@ -337,12 +410,67 @@ export async function exportProductsToExcel(tenantId: string): Promise<Buffer> {
         variant.sku,
         variant.name ?? "",
         variant.priceOverride ?? "",
+        variant.costPrice ?? "",
+        variant.supplier?.name ?? "",
         variant.stockQuantity,
         variant.lowStockThreshold ?? "",
         product.status,
       ]);
     }
   }
+
+  const arrayBuffer = await workbook.xlsx.writeBuffer();
+  return Buffer.from(arrayBuffer);
+}
+
+// A separate, lighter download from exportProductsToExcel: not the tenant's
+// actual data, just the column headers plus one filled-in example row and a
+// "notes" sheet explaining each column - "give me a template" is a distinct
+// ask from "export what I have", and a real tenant could have zero products
+// to export from yet.
+export async function exportProductImportTemplate(): Promise<Buffer> {
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet("Products");
+  sheet.addRow(EXPORT_HEADERS);
+  sheet.addRow([
+    "Футболка хлопковая",
+    "Одежда",
+    "Описание товара",
+    150000,
+    10,
+    "UZS",
+    "Nike",
+    "Белый",
+    "ABC-001",
+    "SKU-0001",
+    "M, белый",
+    "",
+    100000,
+    "Поставщик ООО",
+    20,
+    5,
+    "ACTIVE",
+  ]);
+
+  const notes = workbook.addWorksheet("Notes");
+  notes.addRow(["Column", "Required", "Description"]);
+  notes.addRow(["Name", "yes", "Product name"]);
+  notes.addRow(["Category", "no", "Must match an existing category name exactly, otherwise left empty"]);
+  notes.addRow(["Description", "no", "Generic description"]);
+  notes.addRow(["Price", "yes", "Whole number, e.g. 150000"]);
+  notes.addRow(["DiscountPercent", "no", "1-99, percent off Price shown to customers"]);
+  notes.addRow(["Currency", "no", "Defaults to UZS"]);
+  notes.addRow(["Brand", "no", ""]);
+  notes.addRow(["Color", "no", ""]);
+  notes.addRow(["Code", "no", "Internal product code"]);
+  notes.addRow(["SKU", "yes", "Must be unique across the shop"]);
+  notes.addRow(["Variant", "no", "Variant name, e.g. size/color"]);
+  notes.addRow(["PriceOverride", "no", "Per-variant price, overrides Price if set"]);
+  notes.addRow(["CostPrice", "no", "Purchase price - combined with Supplier, books an inventory receipt and a supplier debt"]);
+  notes.addRow(["Supplier", "no", "Must match an existing supplier name exactly, otherwise ignored"]);
+  notes.addRow(["Stock", "no", "Opening stock quantity, defaults to 0"]);
+  notes.addRow(["LowStockThreshold", "no", "Triggers a low-stock notification once stock falls at or below this"]);
+  notes.addRow(["Status", "no", "ACTIVE, HIDDEN, or OUT_OF_STOCK - defaults to ACTIVE"]);
 
   const arrayBuffer = await workbook.xlsx.writeBuffer();
   return Buffer.from(arrayBuffer);
@@ -380,6 +508,9 @@ export async function importProductsFromExcel(tenantId: string, userId: string, 
   const colorIdx = colIndex("color");
   const codeIdx = colIndex("code");
   const currencyIdx = colIndex("currency");
+  const discountIdx = colIndex("discountpercent");
+  const costPriceIdx = colIndex("costprice");
+  const supplierIdx = colIndex("supplier");
 
   if (nameIdx === -1 || skuIdx === -1 || priceIdx === -1) {
     throw new AppError(400, "INVALID_FILE", "File must have Name, SKU and Price columns");
@@ -387,6 +518,8 @@ export async function importProductsFromExcel(tenantId: string, userId: string, 
 
   const categories = await prisma.category.findMany({ where: { tenantId } });
   const categoryByName = new Map(categories.map((c) => [c.name.toLowerCase(), c.id]));
+  const suppliers = await prisma.supplier.findMany({ where: { tenantId } });
+  const supplierByName = new Map(suppliers.map((s) => [s.name.toLowerCase(), s.id]));
 
   const result: ImportResult = { created: 0, errors: [] };
 
@@ -427,17 +560,24 @@ export async function importProductsFromExcel(tenantId: string, userId: string, 
     const color = colorIdx >= 0 ? String(values[colorIdx] ?? "").trim() || undefined : undefined;
     const code = codeIdx >= 0 ? String(values[codeIdx] ?? "").trim() || undefined : undefined;
     const currency = currencyIdx >= 0 ? String(values[currencyIdx] ?? "").trim() || undefined : undefined;
+    const discountRaw = discountIdx >= 0 ? Number(values[discountIdx]) : NaN;
+    const discountPercent = Number.isFinite(discountRaw) && discountRaw > 0 ? discountRaw : undefined;
+    const costPriceRaw = costPriceIdx >= 0 ? Number(values[costPriceIdx]) : NaN;
+    const costPrice = Number.isFinite(costPriceRaw) && costPriceRaw > 0 ? costPriceRaw : undefined;
+    const supplierName = supplierIdx >= 0 ? String(values[supplierIdx] ?? "").trim().toLowerCase() : "";
+    const supplierId = supplierName ? supplierByName.get(supplierName) : undefined;
 
     await createProduct(tenantId, userId, {
       name,
       description,
       price,
+      discountPercent,
       brand,
       color,
       code,
       currency,
       categoryId,
-      variants: [{ sku, stockQuantity }],
+      variants: [{ sku, stockQuantity, costPrice, supplierId }],
     });
     result.created += 1;
   }

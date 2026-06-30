@@ -8,6 +8,7 @@ import { Button } from "../../components/ui/Button";
 import { Table, Thead, Tbody, Th, Td } from "../../components/ui/Table";
 import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import { downloadBlob } from "../../utils/downloadBlob";
+import { regionName, districtName } from "../../utils/addressLabels";
 
 export function CustomersListPage() {
   const { t } = useTranslation();
@@ -56,8 +57,13 @@ export function CustomersListPage() {
           <tr>
             <Th>{t("customers.name")}</Th>
             <Th>{t("customers.phone")}</Th>
+            <Th>{t("orders.region")}</Th>
+            <Th>{t("orders.district")}</Th>
+            <Th>{t("orders.mahalla")}</Th>
             <Th>{t("customers.orderCount")}</Th>
-            <Th>{t("customers.totalSpent")}</Th>
+            <Th>{t("customers.purchaseAmount")}</Th>
+            <Th>{t("customers.paidAmount")}</Th>
+            <Th>{t("customers.balance")}</Th>
             <Th>{t("customers.lastOrderAt")}</Th>
             <Th>{t("customers.customerSince")}</Th>
           </tr>
@@ -71,15 +77,20 @@ export function CustomersListPage() {
                 </Link>
               </Td>
               <Td>{c.phone}</Td>
+              <Td>{regionName(c.addressRegion)}</Td>
+              <Td>{districtName(c.addressRegion, c.addressDistrict)}</Td>
+              <Td>{c.addressMahalla ?? "—"}</Td>
               <Td>{c.orderCount}</Td>
-              <Td>{c.totalSpent.toLocaleString()}</Td>
+              <Td>{c.purchaseAmount.toLocaleString()}</Td>
+              <Td>{c.paidAmount.toLocaleString()}</Td>
+              <Td className={c.balance > 0 ? "text-red-600" : ""}>{c.balance.toLocaleString()}</Td>
               <Td>{c.lastOrderAt ? new Date(c.lastOrderAt).toLocaleDateString() : "—"}</Td>
               <Td>{new Date(c.createdAt).toLocaleDateString()}</Td>
             </tr>
           ))}
           {customers.length === 0 && (
             <tr>
-              <Td colSpan={6} className="text-center text-gray-400">
+              <Td colSpan={11} className="text-center text-gray-400">
                 {t("common.noData")}
               </Td>
             </tr>

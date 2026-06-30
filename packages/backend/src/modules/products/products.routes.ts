@@ -19,6 +19,7 @@ export const productsRouter = Router();
 productsRouter.use(requireAuth(), requireRole("OWNER", "MANAGER"));
 
 productsRouter.get("/export", asyncHandler(productsController.exportProducts));
+productsRouter.get("/import-template", asyncHandler(productsController.importTemplate));
 productsRouter.post("/import", uploadSpreadsheet, asyncHandler(productsController.importProducts));
 
 productsRouter.get("/", validateQuery(listProductsQuerySchema), asyncHandler(productsController.list));

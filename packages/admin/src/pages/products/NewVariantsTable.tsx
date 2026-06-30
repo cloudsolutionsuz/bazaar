@@ -9,8 +9,10 @@ export interface VariantDraft {
   name: string;
   sku: string;
   priceOverride: string;
+  costPrice: string;
   stockQuantity: string;
   lowStockThreshold: string;
+  supplierId: string;
 }
 
 export function emptyVariantDraft(): VariantDraft {
@@ -52,6 +54,7 @@ export function NewVariantsTable({ drafts, onChange }: Props) {
               <Th>{t("products.variantName")}</Th>
               <Th>{t("products.sku")}</Th>
               <Th>{t("products.priceOverride")}</Th>
+              <Th>{t("products.costPrice")}</Th>
               <Th>{t("products.stock")}</Th>
               <Th>{t("products.lowStockThreshold")}</Th>
               <Th>{t("common.actions")}</Th>
@@ -63,6 +66,7 @@ export function NewVariantsTable({ drafts, onChange }: Props) {
                 <Td>{d.name || "—"}</Td>
                 <Td>{d.sku || "—"}</Td>
                 <Td>{d.priceOverride || "—"}</Td>
+                <Td>{d.costPrice || "—"}</Td>
                 <Td>{d.stockQuantity || "0"}</Td>
                 <Td>{d.lowStockThreshold || "—"}</Td>
                 <Td>

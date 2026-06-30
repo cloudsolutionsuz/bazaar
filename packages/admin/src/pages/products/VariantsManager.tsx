@@ -12,8 +12,10 @@ function toFormValues(variant: ProductVariant): VariantFormValues {
     name: variant.name ?? "",
     sku: variant.sku,
     priceOverride: variant.priceOverride ? String(variant.priceOverride) : "",
+    costPrice: variant.costPrice ? String(variant.costPrice) : "",
     stockQuantity: String(variant.stockQuantity),
     lowStockThreshold: variant.lowStockThreshold ? String(variant.lowStockThreshold) : "",
+    supplierId: variant.supplierId ?? "",
   };
 }
 
@@ -21,7 +23,9 @@ function toUpdateInput(values: VariantFormValues): productsApi.UpdateVariantInpu
   return {
     name: values.name || undefined,
     priceOverride: values.priceOverride ? Number(values.priceOverride) : undefined,
+    costPrice: values.costPrice ? Number(values.costPrice) : undefined,
     lowStockThreshold: values.lowStockThreshold ? Number(values.lowStockThreshold) : undefined,
+    supplierId: values.supplierId || undefined,
   };
 }
 
@@ -30,8 +34,10 @@ function toCreateInput(values: VariantFormValues): productsApi.VariantInput {
     name: values.name || undefined,
     sku: values.sku,
     priceOverride: values.priceOverride ? Number(values.priceOverride) : undefined,
+    costPrice: values.costPrice ? Number(values.costPrice) : undefined,
     stockQuantity: values.stockQuantity ? Number(values.stockQuantity) : undefined,
     lowStockThreshold: values.lowStockThreshold ? Number(values.lowStockThreshold) : undefined,
+    supplierId: values.supplierId || undefined,
   };
 }
 
@@ -75,6 +81,8 @@ export function VariantsManager({ productId, variants }: { productId: string; va
             <Th>{t("products.variantName")}</Th>
             <Th>{t("products.sku")}</Th>
             <Th>{t("products.priceOverride")}</Th>
+            <Th>{t("products.costPrice")}</Th>
+            <Th>{t("products.supplier")}</Th>
             <Th>{t("products.stock")}</Th>
             <Th>{t("products.lowStockThreshold")}</Th>
             <Th>{t("common.actions")}</Th>
@@ -86,6 +94,8 @@ export function VariantsManager({ productId, variants }: { productId: string; va
               <Td>{v.name ?? "—"}</Td>
               <Td>{v.sku}</Td>
               <Td>{v.priceOverride ?? "—"}</Td>
+              <Td>{v.costPrice ?? "—"}</Td>
+              <Td>{v.supplier?.name ?? "—"}</Td>
               <Td>
                 <span title={t("products.stockReadonlyHint")}>{v.stockQuantity}</span>
               </Td>

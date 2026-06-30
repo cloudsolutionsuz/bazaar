@@ -88,7 +88,12 @@ export async function createOrder(tenantId: string, userId: string | null, input
 
   const orderItemsData = input.items.map((item) => {
     const variant = variantById.get(item.variantId)!;
-    const unitPrice = variant.priceOverride ?? variant.product.price;
+    const basePrice = variant.priceOverride ?? variant.product.price;
+    // discountPercent is shown to shoppers on the storefront, so the charged
+    // price must match it rather than billing the pre-discount price.
+    const unitPrice = variant.product.discountPercent
+      ? Math.round(basePrice * (1 - variant.product.discountPercent / 100))
+      : basePrice;
     return { variantId: item.variantId, quantity: item.quantity, unitPrice, totalPrice: unitPrice * item.quantity };
   });
 
@@ -115,8 +120,20 @@ export async function createOrder(tenantId: string, userId: string | null, input
     // this phone gets attributed to the same customer regardless of channel.
     const customer = await tx.customer.upsert({
       where: { tenantId_phone: { tenantId, phone: input.customerPhone } },
-      update: { name: input.customerName },
-      create: { tenantId, phone: input.customerPhone, name: input.customerName },
+      update: {
+        name: input.customerName,
+        addressRegion: input.addressRegion,
+        addressDistrict: input.addressDistrict,
+        addressMahalla: input.addressMahalla,
+      },
+      create: {
+        tenantId,
+        phone: input.customerPhone,
+        name: input.customerName,
+        addressRegion: input.addressRegion,
+        addressDistrict: input.addressDistrict,
+        addressMahalla: input.addressMahalla,
+      },
     });
 
     const order = await tx.order.create({
@@ -163,6 +180,7 @@ export async function createOrder(tenantId: string, userId: string | null, input
         category: "Продажа",
         amount: totalAmount,
         orderId: order.id,
+        customerId: customer.id,
         createdByUserId: userId,
       },
     });

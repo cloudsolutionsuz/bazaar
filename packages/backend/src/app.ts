@@ -22,6 +22,7 @@ import { suppliersRouter } from "./modules/suppliers/suppliers.routes";
 import { cashRegistersRouter } from "./modules/cashRegisters/cashRegisters.routes";
 import { chatRouter } from "./modules/chat/chat.routes";
 import { aiAdvisorRouter } from "./modules/aiAdvisor/aiAdvisor.routes";
+import { promotionsRouter } from "./modules/promotions/promotions.routes";
 
 export function createApp(): Express {
   const app = express();
@@ -54,6 +55,7 @@ export function createApp(): Express {
   app.use("/api/cash-registers", cashRegistersRouter);
   app.use("/api/chat", chatRouter);
   app.use("/api/ai-advisor", aiAdvisorRouter);
+  app.use("/api/promotions", promotionsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

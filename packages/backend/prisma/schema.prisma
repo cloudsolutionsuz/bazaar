@@ -121,6 +121,7 @@ model Tenant {
   suppliers          Supplier[]
   cashRegisters      CashRegister[]
   chatMessages       ChatMessage[]
+  promotions         Promotion[]
 
   @@map("tenants")
 }
@@ -148,22 +149,24 @@ model BillingInvoice {
 }
 
 model Transaction {
-  id              String          @id @default(uuid())
+  id              String            @id @default(uuid())
   tenantId        String
-  tenant          Tenant          @relation(fields: [tenantId], references: [id])
+  tenant          Tenant            @relation(fields: [tenantId], references: [id])
   type            TransactionType
   status          TransactionStatus @default(CONFIRMED)
   category        String
   amount          Int
   description     String?
   orderId         String?
-  order           Order?          @relation(fields: [orderId], references: [id])
+  order           Order?            @relation(fields: [orderId], references: [id])
   cashRegisterId  String?
-  cashRegister    CashRegister?   @relation(fields: [cashRegisterId], references: [id])
+  cashRegister    CashRegister?     @relation(fields: [cashRegisterId], references: [id])
   supplierId      String?
-  supplier        Supplier?       @relation(fields: [supplierId], references: [id])
+  supplier        Supplier?         @relation(fields: [supplierId], references: [id])
+  customerId      String?
+  customer        Customer?         @relation(fields: [customerId], references: [id])
   createdByUserId String?
-  createdAt       DateTime        @default(now())
+  createdAt       DateTime          @default(now())
 
   @@index([tenantId])
   @@index([tenantId, createdAt])
@@ -266,24 +269,28 @@ model Category {
 }
 
 model Product {
-  id          String        @id @default(uuid())
-  tenantId    String
-  tenant      Tenant        @relation(fields: [tenantId], references: [id])
-  categoryId  String?
-  category    Category?     @relation(fields: [categoryId], references: [id])
-  name        String
-  description String?
-  price       Int
-  brand       String?
-  color       String?
-  code        String?
-  currency    String        @default("UZS")
-  status      ProductStatus @default(ACTIVE)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id              String        @id @default(uuid())
+  tenantId        String
+  tenant          Tenant        @relation(fields: [tenantId], references: [id])
+  categoryId      String?
+  category        Category?     @relation(fields: [categoryId], references: [id])
+  name            String
+  description     String?
+  descriptionRu   String?
+  descriptionUz   String?
+  price           Int
+  discountPercent Int?
+  brand           String?
+  color           String?
+  code            String?
+  currency        String        @default("UZS")
+  status          ProductStatus @default(ACTIVE)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
-  variants ProductVariant[]
-  images   ProductImage[]
+  variants   ProductVariant[]
+  images     ProductImage[]
+  promotions PromotionProduct[]
 
   @@index([tenantId])
   @@index([tenantId, categoryId])
@@ -291,18 +298,21 @@ model Product {
 }
 
 model ProductVariant {
-  id                String   @id @default(uuid())
+  id                String    @id @default(uuid())
   tenantId          String
-  tenant            Tenant   @relation(fields: [tenantId], references: [id])
+  tenant            Tenant    @relation(fields: [tenantId], references: [id])
   productId         String
-  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product           Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   name              String?
   sku               String
   priceOverride     Int?
-  stockQuantity     Int      @default(0)
+  costPrice         Int?
+  stockQuantity     Int       @default(0)
   lowStockThreshold Int?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  supplierId        String?
+  supplier          Supplier? @relation(fields: [supplierId], references: [id])
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   orderItems         OrderItem[]
   inventoryMovements InventoryMovement[]
@@ -339,6 +349,7 @@ model Supplier {
 
   inventoryMovements InventoryMovement[]
   transactions       Transaction[]
+  productVariants    ProductVariant[]
 
   @@index([tenantId])
   @@map("suppliers")
@@ -402,16 +413,20 @@ model Order {
 }
 
 model Customer {
-  id        String   @id @default(uuid())
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
-  phone     String
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id @default(uuid())
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id])
+  phone           String
+  name            String
+  addressRegion   String?
+  addressDistrict String?
+  addressMahalla  String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   orders       Order[]
   chatMessages ChatMessage[]
+  transactions Transaction[]
 
   @@unique([tenantId, phone])
   @@map("customers")
@@ -454,6 +469,39 @@ model Banner {
 
   @@index([tenantId])
   @@map("banners")
+}
+
+// A marketing campaign ("Акция") grouping products together, distinct from
+// Product.discountPercent (a simple per-product price cut) - a promotion can
+// carry its own discount and a date window, and the storefront's "Акции"
+// filter shows any product currently in an active, in-window promotion.
+model Promotion {
+  id              String   @id @default(uuid())
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id])
+  name            String
+  discountPercent Int?
+  startsAt        DateTime?
+  endsAt          DateTime?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  products PromotionProduct[]
+
+  @@index([tenantId])
+  @@map("promotions")
+}
+
+model PromotionProduct {
+  promotionId String
+  productId   String
+  promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([promotionId, productId])
+  @@index([productId])
+  @@map("promotion_products")
 }
 
 model OrderItem {

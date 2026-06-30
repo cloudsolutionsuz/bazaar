@@ -21,14 +21,19 @@ export interface VariantInput {
   name?: string;
   sku: string;
   priceOverride?: number;
+  costPrice?: number;
   stockQuantity?: number;
   lowStockThreshold?: number;
+  supplierId?: string;
 }
 
 export interface CreateProductInput {
   name: string;
   description?: string;
+  descriptionRu?: string;
+  descriptionUz?: string;
   price: number;
+  discountPercent?: number;
   brand?: string;
   color?: string;
   code?: string;
@@ -82,6 +87,10 @@ export function reorderImages(productId: string, imageIds: string[]): Promise<vo
 
 export function exportProducts(): Promise<Blob> {
   return apiRequest("/api/products/export", { responseType: "blob" });
+}
+
+export function downloadImportTemplate(): Promise<Blob> {
+  return apiRequest("/api/products/import-template", { responseType: "blob" });
 }
 
 export interface ImportResult {

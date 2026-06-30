@@ -15,7 +15,12 @@
     "export": "Экспорт",
     "import": "Импорт",
     "page": "Стр.",
-    "noData": "Нет данных"
+    "noData": "Нет данных",
+    "apply": "Применить",
+    "select": "Выбрать",
+    "saving": "Сохранение…",
+    "saved": "Сохранено",
+    "error": "Произошла ошибка"
   },
   "nav": {
     "dashboard": "Дашборд",
@@ -23,6 +28,7 @@
     "inventory": "Склад",
     "suppliers": "Поставщики",
     "banners": "Баннеры",
+    "promotions": "Акции",
     "customers": "Покупатели",
     "orders": "Заказы",
     "chat": "Чат",
@@ -72,7 +78,11 @@
     "editProduct": "Редактировать товар",
     "name": "Название",
     "description": "Описание",
+    "descriptionDefault": "Общее",
+    "descriptionRuPlaceholder": "Описание на русском",
+    "descriptionUzPlaceholder": "Tavsif o'zbek tilida",
     "price": "Цена",
+    "discount": "Скидка",
     "currency": "Валюта",
     "brand": "Бренд",
     "color": "Цвет",
@@ -86,6 +96,9 @@
     "variantName": "Название (размер/цвет)",
     "variantModalTitle": "Вариация товара",
     "priceOverride": "Цена (если отличается)",
+    "costPrice": "Себестоимость",
+    "supplier": "Поставщик",
+    "noSupplier": "Без поставщика",
     "lowStockThreshold": "Порог низкого остатка",
     "stockReadonlyHint": "Остаток меняется через приход на складе",
     "skuReadonlyHint": "SKU нельзя изменить после создания вариации",
@@ -100,7 +113,12 @@
     "searchPlaceholder": "Название или SKU",
     "confirmDeleteProduct": "Удалить этот товар?",
     "confirmDeleteVariant": "Удалить эту вариацию?",
-    "importResult": "Импортировано: {{created}}, ошибок: {{errors}}"
+    "cannotDeleteHasOrders": "Нельзя удалить товар, по которому уже есть заказы — скройте его вместо удаления",
+    "importResult": "Импортировано: {{created}}, ошибок: {{errors}}",
+    "downloadTemplate": "Скачать шаблон",
+    "applyDiscount": "Применить скидку",
+    "clearDiscount": "Убрать скидку",
+    "discountApplied": "Скидка применена к товарам: {{count}}"
   },
   "inventory": {
     "title": "Склад",
@@ -168,9 +186,12 @@
   },
   "orders": {
     "title": "Заказы",
+    "archivedTitle": "Архивированные заказы",
+    "viewArchived": "Архив заказов",
     "customer": "Покупатель",
     "phone": "Телефон",
     "date": "Дата",
+    "time": "Время",
     "total": "Сумма",
     "address": "Адрес",
     "additionalPhones": "Доп. телефоны",
@@ -193,7 +214,8 @@
     "statusRefunded": "Возврат",
     "statusArchived": "Архив",
     "archiveSelected": "Архивировать выбранные ({{count}})",
-    "archivedCount": "Заархивировано {{succeeded}} из {{total}}",
+    "applyToSelected": "Применить к выбранным ({{count}})",
+    "archivedCount": "Изменено {{succeeded}} из {{total}}",
     "noTransitions": "Это финальный статус"
   },
   "billing": {
@@ -351,10 +373,11 @@
     "name": "Имя",
     "phone": "Телефон",
     "orderCount": "Заказов",
-    "totalSpent": "Потрачено",
+    "purchaseAmount": "Сумма покупки",
+    "paidAmount": "Оплаченная сумма",
     "lastOrderAt": "Последний заказ",
     "customerSince": "Клиент с",
-    "balance": "Баланс (потрачено)",
+    "balance": "Баланс",
     "purchases": "Покупки"
   },
   "banners": {
@@ -367,6 +390,27 @@
     "inactive": "Скрыт",
     "activate": "Включить",
     "deactivate": "Скрыть"
+  },
+  "promotions": {
+    "title": "Акции",
+    "add": "Добавить акцию",
+    "name": "Название акции",
+    "startsAt": "Начало",
+    "endsAt": "Окончание",
+    "isActive": "Активна",
+    "productCount": "Товаров",
+    "editPromotion": "Редактировать акцию",
+    "confirmDelete": "Удалить эту акцию?",
+    "attachProducts": "Добавить товары",
+    "attach": "Добавить",
+    "detach": "Убрать",
+    "selectedCount": "Выбрано: {{count}}",
+    "selectorMode": {
+      "products": "По названию",
+      "category": "По категории",
+      "brand": "По бренду",
+      "supplier": "По поставщику"
+    }
   },
   "chat": {
     "title": "Чат",

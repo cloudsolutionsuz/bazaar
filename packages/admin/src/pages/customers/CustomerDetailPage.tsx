@@ -28,11 +28,25 @@ export function CustomerDetailPage() {
       <div className="mb-6 rounded-xl border border-gray-200 bg-white p-6">
         <h1 className="text-xl font-semibold text-gray-900">{customer.name}</h1>
         <p className="text-sm text-gray-500">{customer.phone}</p>
+        <p className="text-sm text-gray-500">
+          {regionName(customer.addressRegion)}, {districtName(customer.addressRegion, customer.addressDistrict)}
+          {customer.addressMahalla ? `, ${customer.addressMahalla}` : ""}
+        </p>
 
         <div className="mt-4 grid grid-cols-3 gap-4">
           <div>
+            <div className="text-sm text-gray-500">{t("customers.purchaseAmount")}</div>
+            <div className="text-xl font-semibold text-gray-900">{customer.purchaseAmount.toLocaleString()}</div>
+          </div>
+          <div>
+            <div className="text-sm text-gray-500">{t("customers.paidAmount")}</div>
+            <div className="text-xl font-semibold text-gray-900">{customer.paidAmount.toLocaleString()}</div>
+          </div>
+          <div>
             <div className="text-sm text-gray-500">{t("customers.balance")}</div>
-            <div className="text-xl font-semibold text-gray-900">{customer.totalSpent.toLocaleString()}</div>
+            <div className={`text-xl font-semibold ${customer.balance > 0 ? "text-red-600" : "text-gray-900"}`}>
+              {customer.balance.toLocaleString()}
+            </div>
           </div>
           <div>
             <div className="text-sm text-gray-500">{t("customers.orderCount")}</div>

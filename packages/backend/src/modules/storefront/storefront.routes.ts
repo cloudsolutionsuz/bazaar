@@ -11,6 +11,7 @@ export const storefrontRouter = Router();
 storefrontRouter.use(requireResolvedTenant, requireActiveTenant);
 
 storefrontRouter.get("/categories", asyncHandler(storefrontController.listCategories));
+storefrontRouter.get("/brands", asyncHandler(storefrontController.listBrands));
 storefrontRouter.get("/products", validateQuery(listStorefrontProductsQuerySchema), asyncHandler(storefrontController.listProducts));
 storefrontRouter.get("/products/:id", asyncHandler(storefrontController.getProduct));
 storefrontRouter.post("/orders", validateBody(createOrderSchema), asyncHandler(storefrontController.createOrder));

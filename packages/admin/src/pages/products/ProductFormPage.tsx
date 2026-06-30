@@ -29,7 +29,11 @@ export function ProductFormPage() {
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [descriptionRu, setDescriptionRu] = useState("");
+  const [descriptionUz, setDescriptionUz] = useState("");
+  const [descriptionTab, setDescriptionTab] = useState<"default" | "ru" | "uz">("default");
   const [price, setPrice] = useState("");
+  const [discountPercent, setDiscountPercent] = useState("");
   const [brand, setBrand] = useState("");
   const [color, setColor] = useState("");
   const [code, setCode] = useState("");
@@ -37,13 +41,17 @@ export function ProductFormPage() {
   const [categoryId, setCategoryId] = useState("");
   const [status, setStatus] = useState<ProductStatus>("ACTIVE");
   const [newVariantDrafts, setNewVariantDrafts] = useState<VariantDraft[]>([]);
+  const [justSaved, setJustSaved] = useState(false);
 
   useEffect(() => {
     const product = productQuery.data?.product;
     if (product) {
       setName(product.name);
       setDescription(product.description ?? "");
+      setDescriptionRu(product.descriptionRu ?? "");
+      setDescriptionUz(product.descriptionUz ?? "");
       setPrice(String(product.price));
+      setDiscountPercent(product.discountPercent ? String(product.discountPercent) : "");
       setBrand(product.brand ?? "");
       setColor(product.color ?? "");
       setCode(product.code ?? "");
@@ -53,10 +61,17 @@ export function ProductFormPage() {
     }
   }, [productQuery.data]);
 
+  useEffect(() => {
+    if (!justSaved) return;
+    const timer = setTimeout(() => setJustSaved(false), 2000);
+    return () => clearTimeout(timer);
+  }, [justSaved]);
+
   const createMutation = useMutation({
     mutationFn: productsApi.createProduct,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      setJustSaved(true);
       navigate(`/products/${data.product.id}`, { replace: true });
     },
   });
@@ -66,6 +81,7 @@ export function ProductFormPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["product", id] });
+      setJustSaved(true);
     },
   });
 
@@ -74,7 +90,10 @@ export function ProductFormPage() {
     const basePayload = {
       name,
       description: description || undefined,
+      descriptionRu: descriptionRu || undefined,
+      descriptionUz: descriptionUz || undefined,
       price: Number(price),
+      discountPercent: discountPercent ? Number(discountPercent) : undefined,
       brand: brand || undefined,
       color: color || undefined,
       code: code || undefined,
@@ -90,8 +109,10 @@ export function ProductFormPage() {
           name: d.name || undefined,
           sku: d.sku,
           priceOverride: d.priceOverride ? Number(d.priceOverride) : undefined,
+          costPrice: d.costPrice ? Number(d.costPrice) : undefined,
           stockQuantity: d.stockQuantity ? Number(d.stockQuantity) : undefined,
           lowStockThreshold: d.lowStockThreshold ? Number(d.lowStockThreshold) : undefined,
+          supplierId: d.supplierId || undefined,
         }));
       createMutation.mutate({ ...basePayload, variants: variants.length > 0 ? variants : undefined });
     } else {
@@ -116,13 +137,49 @@ export function ProductFormPage() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.description")}</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
-            rows={3}
-          />
+          <div className="mb-1 flex items-center gap-1">
+            <label className="block text-sm font-medium text-gray-700">{t("products.description")}</label>
+            <div className="ml-2 flex gap-1">
+              {(["default", "ru", "uz"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setDescriptionTab(tab)}
+                  className={`rounded px-2 py-0.5 text-xs font-medium ${
+                    descriptionTab === tab ? "bg-brand-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  {tab === "default" ? t("products.descriptionDefault") : tab.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+          {descriptionTab === "default" && (
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
+              rows={3}
+            />
+          )}
+          {descriptionTab === "ru" && (
+            <textarea
+              value={descriptionRu}
+              onChange={(e) => setDescriptionRu(e.target.value)}
+              placeholder={t("products.descriptionRuPlaceholder")}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
+              rows={3}
+            />
+          )}
+          {descriptionTab === "uz" && (
+            <textarea
+              value={descriptionUz}
+              onChange={(e) => setDescriptionUz(e.target.value)}
+              placeholder={t("products.descriptionUzPlaceholder")}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
+              rows={3}
+            />
+          )}
         </div>
 
         <div className="flex gap-4">
@@ -134,6 +191,13 @@ export function ProductFormPage() {
             <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.currency")}</label>
             <Input value={currency} onChange={(e) => setCurrency(e.target.value)} className="w-full" />
           </div>
+          <div className="w-32">
+            <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.discount")}, %</label>
+            <NumberInput min={0} max={99} value={discountPercent} onChange={(e) => setDiscountPercent(e.target.value)} className="w-full" />
+          </div>
+        </div>
+
+        <div className="flex gap-4">
           <div className="flex-1">
             <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.category")}</label>
             <Select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="w-full">
@@ -170,9 +234,12 @@ export function ProductFormPage() {
           </div>
         </div>
 
-        <Button type="submit" disabled={saving}>
-          {t("common.save")}
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button type="submit" disabled={saving}>
+            {saving ? t("common.saving") : t("common.save")}
+          </Button>
+          {justSaved && !saving && <span className="text-sm font-medium text-green-600">✓ {t("common.saved")}</span>}
+        </div>
       </form>
 
       <section className="mt-8">

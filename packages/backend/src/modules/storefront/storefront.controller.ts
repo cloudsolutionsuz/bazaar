@@ -10,6 +10,11 @@ export async function listCategories(req: Request, res: Response): Promise<void>
   res.json({ categories });
 }
 
+export async function listBrands(req: Request, res: Response): Promise<void> {
+  const brands = await storefrontService.listBrands(req.tenant!.id);
+  res.json({ brands });
+}
+
 export async function listProducts(req: Request, res: Response): Promise<void> {
   const result = await storefrontService.listProducts(req.tenant!.id, req.query as unknown as ListStorefrontProductsQuery);
   res.json(result);

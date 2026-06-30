@@ -16,14 +16,19 @@
     "sortPriceDesc": "Avval qimmatlari",
     "priceFrom": "Narx dan",
     "priceTo": "Narx gacha",
-    "page": "Bet"
+    "page": "Bet",
+    "filterDiscounted": "Chegirmali",
+    "filterPromoted": "Aksiyadagilar",
+    "brand": "Brend",
+    "allBrands": "Barcha brendlar"
   },
   "product": {
     "description": "Tavsifi",
     "variant": "Variant",
     "quantity": "Miqdori",
     "addToCart": "Savatga",
-    "added": "Savatga qo'shildi"
+    "added": "Savatga qo'shildi",
+    "discountPercent": "-{{percent}}%"
   },
   "cart": {
     "title": "Savat",

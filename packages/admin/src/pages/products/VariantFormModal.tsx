@@ -1,20 +1,25 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 import { Modal } from "../../components/ui/Modal";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { NumberInput } from "../../components/ui/NumberInput";
+import { Select } from "../../components/ui/Select";
+import * as suppliersApi from "../../api/suppliers";
 
 export interface VariantFormValues {
   name: string;
   sku: string;
   priceOverride: string;
+  costPrice: string;
   stockQuantity: string;
   lowStockThreshold: string;
+  supplierId: string;
 }
 
 export function emptyVariantFormValues(): VariantFormValues {
-  return { name: "", sku: "", priceOverride: "", stockQuantity: "0", lowStockThreshold: "" };
+  return { name: "", sku: "", priceOverride: "", costPrice: "", stockQuantity: "0", lowStockThreshold: "", supplierId: "" };
 }
 
 interface Props {
@@ -33,6 +38,11 @@ interface Props {
 export function VariantFormModal({ open, onClose, onSubmit, initialValues, showStock, skuEditable, submitting }: Props) {
   const { t } = useTranslation();
   const [values, setValues] = useState(initialValues);
+  const suppliersQuery = useQuery({
+    queryKey: ["suppliers", "all"],
+    queryFn: () => suppliersApi.listSuppliers({ pageSize: 100 }),
+    enabled: open,
+  });
 
   useEffect(() => {
     if (open) setValues(initialValues);
@@ -79,6 +89,28 @@ export function VariantFormModal({ open, onClose, onSubmit, initialValues, showS
               value={values.lowStockThreshold}
               onChange={(e) => setValues({ ...values, lowStockThreshold: e.target.value })}
             />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.costPrice")}</label>
+            <NumberInput
+              className="w-full"
+              value={values.costPrice}
+              onChange={(e) => setValues({ ...values, costPrice: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.supplier")}</label>
+            <Select value={values.supplierId} onChange={(e) => setValues({ ...values, supplierId: e.target.value })} className="w-full">
+              <option value="">{t("products.noSupplier")}</option>
+              {suppliersQuery.data?.items.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </Select>
           </div>
         </div>
 

@@ -16,14 +16,19 @@
     "sortPriceDesc": "Сначала дороже",
     "priceFrom": "Цена от",
     "priceTo": "Цена до",
-    "page": "Страница"
+    "page": "Страница",
+    "filterDiscounted": "Со скидкой",
+    "filterPromoted": "Акции",
+    "brand": "Бренд",
+    "allBrands": "Все бренды"
   },
   "product": {
     "description": "Описание",
     "variant": "Вариант",
     "quantity": "Количество",
     "addToCart": "В корзину",
-    "added": "Добавлено в корзину"
+    "added": "Добавлено в корзину",
+    "discountPercent": "-{{percent}}%"
   },
   "cart": {
     "title": "Корзина",

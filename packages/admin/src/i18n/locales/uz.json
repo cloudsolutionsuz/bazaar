@@ -15,7 +15,12 @@
     "export": "Eksport",
     "import": "Import",
     "page": "Bet",
-    "noData": "Ma'lumot yo'q"
+    "noData": "Ma'lumot yo'q",
+    "apply": "Qo'llash",
+    "select": "Tanlash",
+    "saving": "Saqlanmoqda…",
+    "saved": "Saqlandi",
+    "error": "Xatolik yuz berdi"
   },
   "nav": {
     "dashboard": "Boshqaruv paneli",
@@ -23,6 +28,7 @@
     "inventory": "Ombor",
     "suppliers": "Yetkazib beruvchilar",
     "banners": "Bannerlar",
+    "promotions": "Aksiyalar",
     "customers": "Xaridorlar",
     "orders": "Buyurtmalar",
     "chat": "Chat",
@@ -100,7 +106,19 @@
     "searchPlaceholder": "Nomi yoki SKU",
     "confirmDeleteProduct": "Bu tovarni o'chirishni tasdiqlaysizmi?",
     "confirmDeleteVariant": "Bu variantni o'chirishni tasdiqlaysizmi?",
-    "importResult": "Import qilindi: {{created}}, xatolar: {{errors}}"
+    "importResult": "Import qilindi: {{created}}, xatolar: {{errors}}",
+    "descriptionDefault": "Asosiy",
+    "descriptionRuPlaceholder": "Tavsif rus tilida",
+    "descriptionUzPlaceholder": "Tavsif o'zbek tilida",
+    "discount": "Chegirma",
+    "costPrice": "Tannarx",
+    "supplier": "Yetkazib beruvchi",
+    "noSupplier": "Yetkazib beruvchisiz",
+    "cannotDeleteHasOrders": "Buyurtmalari mavjud tovarni o'chirib bo'lmaydi — o'chirish o'rniga yashiring",
+    "downloadTemplate": "Shablonni yuklab olish",
+    "applyDiscount": "Chegirma qo'llash",
+    "clearDiscount": "Chegirmani olib tashlash",
+    "discountApplied": "Tovarlarga chegirma qo'llandi: {{count}}"
   },
   "inventory": {
     "title": "Ombor",
@@ -193,8 +211,12 @@
     "statusRefunded": "Qaytarildi",
     "statusArchived": "Arxiv",
     "archiveSelected": "Tanlanganlarni arxivlash ({{count}})",
-    "archivedCount": "{{total}} tadan {{succeeded}} tasi arxivlandi",
-    "noTransitions": "Bu yakuniy holat"
+    "archivedCount": "{{total}} tadan {{succeeded}} tasi o'zgartirildi",
+    "noTransitions": "Bu yakuniy holat",
+    "archivedTitle": "Arxivlangan buyurtmalar",
+    "viewArchived": "Buyurtmalar arxivi",
+    "time": "Vaqt",
+    "applyToSelected": "Tanlanganlarga qo'llash ({{count}})"
   },
   "billing": {
     "title": "Billing",
@@ -351,10 +373,11 @@
     "name": "Ism",
     "phone": "Telefon",
     "orderCount": "Buyurtmalar",
-    "totalSpent": "Sarflangan",
+    "purchaseAmount": "Xarid summasi",
+    "paidAmount": "To'langan summa",
     "lastOrderAt": "So'nggi buyurtma",
     "customerSince": "Xaridor bo'lgan sana",
-    "balance": "Balans (sarflangan)",
+    "balance": "Balans",
     "purchases": "Xaridlar"
   },
   "banners": {
@@ -367,6 +390,27 @@
     "inactive": "Yashirilgan",
     "activate": "Yoqish",
     "deactivate": "Yashirish"
+  },
+  "promotions": {
+    "title": "Aksiyalar",
+    "add": "Aksiya qo'shish",
+    "name": "Aksiya nomi",
+    "startsAt": "Boshlanishi",
+    "endsAt": "Tugashi",
+    "isActive": "Faol",
+    "productCount": "Tovarlar",
+    "editPromotion": "Aksiyani tahrirlash",
+    "confirmDelete": "Bu aksiyani o'chirishni tasdiqlaysizmi?",
+    "attachProducts": "Tovar qo'shish",
+    "attach": "Qo'shish",
+    "detach": "Olib tashlash",
+    "selectedCount": "Tanlandi: {{count}}",
+    "selectorMode": {
+      "products": "Nomi bo'yicha",
+      "category": "Kategoriya bo'yicha",
+      "brand": "Brend bo'yicha",
+      "supplier": "Yetkazib beruvchi bo'yicha"
+    }
   },
   "chat": {
     "title": "Chat",

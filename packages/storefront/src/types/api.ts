@@ -27,7 +27,10 @@ export interface Product {
   category: Category | null;
   name: string;
   description: string | null;
+  descriptionRu: string | null;
+  descriptionUz: string | null;
   price: number;
+  discountPercent: number | null;
   brand: string | null;
   color: string | null;
   currency: string;

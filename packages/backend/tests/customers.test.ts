@@ -136,11 +136,11 @@ describeWithDb("customers (mini-account by phone, integration)", () => {
     const aziz = list.body.items[0];
     expect(aziz.name).toBe("Aziz Karimov");
     expect(aziz.orderCount).toBe(2);
-    expect(aziz.totalSpent).toBe(30000);
+    expect(aziz.purchaseAmount).toBe(30000);
 
     const cancelled = await request(app).get("/api/customers").set(auth()).query({ search: "Cancels" });
     expect(cancelled.body.items[0].orderCount).toBe(0);
-    expect(cancelled.body.items[0].totalSpent).toBe(0);
+    expect(cancelled.body.items[0].purchaseAmount).toBe(0);
   });
 
   it("returns a customer's full order history on the detail endpoint, including a cancelled order, while excluding it from the balance", async () => {
@@ -151,7 +151,7 @@ describeWithDb("customers (mini-account by phone, integration)", () => {
     expect(res.status).toBe(200);
     expect(res.body.customer.orders).toHaveLength(1);
     expect(res.body.customer.orders[0].status).toBe("CANCELLED");
-    expect(res.body.customer.totalSpent).toBe(0);
+    expect(res.body.customer.purchaseAmount).toBe(0);
     expect(res.body.customer.orderCount).toBe(0);
   });
 
