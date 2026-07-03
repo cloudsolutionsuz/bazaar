@@ -32,6 +32,7 @@ export function createApp(): Express {
 
   app.use(cors());
   app.use(express.json());
+  app.use(express.urlencoded({ extended: false })); // needed for Click webhook (form-encoded)
   app.use(resolveTenant);
   app.use("/uploads", express.static(UPLOADS_DIR));
 

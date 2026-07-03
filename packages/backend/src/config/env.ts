@@ -36,4 +36,10 @@ export const env = {
   vapidPublicKey: process.env.VAPID_PUBLIC_KEY ?? null,
   vapidPrivateKey: process.env.VAPID_PRIVATE_KEY ?? null,
   vapidMailto: process.env.VAPID_MAILTO ?? "mailto:admin@ubazaar.uz",
+
+  // Optional: Click.uz merchant credentials. When present, invoices redirect
+  // to the real Click payment page; when absent, the sandbox flow is used.
+  clickServiceId: process.env.CLICK_SERVICE_ID ?? null,
+  clickMerchantId: process.env.CLICK_MERCHANT_ID ?? null,
+  clickSecretKey: process.env.CLICK_SECRET_KEY ?? null,
 };

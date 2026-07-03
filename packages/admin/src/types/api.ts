@@ -296,6 +296,7 @@ export interface BillingSummary {
   tenant: Tenant & { plan: Plan };
   invoices: BillingInvoice[];
   nextInvoice: BillingInvoice | null;
+  clickConfigured: boolean;
 }
 
 export type TransactionType = "INCOME" | "EXPENSE";

@@ -251,6 +251,8 @@
     "invoiceStatusOverdue": "Muddati o'tgan",
     "invoiceStatusCancelled": "Bekor qilingan",
     "pay": "To'lash",
+    "payViaClick": "Click orqali to'lash",
+    "payClickRedirect": "To'lov uchun Click sahifasiga yo'naltirilasiz",
     "bannerPastDue": "Obuna to'lovi muddati o'tgan. Do'konning bloklanishining oldini olish uchun hisobni to'lang.",
     "bannerBlocked": "Do'kon to'lanmaganligi sababli bloklangan. Kirishni qayta tiklash uchun hisobni to'lang.",
     "sandboxNotice": "Bu test to'lovi (sandbox) — Payme/Click bilan haqiqiy integratsiya keyinroq qo'shiladi",

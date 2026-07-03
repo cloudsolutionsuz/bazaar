@@ -50,6 +50,21 @@ export function BillingPage() {
   const summaryQuery = useQuery({ queryKey: ["billing", "summary"], queryFn: billingApi.getBillingSummary });
   const plansQuery = useQuery({ queryKey: ["plans"], queryFn: plansApi.listPlans });
 
+  // checkoutMutation: if Click is configured, server returns a real Click URL
+  // and we redirect; otherwise it returns the sandbox path and we open the modal.
+  const checkoutMutation = useMutation({
+    mutationFn: (invoiceId: string) => billingApi.createCheckout(invoiceId),
+    onSuccess: ({ checkoutUrl }) => {
+      if (checkoutUrl.startsWith("https://")) {
+        window.open(checkoutUrl, "_blank", "noopener,noreferrer");
+      } else {
+        // Extract invoice ID from "/billing/checkout/:id" for sandbox modal
+        const id = checkoutUrl.split("/").pop() ?? null;
+        setPayingInvoiceId(id);
+      }
+    },
+  });
+
   const payMutation = useMutation({
     mutationFn: (invoiceId: string) => billingApi.confirmSandboxPayment(invoiceId),
     onSuccess: () => {
@@ -83,7 +98,7 @@ export function BillingPage() {
   const plans = plansQuery.data?.plans ?? [];
   if (!summary) return null;
 
-  const { tenant, invoices, nextInvoice } = summary;
+  const { tenant, invoices, nextInvoice, clickConfigured } = summary;
 
   return (
     <div className="max-w-3xl">
@@ -157,7 +172,12 @@ export function BillingPage() {
               </div>
               <Badge color={INVOICE_STATUS_COLORS[nextInvoice.status]}>{t(INVOICE_STATUS_KEYS[nextInvoice.status])}</Badge>
             </div>
-            <Button onClick={() => setPayingInvoiceId(nextInvoice.id)}>{t("billing.pay")}</Button>
+            <Button
+              disabled={checkoutMutation.isPending}
+              onClick={() => checkoutMutation.mutate(nextInvoice.id)}
+            >
+              {clickConfigured ? t("billing.payViaClick") : t("billing.pay")}
+            </Button>
           </div>
         ) : (
           <p className="text-sm text-gray-500">{t("billing.noNextCharge")}</p>

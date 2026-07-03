@@ -2,6 +2,7 @@ import type { PaymentProviderType } from "@prisma/client";
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
 import { notifyPaymentExpiringSoon } from "../../utils/notifications";
+import { env } from "../../config/env";
 
 // "Грейс-период" from the spec is modeled as two stages: a few days after
 // the period starts before payment is actually due, then a further window
@@ -193,12 +194,16 @@ export async function getInvoiceForTenant(tenantId: string, invoiceId: string) {
   return invoice;
 }
 
+export async function getInvoiceById(invoiceId: string) {
+  return prisma.billingInvoice.findUnique({ where: { id: invoiceId } });
+}
+
 export async function getBillingSummary(tenantId: string) {
   const tenant = await prisma.tenant.findUniqueOrThrow({ where: { id: tenantId }, include: { plan: true } });
   const invoices = await prisma.billingInvoice.findMany({ where: { tenantId }, orderBy: { periodStart: "desc" } });
   const nextInvoice = invoices.find((i) => i.status === "PENDING" || i.status === "OVERDUE") ?? null;
 
-  return { tenant, invoices, nextInvoice };
+  return { tenant, invoices, nextInvoice, clickConfigured: Boolean(env.clickServiceId) };
 }
 
 export async function changePlan(tenantId: string, planId: string) {
