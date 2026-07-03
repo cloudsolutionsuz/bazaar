@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as storefrontApi from "../api/storefront";
@@ -19,6 +19,32 @@ export function ChatPage() {
     refetchInterval: identified ? 5000 : false,
   });
   const messages = query.data?.messages ?? [];
+
+  useEffect(() => {
+    if (!identified || !phone || !name) return;
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+
+    (async () => {
+      try {
+        const { publicKey } = await storefrontApi.getPushVapidKey();
+        if (!publicKey) return;
+
+        const registration = await navigator.serviceWorker.register("/sw.js");
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") return;
+
+        const existing = await registration.pushManager.getSubscription();
+        const sub = existing ?? await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: publicKey,
+        });
+
+        await storefrontApi.subscribeToPush(phone, name, sub.toJSON());
+      } catch {
+        // Push is best-effort — silently ignore any error
+      }
+    })();
+  }, [identified, phone, name]);
 
   function handleIdentify(e: FormEvent) {
     e.preventDefault();

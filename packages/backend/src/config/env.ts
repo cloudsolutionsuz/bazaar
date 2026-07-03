@@ -30,4 +30,10 @@ export const env = {
   // when this isn't configured yet.
   anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? null,
   anthropicModel: process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6",
+
+  // Optional: VAPID keys for Web Push Notifications. Degrades gracefully
+  // (push silently skipped) when not configured.
+  vapidPublicKey: process.env.VAPID_PUBLIC_KEY ?? null,
+  vapidPrivateKey: process.env.VAPID_PRIVATE_KEY ?? null,
+  vapidMailto: process.env.VAPID_MAILTO ?? "mailto:admin@ubazaar.uz",
 };

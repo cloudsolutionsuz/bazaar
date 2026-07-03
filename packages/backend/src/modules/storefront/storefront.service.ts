@@ -3,7 +3,8 @@ import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
 import { notifyNewChatMessage } from "../../utils/notifications";
 import { normalizePhone } from "../../utils/phone";
-import type { ListStorefrontProductsQuery, SendChatMessageInput, TrackPageViewInput } from "./storefront.schema";
+import { getVapidPublicKey, sendWebPush } from "../../utils/webpush";
+import type { ListStorefrontProductsQuery, PushSubscribeInput, SendChatMessageInput, TrackPageViewInput } from "./storefront.schema";
 
 const productInclude = {
   variants: true,
@@ -175,4 +176,28 @@ export async function sendChatMessage(tenantId: string, input: SendChatMessageIn
   await notifyNewChatMessage(tenant?.telegramChatId ?? null, input.name, input.text);
 
   return message;
+}
+
+export function getPushVapidKey() {
+  return { publicKey: getVapidPublicKey() };
+}
+
+export async function subscribeToPush(tenantId: string, input: PushSubscribeInput) {
+  const phone = normalizePhone(input.phone);
+  await prisma.customer.upsert({
+    where: { tenantId_phone: { tenantId, phone } },
+    update: { name: input.name },
+    create: { tenantId, phone, name: input.name },
+  });
+  await prisma.pushSubscription.upsert({
+    where: { tenantId_phone: { tenantId, phone } },
+    update: { endpoint: input.endpoint, p256dh: input.p256dh, auth: input.auth },
+    create: { tenantId, phone, endpoint: input.endpoint, p256dh: input.p256dh, auth: input.auth },
+  });
+}
+
+export async function pushToCustomer(tenantId: string, phone: string, title: string, body: string) {
+  const sub = await prisma.pushSubscription.findUnique({ where: { tenantId_phone: { tenantId, phone } } });
+  if (!sub) return;
+  await sendWebPush(sub, { title, body });
 }

@@ -35,3 +35,13 @@ export const sendChatMessageSchema = z.object({
 });
 
 export type SendChatMessageInput = z.infer<typeof sendChatMessageSchema>;
+
+export const pushSubscribeSchema = z.object({
+  phone: z.string().min(3).max(30),
+  name: z.string().min(1).max(200),
+  endpoint: z.string().url(),
+  p256dh: z.string().min(1),
+  auth: z.string().min(1),
+});
+
+export type PushSubscribeInput = z.infer<typeof pushSubscribeSchema>;

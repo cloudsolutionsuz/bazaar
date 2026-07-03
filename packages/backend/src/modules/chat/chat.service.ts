@@ -1,5 +1,6 @@
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
+import { pushToCustomer } from "../storefront/storefront.service";
 
 // "Last message per customer" via Prisma's distinct+orderBy combo: ordering
 // by createdAt desc means distinct keeps the first (= newest) row it sees
@@ -66,9 +67,13 @@ export async function getThreadMessages(tenantId: string, customerId: string) {
 }
 
 export async function sendStaffMessage(tenantId: string, userId: string, customerId: string, text: string) {
-  await getCustomerOrThrow(tenantId, customerId);
+  const customer = await getCustomerOrThrow(tenantId, customerId);
 
-  return prisma.chatMessage.create({
+  const message = await prisma.chatMessage.create({
     data: { tenantId, customerId, sender: "STAFF", text, createdByUserId: userId },
   });
+
+  await pushToCustomer(tenantId, customer.phone, "Новое сообщение от магазина", text).catch(() => {});
+
+  return message;
 }

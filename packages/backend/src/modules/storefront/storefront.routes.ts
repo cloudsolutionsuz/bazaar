@@ -2,7 +2,7 @@ import { Router } from "express";
 import { asyncHandler } from "../../utils/asyncHandler";
 import { requireActiveTenant, requireResolvedTenant } from "../../middleware/requireTenant";
 import { validateBody, validateQuery } from "../../middleware/validate";
-import { listStorefrontProductsQuerySchema, myOrdersQuerySchema, sendChatMessageSchema, trackPageViewSchema } from "./storefront.schema";
+import { listStorefrontProductsQuerySchema, myOrdersQuerySchema, pushSubscribeSchema, sendChatMessageSchema, trackPageViewSchema } from "./storefront.schema";
 import { createOrderSchema } from "../orders/orders.schema";
 import * as storefrontController from "./storefront.controller";
 
@@ -25,3 +25,5 @@ storefrontRouter.post(
   validateBody(trackPageViewSchema),
   asyncHandler(storefrontController.trackPageView),
 );
+storefrontRouter.get("/push/vapid-key", asyncHandler(storefrontController.getPushVapidKey));
+storefrontRouter.post("/push/subscribe", validateBody(pushSubscribeSchema), asyncHandler(storefrontController.subscribeToPush));

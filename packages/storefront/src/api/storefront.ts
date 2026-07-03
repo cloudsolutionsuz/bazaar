@@ -75,3 +75,20 @@ export function getChatMessages(phone: string): Promise<{ messages: ChatMessage[
 export function sendChatMessage(phone: string, name: string, text: string): Promise<{ message: ChatMessage }> {
   return apiRequest("/api/storefront/chat", { method: "POST", body: { phone, name, text } });
 }
+
+export function getPushVapidKey(): Promise<{ publicKey: string | null }> {
+  return apiRequest("/api/storefront/push/vapid-key");
+}
+
+export function subscribeToPush(phone: string, name: string, sub: PushSubscriptionJSON): Promise<{ ok: boolean }> {
+  return apiRequest("/api/storefront/push/subscribe", {
+    method: "POST",
+    body: {
+      phone,
+      name,
+      endpoint: sub.endpoint,
+      p256dh: sub.keys?.p256dh,
+      auth: sub.keys?.auth,
+    },
+  });
+}

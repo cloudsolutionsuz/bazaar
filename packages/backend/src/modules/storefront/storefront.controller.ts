@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import * as storefrontService from "./storefront.service";
 import * as ordersService from "../orders/orders.service";
 import * as bannersService from "../banners/banners.service";
-import type { ListStorefrontProductsQuery, MyOrdersQuery, SendChatMessageInput, TrackPageViewInput } from "./storefront.schema";
+import type { ListStorefrontProductsQuery, MyOrdersQuery, PushSubscribeInput, SendChatMessageInput, TrackPageViewInput } from "./storefront.schema";
 import type { CreateOrderInput } from "../orders/orders.schema";
 
 export async function listCategories(req: Request, res: Response): Promise<void> {
@@ -60,4 +60,13 @@ export async function listBanners(req: Request, res: Response): Promise<void> {
 export async function getMeta(req: Request, res: Response): Promise<void> {
   const { name, logoUrl, themeColor, description, inn, companyName, contactPhone, instagram, facebook, youtube } = req.tenant!;
   res.json({ name, logoUrl, themeColor, description, inn, companyName, contactPhone, instagram, facebook, youtube });
+}
+
+export async function getPushVapidKey(req: Request, res: Response): Promise<void> {
+  res.json(storefrontService.getPushVapidKey());
+}
+
+export async function subscribeToPush(req: Request, res: Response): Promise<void> {
+  await storefrontService.subscribeToPush(req.tenant!.id, req.body as PushSubscribeInput);
+  res.status(201).json({ ok: true });
 }
