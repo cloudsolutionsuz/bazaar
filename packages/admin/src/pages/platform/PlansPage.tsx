@@ -128,36 +128,66 @@ export function PlansPage() {
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">{t("platform.maxProducts")}</label>
-              <Input
-                type="number"
-                min={1}
-                placeholder={t("platform.unlimited")}
-                value={form.maxProducts}
-                onChange={(e) => setForm({ ...form, maxProducts: e.target.value })}
-                className="w-full"
-              />
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  min={1}
+                  placeholder={t("platform.unlimited")}
+                  value={form.maxProducts}
+                  onChange={(e) => setForm({ ...form, maxProducts: e.target.value })}
+                  className="w-full"
+                  disabled={form.maxProducts === ""}
+                />
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, maxProducts: form.maxProducts === "" ? "100" : "" })}
+                  className={`shrink-0 rounded-md border px-3 text-sm font-medium ${form.maxProducts === "" ? "border-brand-500 bg-brand-50 text-brand-700" : "border-gray-300 text-gray-500 hover:border-brand-400"}`}
+                >
+                  ∞
+                </button>
+              </div>
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">{t("platform.maxOrdersPerMonth")}</label>
-              <Input
-                type="number"
-                min={1}
-                placeholder={t("platform.unlimited")}
-                value={form.maxOrdersPerMonth}
-                onChange={(e) => setForm({ ...form, maxOrdersPerMonth: e.target.value })}
-                className="w-full"
-              />
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  min={1}
+                  placeholder={t("platform.unlimited")}
+                  value={form.maxOrdersPerMonth}
+                  onChange={(e) => setForm({ ...form, maxOrdersPerMonth: e.target.value })}
+                  className="w-full"
+                  disabled={form.maxOrdersPerMonth === ""}
+                />
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, maxOrdersPerMonth: form.maxOrdersPerMonth === "" ? "1000" : "" })}
+                  className={`shrink-0 rounded-md border px-3 text-sm font-medium ${form.maxOrdersPerMonth === "" ? "border-brand-500 bg-brand-50 text-brand-700" : "border-gray-300 text-gray-500 hover:border-brand-400"}`}
+                >
+                  ∞
+                </button>
+              </div>
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">{t("platform.maxEmployees")}</label>
-              <Input
-                type="number"
-                min={1}
-                placeholder={t("platform.unlimited")}
-                value={form.maxEmployees}
-                onChange={(e) => setForm({ ...form, maxEmployees: e.target.value })}
-                className="w-full"
-              />
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  min={1}
+                  placeholder={t("platform.unlimited")}
+                  value={form.maxEmployees}
+                  onChange={(e) => setForm({ ...form, maxEmployees: e.target.value })}
+                  className="w-full"
+                  disabled={form.maxEmployees === ""}
+                />
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, maxEmployees: form.maxEmployees === "" ? "10" : "" })}
+                  className={`shrink-0 rounded-md border px-3 text-sm font-medium ${form.maxEmployees === "" ? "border-brand-500 bg-brand-50 text-brand-700" : "border-gray-300 text-gray-500 hover:border-brand-400"}`}
+                >
+                  ∞
+                </button>
+              </div>
             </div>
           </div>
           <div className="flex gap-2">

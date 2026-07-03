@@ -20,7 +20,8 @@
     "select": "Выбрать",
     "saving": "Сохранение…",
     "saved": "Сохранено",
-    "error": "Произошла ошибка"
+    "error": "Произошла ошибка",
+    "total": "Итого"
   },
   "nav": {
     "dashboard": "Дашборд",
@@ -310,10 +311,19 @@
     "trendFlat": "Тренд продаж стабилен",
     "forecastDisclaimer": "Базовый прогноз по линейному тренду за последние 90 дней — не учитывает сезонность, акции и другие факторы",
     "presetToday": "Сегодня",
+    "presetYesterday": "Вчера",
     "preset7Days": "7 дней",
     "preset30Days": "30 дней",
     "preset90Days": "90 дней",
-    "comparedToPrevious": "В сравнении с предыдущим периодом ({{from}} — {{to}})"
+    "comparedToPrevious": "В сравнении с предыдущим периодом ({{from}} — {{to}})",
+    "products": "Товары",
+    "payments": "Оплаты",
+    "productReport": "Отчёт по товарам",
+    "paymentReport": "Отчёт по оплатам",
+    "paymentDate": "Дата",
+    "paymentAmount": "Сумма",
+    "paymentCategory": "Категория",
+    "paymentDescription": "Описание"
   },
   "platform": {
     "tenantsTitle": "Магазины",
@@ -392,7 +402,12 @@
     "lastOrderAt": "Последний заказ",
     "customerSince": "Клиент с",
     "balance": "Баланс",
-    "purchases": "Покупки"
+    "purchases": "Покупки",
+    "recordPayment": "Записать оплату",
+    "payAmount": "Сумма оплаты",
+    "pay": "Записать",
+    "paySuccess": "Оплата записана",
+    "paymentHistory": "История оплат"
   },
   "banners": {
     "title": "Баннеры",

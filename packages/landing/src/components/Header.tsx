@@ -21,7 +21,7 @@ export function Header() {
             <option value="ru">RU</option>
             <option value="uz">UZ</option>
           </select>
-          <a href={`${ADMIN_URL}/login`} className="text-sm font-medium text-brand-700 hover:underline">
+          <a href={ADMIN_URL} className="text-sm font-medium text-brand-700 hover:underline">
             {t("nav.login")}
           </a>
           <Link to="/register" className="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">

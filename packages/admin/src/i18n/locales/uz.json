@@ -20,7 +20,8 @@
     "select": "Tanlash",
     "saving": "Saqlanmoqda…",
     "saved": "Saqlandi",
-    "error": "Xatolik yuz berdi"
+    "error": "Xatolik yuz berdi",
+    "total": "Jami"
   },
   "nav": {
     "dashboard": "Boshqaruv paneli",
@@ -310,10 +311,19 @@
     "trendFlat": "Sotuvlar trendi barqaror",
     "forecastDisclaimer": "So'nggi 90 kunlik chiziqli trendga asoslangan oddiy prognoz — fasllik, aksiyalar va boshqa omillarni hisobga olmaydi",
     "presetToday": "Bugun",
+    "presetYesterday": "Kecha",
     "preset7Days": "7 kun",
     "preset30Days": "30 kun",
     "preset90Days": "90 kun",
-    "comparedToPrevious": "Oldingi davr bilan solishtirilgan ({{from}} — {{to}})"
+    "comparedToPrevious": "Oldingi davr bilan solishtirilgan ({{from}} — {{to}})",
+    "products": "Tovarlar",
+    "payments": "To'lovlar",
+    "productReport": "Tovarlar hisoboti",
+    "paymentReport": "To'lovlar hisoboti",
+    "paymentDate": "Sana",
+    "paymentAmount": "Summa",
+    "paymentCategory": "Kategoriya",
+    "paymentDescription": "Tavsifi"
   },
   "platform": {
     "tenantsTitle": "Do'konlar",
@@ -392,7 +402,12 @@
     "lastOrderAt": "So'nggi buyurtma",
     "customerSince": "Xaridor bo'lgan sana",
     "balance": "Balans",
-    "purchases": "Xaridlar"
+    "purchases": "Xaridlar",
+    "recordPayment": "To'lovni qayd etish",
+    "payAmount": "To'lov summasi",
+    "pay": "Qayd etish",
+    "paySuccess": "To'lov qayd etildi",
+    "paymentHistory": "To'lovlar tarixi"
   },
   "banners": {
     "title": "Bannerlar",

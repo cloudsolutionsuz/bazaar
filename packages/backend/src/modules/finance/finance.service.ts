@@ -46,6 +46,7 @@ export async function createTransaction(tenantId: string, userId: string, input:
       description: input.description,
       cashRegisterId: input.cashRegisterId,
       supplierId: input.supplierId,
+      customerId: input.customerId,
       createdByUserId: userId,
     },
   });

@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Header } from "../components/Header";
 import * as registrationApi from "../api/registration";
 
-const FEATURE_KEYS = ["products", "inventory", "orders", "storefront", "analytics", "finance"] as const;
+const FEATURE_KEYS = ["products", "inventory", "orders", "storefront", "analytics", "finance", "aiAdvisor", "reports", "chat"] as const;
 
 export function LandingPage() {
   const { t } = useTranslation();

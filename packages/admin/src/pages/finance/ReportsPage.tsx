@@ -10,7 +10,7 @@ import { Table, Thead, Tbody, Th, Td } from "../../components/ui/Table";
 import { StatCard } from "../../components/ui/StatCard";
 import { downloadBlob } from "../../utils/downloadBlob";
 
-type Tab = "analytics" | "pnl" | "forecast";
+type Tab = "analytics" | "pnl" | "forecast" | "products" | "payments";
 type Granularity = "day" | "week" | "month";
 
 function toDateInputValue(d: Date): string {
@@ -70,15 +70,21 @@ export function ReportsPage() {
   }
 
   function applyPreset(days: number) {
-    setFrom(days === 0 ? defaultTo() : daysAgo(days));
-    setTo(defaultTo());
+    if (days === 1) {
+      const yesterday = daysAgo(1);
+      setFrom(yesterday);
+      setTo(yesterday);
+    } else {
+      setFrom(days === 0 ? defaultTo() : daysAgo(days));
+      setTo(defaultTo());
+    }
   }
 
   return (
     <div>
       <h1 className="mb-4 text-xl font-semibold text-gray-900">{t("reports.title")}</h1>
 
-      <div className="mb-4 flex gap-2 border-b border-gray-200 pb-2">
+      <div className="mb-4 flex flex-wrap gap-2 border-b border-gray-200 pb-2">
         <button className={tabClass(tab === "analytics")} onClick={() => setTab("analytics")}>
           {t("reports.analytics")}
         </button>
@@ -87,6 +93,12 @@ export function ReportsPage() {
         </button>
         <button className={tabClass(tab === "forecast")} onClick={() => setTab("forecast")}>
           {t("reports.forecast")}
+        </button>
+        <button className={tabClass(tab === "products")} onClick={() => setTab("products")}>
+          {t("reports.products")}
+        </button>
+        <button className={tabClass(tab === "payments")} onClick={() => setTab("payments")}>
+          {t("reports.payments")}
         </button>
       </div>
 
@@ -110,9 +122,12 @@ export function ReportsPage() {
               </Select>
             </div>
           )}
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button variant="secondary" onClick={() => applyPreset(0)}>
               {t("reports.presetToday")}
+            </Button>
+            <Button variant="secondary" onClick={() => applyPreset(1)}>
+              {t("reports.presetYesterday")}
             </Button>
             <Button variant="secondary" onClick={() => applyPreset(7)}>
               {t("reports.preset7Days")}
@@ -130,6 +145,8 @@ export function ReportsPage() {
       {tab === "pnl" && <PnLTab from={from} to={to} />}
       {tab === "analytics" && <AnalyticsTab from={from} to={to} granularity={granularity} />}
       {tab === "forecast" && <ForecastTab />}
+      {tab === "products" && <ProductReportTab from={from} to={to} />}
+      {tab === "payments" && <PaymentsReportTab from={from} to={to} />}
     </div>
   );
 }
@@ -266,7 +283,7 @@ function AnalyticsTab({ from, to, granularity }: { from: string; to: string; gra
             <XAxis dataKey="bucket" tick={{ fontSize: 12 }} />
             <YAxis tick={{ fontSize: 12 }} />
             <Tooltip />
-            <Bar dataKey="revenue" fill="#1f7a64" />
+            <Bar dataKey="revenue" name={t("reports.revenue")} fill="#1f7a64" />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -364,6 +381,108 @@ function ForecastTab() {
       </div>
 
       <p className="text-xs text-gray-400">{t("reports.forecastDisclaimer")}</p>
+    </div>
+  );
+}
+
+function ProductReportTab({ from, to }: { from: string; to: string }) {
+  const { t } = useTranslation();
+  const { fromIso, toIso } = rangeToIso(from, to);
+  const query = useQuery({
+    queryKey: ["finance", "analytics", fromIso, toIso, "day"],
+    queryFn: () => financeApi.getAnalytics(fromIso, toIso, "day"),
+  });
+  const data = query.data;
+  if (!data) return null;
+
+  const products = data.topProducts;
+  return (
+    <div>
+      <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("reports.productReport")}</h2>
+      <Table>
+        <Thead>
+          <tr>
+            <Th>{t("products.name")}</Th>
+            <Th>{t("inventory.quantity")}</Th>
+            <Th>{t("reports.revenue")}</Th>
+          </tr>
+        </Thead>
+        <Tbody>
+          {products.map((p) => (
+            <tr key={p.productId}>
+              <Td>{p.productName}</Td>
+              <Td>{p.quantity}</Td>
+              <Td>{p.revenue.toLocaleString()}</Td>
+            </tr>
+          ))}
+          {products.length === 0 && (
+            <tr>
+              <Td colSpan={3} className="text-center text-gray-400">
+                {t("common.noData")}
+              </Td>
+            </tr>
+          )}
+          {products.length > 0 && (
+            <tr className="border-t-2 border-gray-200 font-semibold">
+              <Td>{t("common.total")}</Td>
+              <Td>{products.reduce((s, p) => s + p.quantity, 0)}</Td>
+              <Td>{products.reduce((s, p) => s + p.revenue, 0).toLocaleString()}</Td>
+            </tr>
+          )}
+        </Tbody>
+      </Table>
+    </div>
+  );
+}
+
+function PaymentsReportTab({ from, to }: { from: string; to: string }) {
+  const { t } = useTranslation();
+  const { fromIso, toIso } = rangeToIso(from, to);
+  const query = useQuery({
+    queryKey: ["finance", "transactions", "INCOME", fromIso, toIso],
+    queryFn: () => financeApi.listTransactions({ type: "INCOME", from: fromIso, to: toIso, pageSize: 200 }),
+  });
+  const data = query.data;
+  if (!data) return null;
+
+  const items = data.items;
+  return (
+    <div>
+      <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("reports.paymentReport")}</h2>
+      <Table>
+        <Thead>
+          <tr>
+            <Th>{t("reports.paymentDate")}</Th>
+            <Th>{t("reports.paymentCategory")}</Th>
+            <Th>{t("reports.paymentAmount")}</Th>
+            <Th>{t("reports.paymentDescription")}</Th>
+          </tr>
+        </Thead>
+        <Tbody>
+          {items.map((tx) => (
+            <tr key={tx.id}>
+              <Td>{new Date(tx.createdAt).toLocaleDateString()}</Td>
+              <Td>{tx.category}</Td>
+              <Td>{tx.amount.toLocaleString()}</Td>
+              <Td>{tx.description ?? "—"}</Td>
+            </tr>
+          ))}
+          {items.length === 0 && (
+            <tr>
+              <Td colSpan={4} className="text-center text-gray-400">
+                {t("common.noData")}
+              </Td>
+            </tr>
+          )}
+          {items.length > 0 && (
+            <tr className="border-t-2 border-gray-200 font-semibold">
+              <Td colSpan={2}>{t("common.total")}</Td>
+              <Td>{items.reduce((s, tx) => s + tx.amount, 0).toLocaleString()}</Td>
+              <Td>{""}</Td>
+            </tr>
+          )}
+        </Tbody>
+      </Table>
     </div>
   );
 }

@@ -195,6 +195,11 @@ export function CatalogPage() {
                     {t("product.discountPercent", { percent: p.discountPercent })}
                   </span>
                 )}
+                {p.promotionName && (
+                  <span className="absolute right-2 top-2 z-10 max-w-[45%] truncate rounded-full bg-amber-500 px-2 py-0.5 text-xs font-semibold text-white">
+                    {p.promotionName}
+                  </span>
+                )}
                 <div className="flex aspect-square items-center justify-center bg-sand-100">
                   {cover ? (
                     <img src={cover} alt={p.name} className="h-full w-full object-cover" />

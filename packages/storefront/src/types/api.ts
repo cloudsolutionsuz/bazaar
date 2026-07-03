@@ -37,6 +37,7 @@ export interface Product {
   status: ProductStatus;
   variants: ProductVariant[];
   images: ProductImage[];
+  promotionName: string | null;
 }
 
 export interface Paginated<T> {

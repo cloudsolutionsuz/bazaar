@@ -7,6 +7,7 @@ export const createTransactionSchema = z.object({
   description: z.string().max(500).optional(),
   cashRegisterId: z.string().uuid(),
   supplierId: z.string().uuid().optional(),
+  customerId: z.string().uuid().optional(),
 });
 
 export const listTransactionsQuerySchema = z.object({

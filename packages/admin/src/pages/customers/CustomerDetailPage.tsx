@@ -1,20 +1,57 @@
+import { type FormEvent, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as customersApi from "../../api/customers";
+import * as financeApi from "../../api/finance";
 import { Badge } from "../../components/ui/Badge";
+import { Button } from "../../components/ui/Button";
+import { Input } from "../../components/ui/Input";
+import { Select } from "../../components/ui/Select";
 import { Table, Thead, Tbody, Th, Td } from "../../components/ui/Table";
 import { STATUS_COLORS, STATUS_LABEL_KEYS } from "../orders/OrdersListPage";
 import { regionName, districtName } from "../../utils/addressLabels";
+import { useActiveCashRegisters } from "../../hooks/useActiveCashRegisters";
 
 export function CustomerDetailPage() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
+  const [payAmount, setPayAmount] = useState("");
+  const [payDescription, setPayDescription] = useState("");
+  const [payCashRegisterId, setPayCashRegisterId] = useState("");
+  const [paySuccess, setPaySuccess] = useState(false);
+  const { activeRegisters, defaultRegisterId } = useActiveCashRegisters();
 
   const query = useQuery({
     queryKey: ["customer", id],
     queryFn: () => customersApi.getCustomer(id as string),
   });
+
+  const payMutation = useMutation({
+    mutationFn: (input: financeApi.CreateTransactionInput) => financeApi.createTransaction(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customer", id] });
+      setPayAmount("");
+      setPayDescription("");
+      setPaySuccess(true);
+      setTimeout(() => setPaySuccess(false), 3000);
+    },
+  });
+
+  function handlePay(e: FormEvent) {
+    e.preventDefault();
+    const registerId = payCashRegisterId || defaultRegisterId;
+    if (!registerId) return;
+    payMutation.mutate({
+      type: "INCOME",
+      category: "customer_payment",
+      amount: Number(payAmount),
+      description: payDescription || undefined,
+      cashRegisterId: registerId,
+      customerId: id,
+    });
+  }
 
   const customer = query.data?.customer;
   if (!customer) return null;
@@ -57,6 +94,45 @@ export function CustomerDetailPage() {
             <div className="text-xl font-semibold text-gray-900">{new Date(customer.createdAt).toLocaleDateString()}</div>
           </div>
         </div>
+      </div>
+
+      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-6">
+        <h2 className="mb-4 text-base font-semibold text-gray-900">{t("customers.recordPayment")}</h2>
+        <form onSubmit={handlePay} className="flex flex-wrap items-end gap-3">
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">{t("customers.payAmount")}</label>
+            <Input
+              type="number"
+              min={1}
+              required
+              value={payAmount}
+              onChange={(e) => setPayAmount(e.target.value)}
+              className="w-40"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">{t("kassa.description")}</label>
+            <Input value={payDescription} onChange={(e) => setPayDescription(e.target.value)} className="w-52" />
+          </div>
+          {activeRegisters.length > 1 && (
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t("kassa.register")}</label>
+              <Select
+                value={payCashRegisterId || defaultRegisterId}
+                onChange={(e) => setPayCashRegisterId(e.target.value)}
+                className="w-40"
+              >
+                {activeRegisters.map((r) => (
+                  <option key={r.id} value={r.id}>{r.name}</option>
+                ))}
+              </Select>
+            </div>
+          )}
+          <Button type="submit" disabled={!payAmount || payMutation.isPending}>
+            {t("customers.pay")}
+          </Button>
+          {paySuccess && <span className="text-sm text-green-600">{t("customers.paySuccess")}</span>}
+        </form>
       </div>
 
       <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("customers.purchases")}</h2>

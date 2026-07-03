@@ -66,7 +66,7 @@ export function RegisterWizardPage() {
 
   const registerMutation = useMutation({
     mutationFn: registrationApi.register,
-    onSuccess: () => setRegistered(true),
+    onSuccess: () => { window.location.href = ADMIN_URL; },
     onError: (err) => {
       if (err instanceof ApiError && err.code === "EMAIL_TAKEN") setSubmitError(t("register.errorEmailTaken"));
       else if (err instanceof ApiError && err.code === "SUBDOMAIN_TAKEN") setSubmitError(t("register.errorSubdomainTaken"));

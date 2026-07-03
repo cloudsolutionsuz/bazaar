@@ -33,6 +33,8 @@ export interface CreateTransactionInput {
   amount: number;
   description?: string;
   cashRegisterId: string;
+  supplierId?: string;
+  customerId?: string;
 }
 
 export function createTransaction(input: CreateTransactionInput): Promise<{ transaction: FinanceTransaction }> {

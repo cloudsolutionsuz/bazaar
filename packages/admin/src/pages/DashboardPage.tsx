@@ -55,7 +55,7 @@ export function DashboardPage() {
                 <XAxis dataKey="bucket" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip />
-                <Bar dataKey="revenue" fill="#1f7a64" />
+                <Bar dataKey="revenue" name={t("reports.revenue")} fill="#1f7a64" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -82,6 +82,13 @@ export function DashboardPage() {
                   <Td colSpan={3} className="text-center text-gray-400">
                     {t("common.noData")}
                   </Td>
+                </tr>
+              )}
+              {data.topProducts.length > 0 && (
+                <tr className="border-t-2 border-gray-200 font-semibold">
+                  <Td>{t("common.total")}</Td>
+                  <Td>{data.topProducts.reduce((s, p) => s + p.quantity, 0)}</Td>
+                  <Td>{data.topProducts.reduce((s, p) => s + p.revenue, 0).toLocaleString()}</Td>
                 </tr>
               )}
             </Tbody>
@@ -118,6 +125,12 @@ export function DashboardPage() {
                   <Td colSpan={4} className="text-center text-gray-400">
                     {t("common.noData")}
                   </Td>
+                </tr>
+              )}
+              {data.recentOrders.length > 0 && (
+                <tr className="border-t-2 border-gray-200 font-semibold">
+                  <Td colSpan={3}>{t("common.total")}</Td>
+                  <Td>{data.recentOrders.reduce((s, o) => s + o.totalAmount, 0).toLocaleString()}</Td>
                 </tr>
               )}
             </Tbody>

@@ -9,7 +9,30 @@ const productInclude = {
   variants: true,
   images: { orderBy: { position: "asc" as const } },
   category: true,
+  promotions: { include: { promotion: true } },
 };
+
+function extractPromotionName(
+  promotions: { promotion: { name: string; isActive: boolean; startsAt: Date | null; endsAt: Date | null } }[],
+  now: Date,
+): string | null {
+  const active = promotions.find(
+    (pp) =>
+      pp.promotion.isActive &&
+      (pp.promotion.startsAt === null || pp.promotion.startsAt <= now) &&
+      (pp.promotion.endsAt === null || pp.promotion.endsAt >= now),
+  );
+  return active?.promotion.name ?? null;
+}
+
+type ProductWithIncludes = Awaited<ReturnType<typeof prisma.product.findFirst>> & {
+  promotions: { promotion: { name: string; isActive: boolean; startsAt: Date | null; endsAt: Date | null } }[];
+};
+
+function mapProduct(product: ProductWithIncludes, now: Date) {
+  const { promotions, ...rest } = product;
+  return { ...rest, promotionName: extractPromotionName(promotions, now) };
+}
 
 export function listCategories(tenantId: string) {
   return prisma.category.findMany({ where: { tenantId }, orderBy: { name: "asc" } });
@@ -67,7 +90,7 @@ export async function listProducts(tenantId: string, query: ListStorefrontProduc
   const orderBy: Prisma.ProductOrderByWithRelationInput =
     query.sort === "price_asc" ? { price: "asc" } : query.sort === "price_desc" ? { price: "desc" } : { createdAt: "desc" };
 
-  const [items, total] = await Promise.all([
+  const [rawItems, total] = await Promise.all([
     prisma.product.findMany({
       where,
       include: productInclude,
@@ -78,6 +101,7 @@ export async function listProducts(tenantId: string, query: ListStorefrontProduc
     prisma.product.count({ where }),
   ]);
 
+  const items = rawItems.map((p) => mapProduct(p as ProductWithIncludes, now));
   return { items, total, page, pageSize };
 }
 
@@ -89,7 +113,7 @@ export async function getProduct(tenantId: string, productId: string) {
   if (!product) {
     throw new AppError(404, "NOT_FOUND", "Product not found");
   }
-  return product;
+  return mapProduct(product as ProductWithIncludes, new Date());
 }
 
 export function trackPageView(tenantId: string, input: TrackPageViewInput) {

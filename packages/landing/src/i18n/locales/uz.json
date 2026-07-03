@@ -7,7 +7,7 @@
     "title": "Biznesingiz uchun shaxsiy onlayn-do'kon 5 daqiqada",
     "subtitle": "Tovarlar, ombor, buyurtmalar va savdo — O'zbekiston sotuvchilari uchun yagona platformada",
     "cta": "Bepul boshlash",
-    "trialNote": "7 kun bepul, kartasiz"
+    "trialNote": "10 kun bepul, kartasiz"
   },
   "features": {
     "title": "Do'koningizni boshqarish uchun hamma narsa",
@@ -16,7 +16,10 @@
     "orders": { "title": "Buyurtmalar", "description": "Yangi buyurtmadan yetkazib berishgacha to'liq sikl, holat tarixi bilan" },
     "storefront": { "title": "Vitrina", "description": "Xaridorlaringiz uchun o'z subdomeningizda mobil vitrina" },
     "analytics": { "title": "Tahlil", "description": "Daromad, o'rtacha chek va savdo dinamikasi" },
-    "finance": { "title": "Kassa va P&L", "description": "Daromad/xarajatlar hisobi va sof foyda hisoblash" }
+    "finance": { "title": "Kassa va P&L", "description": "Daromad/xarajatlar hisobi va sof foyda hisoblash" },
+    "aiAdvisor": { "title": "AI-maslahatchi", "description": "Savdo va qoldiqlaringiz asosida shaxsiy tavsiyalar" },
+    "reports": { "title": "Hisobotlar", "description": "Tovarlar, to'lovlar va davrlar bo'yicha hisobotlar — bir bosishda" },
+    "chat": { "title": "Xaridorlar bilan chat", "description": "Savolllarni to'g'ridan-to'g'ri vitrinada qabul qiling va boshqaruv panelidan javob bering" }
   },
   "pricing": {
     "title": "Tariflar",
@@ -45,7 +48,7 @@
     "subdomainTaken": "Bu subdomen allaqachon band",
     "subdomainInvalid": "Subdomen faqat lotin harflari, raqamlar va chiziqchadan iborat bo'lishi mumkin",
     "step4Title": "Tarifni tanlang",
-    "trialNotice": "Birinchi 7 kun — tanlangan tarifdan qat'i nazar, bepul sinov muddati",
+    "trialNotice": "Birinchi 10 kun — tanlangan tarifdan qat'i nazar, bepul sinov muddati",
     "back": "Orqaga",
     "next": "Keyingisi",
     "submit": "Ro'yxatdan o'tish",
