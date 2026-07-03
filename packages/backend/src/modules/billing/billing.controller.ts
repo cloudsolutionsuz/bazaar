@@ -24,6 +24,12 @@ export async function confirmSandboxPayment(req: Request, res: Response): Promis
   res.json({ invoice });
 }
 
+export async function changePlan(req: Request, res: Response): Promise<void> {
+  const { planId } = req.body as { planId: string };
+  const plan = await billingService.changePlan(req.authUser!.tenantId!, planId);
+  res.json({ plan });
+}
+
 export async function paymeWebhook(_req: Request, res: Response): Promise<void> {
   // TODO: once real merchant credentials exist, verify the request via Basic
   // Auth against PAYME_SECRET_KEY and dispatch on the JSON-RPC `method`

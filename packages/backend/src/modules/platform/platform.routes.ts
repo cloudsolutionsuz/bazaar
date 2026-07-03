@@ -24,3 +24,4 @@ platformRouter.patch(
 );
 platformRouter.get("/stats", asyncHandler(platformController.getStats));
 platformRouter.get("/billing-timeline", validateQuery(listTenantsQuerySchema), asyncHandler(platformController.getBillingTimeline));
+platformRouter.get("/tenants/:id/reports", asyncHandler(platformController.getTenantReports));

@@ -14,3 +14,9 @@ export async function notifyNewChatMessage(chatId: string | null, customerName: 
   if (!chatId) return;
   await sendTelegramMessage(chatId, `Новое сообщение от ${customerName}: "${text}"`);
 }
+
+export async function notifyPaymentExpiringSoon(chatId: string | null, amount: number, dueDate: Date): Promise<void> {
+  if (!chatId) return;
+  const dateStr = dueDate.toLocaleDateString("ru-RU");
+  await sendTelegramMessage(chatId, `Напоминание: счёт на ${amount.toLocaleString("ru-RU")} сум нужно оплатить до ${dateStr}, иначе магазин будет заблокирован.`);
+}

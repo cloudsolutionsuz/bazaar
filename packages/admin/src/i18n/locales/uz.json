@@ -245,7 +245,10 @@
     "bannerBlocked": "Do'kon to'lanmaganligi sababli bloklangan. Kirishni qayta tiklash uchun hisobni to'lang.",
     "sandboxNotice": "Bu test to'lovi (sandbox) — Payme/Click bilan haqiqiy integratsiya keyinroq qo'shiladi",
     "payConfirm": "Test to'lovini tasdiqlash",
-    "paySuccess": "To'lov muvaffaqiyatli amalga oshirildi"
+    "paySuccess": "To'lov muvaffaqiyatli amalga oshirildi",
+    "changePlan": "Tarifni o'zgartirish",
+    "changePlanConfirm": "Tarifni almashtirish",
+    "changePlanSuccess": "Tarif muvaffaqiyatli o'zgartirildi"
   },
   "kassa": {
     "title": "Kassa",
@@ -351,7 +354,9 @@
     "removeVip": "VIP'ni olib tashlash",
     "confirmVip": "Bu do'konni VIP qilasizmi? Billing endi unga hisob-faktura chiqarmaydi va bloklamaydi, holati darhol «Faol»ga o'tadi.",
     "confirmRemoveVip": "Bu do'kondan VIP holatini olib tashlaysizmi? Billing yana odatdagi qoidalar bo'yicha hisob-fakturalarni tekshira boshlaydi.",
-    "billingTimeline": "Billing vaqt jadvali"
+    "billingTimeline": "Billing vaqt jadvali",
+    "shopReports": "Do'kon hisobotlari (30 kun)",
+    "shopPayments": "Kiruvchi to'lovlar"
   },
   "settings": {
     "title": "Sozlamalar",

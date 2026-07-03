@@ -23,3 +23,4 @@ billingRouter.post(
   asyncHandler(billingController.confirmSandboxPayment),
 );
 billingRouter.post("/run-cycle", requireRole("SUPER_ADMIN"), asyncHandler(billingController.runCycle));
+billingRouter.post("/change-plan", requireRole("OWNER"), asyncHandler(billingController.changePlan));

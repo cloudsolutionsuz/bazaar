@@ -52,6 +52,7 @@ export function TenantDetailPage() {
 
   const tenantQuery = useQuery({ queryKey: ["platform", "tenant", id], queryFn: () => platformApi.getTenant(id as string) });
   const plansQuery = useQuery({ queryKey: ["plans"], queryFn: plansApi.listPlans });
+  const reportsQuery = useQuery({ queryKey: ["platform", "tenant", id, "reports"], queryFn: () => platformApi.getTenantReports(id as string) });
 
   const changePlanMutation = useMutation({
     mutationFn: (planId: string) => platformApi.updateTenantPlan(id as string, planId),
@@ -72,6 +73,7 @@ export function TenantDetailPage() {
 
   const tenant = tenantQuery.data?.tenant;
   const plans = plansQuery.data?.plans ?? [];
+  const reports = reportsQuery.data;
   if (!tenant) return null;
 
   const owner = tenant.users.find((u) => u.role === "OWNER");
@@ -166,7 +168,7 @@ export function TenantDetailPage() {
         </Table>
       </section>
 
-      <section>
+      <section className="mb-6">
         <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("billing.history")}</h2>
         <Table>
           <Thead>
@@ -202,6 +204,49 @@ export function TenantDetailPage() {
           </Tbody>
         </Table>
       </section>
+
+      {reports && (
+        <section className="mb-6">
+          <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("platform.shopReports")}</h2>
+          <div className="mb-4 grid grid-cols-3 gap-4">
+            <div className="rounded-xl border border-gray-200 bg-white p-4">
+              <div className="text-sm text-gray-500">{t("reports.revenue")}</div>
+              <div className="text-xl font-semibold text-gray-900">{reports.analytics.revenue.toLocaleString()}</div>
+            </div>
+            <div className="rounded-xl border border-gray-200 bg-white p-4">
+              <div className="text-sm text-gray-500">{t("reports.orderCount")}</div>
+              <div className="text-xl font-semibold text-gray-900">{reports.analytics.orderCount}</div>
+            </div>
+            <div className="rounded-xl border border-gray-200 bg-white p-4">
+              <div className="text-sm text-gray-500">{t("reports.averageOrderValue")}</div>
+              <div className="text-xl font-semibold text-gray-900">{reports.analytics.averageOrderValue.toLocaleString()}</div>
+            </div>
+          </div>
+          {reports.payments.length > 0 && (
+            <>
+              <h3 className="mb-2 text-sm font-semibold text-gray-700">{t("platform.shopPayments")}</h3>
+              <Table>
+                <Thead>
+                  <tr>
+                    <Th>{t("reports.paymentDate")}</Th>
+                    <Th>{t("reports.paymentAmount")}</Th>
+                    <Th>{t("reports.paymentDescription")}</Th>
+                  </tr>
+                </Thead>
+                <Tbody>
+                  {reports.payments.map((tx) => (
+                    <tr key={tx.id}>
+                      <Td>{new Date(tx.createdAt).toLocaleDateString()}</Td>
+                      <Td>{tx.amount.toLocaleString()}</Td>
+                      <Td>{tx.description ?? "—"}</Td>
+                    </tr>
+                  ))}
+                </Tbody>
+              </Table>
+            </>
+          )}
+        </section>
+      )}
     </div>
   );
 }

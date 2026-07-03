@@ -1,5 +1,5 @@
 import { apiRequest } from "./client";
-import type { BillingTimelineTenant, PlatformStats, Paginated, TenantStatus, TenantWithRelations } from "../types/api";
+import type { AnalyticsResult, BillingTimelineTenant, FinanceTransaction, PlatformStats, Paginated, TenantStatus, TenantWithRelations } from "../types/api";
 
 export interface ListTenantsParams {
   status?: TenantStatus;
@@ -30,4 +30,8 @@ export function getStats(): Promise<PlatformStats> {
 
 export function getBillingTimeline(params: ListTenantsParams = {}): Promise<Paginated<BillingTimelineTenant>> {
   return apiRequest("/api/platform/billing-timeline", { query: params });
+}
+
+export function getTenantReports(id: string, from?: string, to?: string): Promise<{ analytics: AnalyticsResult; payments: FinanceTransaction[] }> {
+  return apiRequest(`/api/platform/tenants/${id}/reports`, { query: { from, to } });
 }

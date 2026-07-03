@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as billingApi from "../../api/billing";
+import * as plansApi from "../../api/plans";
 import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Modal } from "../../components/ui/Modal";
+import { Select } from "../../components/ui/Select";
 import { Table, Thead, Tbody, Th, Td } from "../../components/ui/Table";
 import type { InvoiceStatus } from "../../types/api";
 
@@ -41,8 +43,11 @@ export function BillingPage() {
   const queryClient = useQueryClient();
   const [payingInvoiceId, setPayingInvoiceId] = useState<string | null>(null);
   const [justPaid, setJustPaid] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+  const [planChanged, setPlanChanged] = useState(false);
 
   const summaryQuery = useQuery({ queryKey: ["billing", "summary"], queryFn: billingApi.getBillingSummary });
+  const plansQuery = useQuery({ queryKey: ["plans"], queryFn: plansApi.listPlans });
 
   const payMutation = useMutation({
     mutationFn: (invoiceId: string) => billingApi.confirmSandboxPayment(invoiceId),
@@ -54,7 +59,18 @@ export function BillingPage() {
     },
   });
 
+  const changePlanMutation = useMutation({
+    mutationFn: (planId: string) => billingApi.changePlan(planId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["billing"] });
+      setSelectedPlanId(null);
+      setPlanChanged(true);
+      setTimeout(() => setPlanChanged(false), 3000);
+    },
+  });
+
   const summary = summaryQuery.data;
+  const plans = plansQuery.data?.plans ?? [];
   if (!summary) return null;
 
   const { tenant, invoices, nextInvoice } = summary;
@@ -71,6 +87,26 @@ export function BillingPage() {
         <div>
           <div className="text-sm text-gray-500">{t("billing.shopStatus")}</div>
           <Badge color={TENANT_STATUS_COLORS[tenant.status]}>{t(TENANT_STATUS_KEYS[tenant.status])}</Badge>
+        </div>
+      </div>
+
+      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-6">
+        <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("billing.changePlan")}</h2>
+        {planChanged && <p className="mb-3 text-sm text-green-600">{t("billing.changePlanSuccess")}</p>}
+        <div className="flex items-end gap-2">
+          <Select value={selectedPlanId ?? tenant.planId} onChange={(e) => setSelectedPlanId(e.target.value)}>
+            {plans.map((plan) => (
+              <option key={plan.id} value={plan.id}>
+                {plan.name} — {plan.priceSum.toLocaleString()} сум/мес
+              </option>
+            ))}
+          </Select>
+          <Button
+            disabled={!selectedPlanId || selectedPlanId === tenant.planId || changePlanMutation.isPending}
+            onClick={() => selectedPlanId && changePlanMutation.mutate(selectedPlanId)}
+          >
+            {t("billing.changePlanConfirm")}
+          </Button>
         </div>
       </div>
 

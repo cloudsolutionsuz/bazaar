@@ -1,6 +1,7 @@
 import type { PaymentProviderType } from "@prisma/client";
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
+import { notifyPaymentExpiringSoon } from "../../utils/notifications";
 
 // "Грейс-период" from the spec is modeled as two stages: a few days after
 // the period starts before payment is actually due, then a further window
@@ -105,12 +106,27 @@ async function blockUnpaidPastGracePeriod(now: Date): Promise<void> {
   }
 }
 
+async function sendExpiryReminders(now: Date): Promise<void> {
+  const threshold = addDays(now, 5);
+  const expiring = await prisma.billingInvoice.findMany({
+    where: { status: "PENDING", dueDate: { gte: now, lte: threshold } },
+    include: { tenant: true },
+  });
+
+  for (const invoice of expiring) {
+    if (invoice.tenant.telegramChatId) {
+      await notifyPaymentExpiringSoon(invoice.tenant.telegramChatId, invoice.amount, invoice.dueDate).catch(() => {});
+    }
+  }
+}
+
 export async function runBillingCycle(): Promise<void> {
   const now = new Date();
   await startFirstBillingPeriod(now);
   await renewExpiredPeriods(now);
   await markOverdueInvoices(now);
   await blockUnpaidPastGracePeriod(now);
+  await sendExpiryReminders(now);
 }
 
 export async function payInvoice(invoiceId: string, provider: PaymentProviderType, providerTransactionId?: string) {
@@ -147,4 +163,22 @@ export async function getBillingSummary(tenantId: string) {
   const nextInvoice = invoices.find((i) => i.status === "PENDING" || i.status === "OVERDUE") ?? null;
 
   return { tenant, invoices, nextInvoice };
+}
+
+export async function changePlan(tenantId: string, planId: string) {
+  const plan = await prisma.plan.findUnique({ where: { id: planId } });
+  if (!plan) {
+    throw new AppError(404, "NOT_FOUND", "Plan not found");
+  }
+  await prisma.tenant.update({ where: { id: tenantId }, data: { planId } });
+  return plan;
+}
+
+export async function getExpiringInvoices(daysAhead: number) {
+  const now = new Date();
+  const threshold = addDays(now, daysAhead);
+  return prisma.billingInvoice.findMany({
+    where: { status: "PENDING", dueDate: { gte: now, lte: threshold } },
+    include: { tenant: true },
+  });
 }
