@@ -6,6 +6,7 @@ import { assertWithinPlanLimit } from "../plans/limits";
 import { notifyLowStock, notifyNewOrder } from "../../utils/notifications";
 import { pushToCustomer } from "../storefront/storefront.service";
 import { validatePromoCode } from "../promo-codes/promo-codes.service";
+import { getShippingCost } from "../delivery/delivery.service";
 import type { CreateOrderInput, ListOrdersQuery } from "./orders.schema";
 
 const orderInclude = {
@@ -117,6 +118,9 @@ export async function createOrder(tenantId: string, userId: string | null, input
   let loyaltyPointsRedeemed = 0;
   let customerId: string | null = null;
 
+  const preLoyaltyTotal = subtotal - discountAmount;
+  const shippingCost = await getShippingCost(tenantId, input.addressRegion, preLoyaltyTotal);
+
   if (tenant?.loyaltyEnabled && (input.loyaltyPointsToRedeem ?? 0) > 0) {
     const existingCustomer = await prisma.customer.findUnique({
       where: { tenantId_phone: { tenantId, phone: input.customerPhone } },
@@ -128,17 +132,15 @@ export async function createOrder(tenantId: string, userId: string | null, input
       const available = existingCustomer.loyaltyPoints;
       const minRedeem = tenant.loyaltyMinRedeem ?? 0;
       if (available >= minRedeem && available > 0) {
-        const afterPromo = subtotal - discountAmount;
-        loyaltyPointsRedeemed = Math.min(requested, available, afterPromo);
+        loyaltyPointsRedeemed = Math.min(requested, available, preLoyaltyTotal + shippingCost);
       }
     }
   }
 
-  const preLoyaltyTotal = subtotal - discountAmount;
   const loyaltyPointsEarned = tenant?.loyaltyEnabled
     ? Math.round(preLoyaltyTotal * (tenant.loyaltyPointsRate ?? 1) / 100)
     : 0;
-  const totalAmount = preLoyaltyTotal - loyaltyPointsRedeemed;
+  const totalAmount = preLoyaltyTotal + shippingCost - loyaltyPointsRedeemed;
 
   const orderId = await prisma.$transaction(async (tx) => {
     // Atomic, race-safe stock guard: only decrements if enough stock is
@@ -191,6 +193,7 @@ export async function createOrder(tenantId: string, userId: string | null, input
         paymentMethod: input.paymentMethod,
         promoCodeId,
         discountAmount,
+        shippingCost,
         loyaltyPointsEarned,
         loyaltyPointsRedeemed,
         totalAmount,

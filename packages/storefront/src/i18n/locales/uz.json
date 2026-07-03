@@ -88,7 +88,9 @@
     "loyaltyUse": "{{points}} ball ishlatish (−{{amount}} so'm)",
     "loyaltyDiscount": "Sodiqlik ballari",
     "loyaltyNoPoints": "Sizda hali balllar yo'q",
-    "loyaltyNotEnabled": "Bu do'konda sodiqlik dasturi faol emas"
+    "loyaltyNotEnabled": "Bu do'konda sodiqlik dasturi faol emas",
+    "shippingCost": "Yetkazib berish",
+    "shippingFree": "Bepul"
   },
   "confirmation": {
     "title": "Buyurtma qabul qilindi!",

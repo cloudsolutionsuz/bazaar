@@ -49,6 +49,16 @@ export function CheckoutPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  const afterPromoAmount = total - (appliedPromo?.discountAmount ?? 0);
+
+  const shippingQuery = useQuery({
+    queryKey: ["shipping-cost", addressRegion, afterPromoAmount],
+    queryFn: () => storefrontApi.getShippingCost(addressRegion, afterPromoAmount),
+    enabled: !!addressRegion,
+    staleTime: 60_000,
+  });
+  const shippingCost = shippingQuery.data?.shippingCost ?? 0;
+
   const districts = UZBEKISTAN_REGIONS.find((r) => r.code === addressRegion)?.districts ?? [];
 
   function handleRegionChange(code: string) {
@@ -107,9 +117,8 @@ export function CheckoutPage() {
     setError(null);
     setSubmitting(true);
     try {
-      const afterPromoTotal = total - (appliedPromo?.discountAmount ?? 0);
       const loyaltyToRedeem = useLoyalty && loyaltyBalance?.loyaltyEnabled && loyaltyBalance.loyaltyPoints > 0
-        ? Math.min(loyaltyBalance.loyaltyPoints, afterPromoTotal)
+        ? Math.min(loyaltyBalance.loyaltyPoints, afterPromoAmount + shippingCost)
         : 0;
       const result = await storefrontApi.placeOrder({
         customerName,
@@ -338,7 +347,7 @@ export function CheckoutPage() {
               <span className="text-yellow-800">
                 {t("checkout.loyaltyUse", {
                   points: loyaltyBalance.loyaltyPoints.toLocaleString(),
-                  amount: Math.min(loyaltyBalance.loyaltyPoints, total - (appliedPromo?.discountAmount ?? 0)).toLocaleString(),
+                  amount: Math.min(loyaltyBalance.loyaltyPoints, afterPromoAmount + shippingCost).toLocaleString(),
                 })}
               </span>
             </label>
@@ -363,9 +372,20 @@ export function CheckoutPage() {
             <span className="font-medium">−{appliedPromo.discountAmount.toLocaleString()}</span>
           </div>
         )}
+        {addressRegion && (
+          <div className="flex items-center justify-between text-base text-gray-700">
+            <span className="text-sm">{t("checkout.shippingCost")}</span>
+            <span className="font-medium">
+              {shippingQuery.isLoading
+                ? "…"
+                : shippingCost === 0
+                ? t("checkout.shippingFree")
+                : `+${shippingCost.toLocaleString()}`}
+            </span>
+          </div>
+        )}
         {useLoyalty && loyaltyBalance && loyaltyBalance.loyaltyPoints > 0 && (() => {
-          const afterPromo = total - (appliedPromo?.discountAmount ?? 0);
-          const loyaltyDiscount = Math.min(loyaltyBalance.loyaltyPoints, afterPromo);
+          const loyaltyDiscount = Math.min(loyaltyBalance.loyaltyPoints, afterPromoAmount + shippingCost);
           return loyaltyDiscount > 0 ? (
             <div className="flex items-center justify-between text-base text-yellow-700">
               <span className="text-sm">{t("checkout.loyaltyDiscount")}</span>
@@ -376,11 +396,10 @@ export function CheckoutPage() {
         <div className="flex items-center justify-between text-lg font-semibold text-gray-900">
           <span>{t("checkout.finalTotal")}</span>
           <span>{(() => {
-            const afterPromo = total - (appliedPromo?.discountAmount ?? 0);
             const loyaltyDiscount = useLoyalty && loyaltyBalance?.loyaltyEnabled && loyaltyBalance.loyaltyPoints > 0
-              ? Math.min(loyaltyBalance.loyaltyPoints, afterPromo)
+              ? Math.min(loyaltyBalance.loyaltyPoints, afterPromoAmount + shippingCost)
               : 0;
-            return (afterPromo - loyaltyDiscount).toLocaleString();
+            return (afterPromoAmount + shippingCost - loyaltyDiscount).toLocaleString();
           })()}</span>
         </div>
 

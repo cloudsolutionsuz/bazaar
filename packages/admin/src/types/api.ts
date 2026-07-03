@@ -463,3 +463,16 @@ export interface PromoCode {
   isActive: boolean;
   createdAt: string;
 }
+
+export interface DeliveryZone {
+  id: string;
+  tenantId: string;
+  name: string;
+  regions: string[];
+  cost: number;
+  freeAbove: number | null;
+  isActive: boolean;
+  position: number;
+  createdAt: string;
+  updatedAt: string;
+}

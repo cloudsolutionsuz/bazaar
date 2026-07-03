@@ -88,7 +88,9 @@
     "loyaltyUse": "Использовать {{points}} баллов (−{{amount}} сум)",
     "loyaltyDiscount": "Баллы лояльности",
     "loyaltyNoPoints": "У вас пока нет баллов",
-    "loyaltyNotEnabled": "Программа лояльности в этом магазине не активна"
+    "loyaltyNotEnabled": "Программа лояльности в этом магазине не активна",
+    "shippingCost": "Доставка",
+    "shippingFree": "Бесплатно"
   },
   "confirmation": {
     "title": "Заказ принят!",

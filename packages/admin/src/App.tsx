@@ -33,6 +33,7 @@ import { PromotionsListPage } from "./pages/promotions/PromotionsListPage";
 import { PromotionFormPage } from "./pages/promotions/PromotionFormPage";
 import { PromoCodesPage } from "./pages/promo-codes/PromoCodesPage";
 import { ReviewsPage } from "./pages/reviews/ReviewsPage";
+import { DeliveryZonesPage } from "./pages/delivery/DeliveryZonesPage";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ export function App() {
                 <Route path="/promotions/:id" element={<PromotionFormPage />} />
                 <Route path="/promo-codes" element={<PromoCodesPage />} />
                 <Route path="/reviews" element={<ReviewsPage />} />
+                <Route path="/delivery-zones" element={<DeliveryZonesPage />} />
                 <Route path="/orders" element={<OrdersListPage />} />
                 <Route path="/orders/archived" element={<OrdersListPage archivedOnly />} />
                 <Route path="/orders/:id" element={<OrderDetailPage />} />

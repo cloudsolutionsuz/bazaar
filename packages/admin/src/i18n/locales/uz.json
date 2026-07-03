@@ -21,7 +21,12 @@
     "saving": "Saqlanmoqda…",
     "saved": "Saqlandi",
     "error": "Xatolik yuz berdi",
-    "total": "Jami"
+    "total": "Jami",
+    "active": "Faol",
+    "inactive": "Faol emas",
+    "activate": "Yoqish",
+    "deactivate": "O'chirish",
+    "sum": "so'm"
   },
   "nav": {
     "dashboard": "Boshqaruv paneli",
@@ -32,6 +37,7 @@
     "promotions": "Aksiyalar",
     "promoCodes": "Promokodlar",
     "reviews": "Sharhlar",
+    "deliveryZones": "Yetkazib berish",
     "customers": "Xaridorlar",
     "orders": "Buyurtmalar",
     "chat": "Chat",
@@ -508,6 +514,22 @@
     "approve": "Tasdiqlash",
     "confirmDelete": "Bu sharhni o'chirmoqchimisiz?",
     "empty": "Sharhlar yo'q"
+  },
+  "delivery": {
+    "title": "Yetkazib berish zonalari",
+    "add": "Zona qo'shish",
+    "addZone": "Yangi yetkazib berish zonasi",
+    "editZone": "Zonani tahrirlash",
+    "zoneName": "Zona nomi",
+    "zoneNamePlaceholder": "Masalan: Toshkent",
+    "cost": "Yetkazib berish narxi (so'm)",
+    "freeAbove": "Tekin yuqori chegarasi (so'm)",
+    "freeAbovePlaceholder": "Chegara yo'q",
+    "position": "Tartib",
+    "regions": "Viloyatlar",
+    "selected": "tanlangan",
+    "confirmDelete": "Bu yetkazib berish zonasini o'chirmoqchimisiz?",
+    "empty": "Yetkazib berish zonalari yo'q"
   },
   "chat": {
     "title": "Chat",

@@ -56,6 +56,10 @@ export function getLoyaltyBalance(phone: string): Promise<LoyaltyBalance> {
   return apiRequest("/api/storefront/loyalty", { query: { phone } });
 }
 
+export function getShippingCost(region: string, amount: number): Promise<{ shippingCost: number; region: string }> {
+  return apiRequest("/api/delivery/shipping-cost", { query: { region, amount } });
+}
+
 export function getProductReviews(productId: string): Promise<ProductReviewsResult> {
   return apiRequest(`/api/storefront/products/${productId}/reviews`);
 }

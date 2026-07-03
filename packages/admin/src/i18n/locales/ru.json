@@ -21,7 +21,12 @@
     "saving": "Сохранение…",
     "saved": "Сохранено",
     "error": "Произошла ошибка",
-    "total": "Итого"
+    "total": "Итого",
+    "active": "Активен",
+    "inactive": "Неактивен",
+    "activate": "Включить",
+    "deactivate": "Отключить",
+    "sum": "сум"
   },
   "nav": {
     "dashboard": "Дашборд",
@@ -32,6 +37,7 @@
     "promotions": "Акции",
     "promoCodes": "Промокоды",
     "reviews": "Отзывы",
+    "deliveryZones": "Доставка",
     "customers": "Покупатели",
     "orders": "Заказы",
     "chat": "Чат",
@@ -508,6 +514,22 @@
     "approve": "Одобрить",
     "confirmDelete": "Удалить этот отзыв?",
     "empty": "Отзывов нет"
+  },
+  "delivery": {
+    "title": "Зоны доставки",
+    "add": "Добавить зону",
+    "addZone": "Новая зона доставки",
+    "editZone": "Редактировать зону",
+    "zoneName": "Название зоны",
+    "zoneNamePlaceholder": "Например: Ташкент",
+    "cost": "Стоимость доставки (сум)",
+    "freeAbove": "Бесплатно от (сум)",
+    "freeAbovePlaceholder": "Без порога",
+    "position": "Порядок",
+    "regions": "Регионы",
+    "selected": "выбрано",
+    "confirmDelete": "Удалить эту зону доставки?",
+    "empty": "Зон доставки пока нет"
   },
   "chat": {
     "title": "Чат",
