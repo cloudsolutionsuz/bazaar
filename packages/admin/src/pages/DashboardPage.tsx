@@ -1,21 +1,61 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import * as dashboardApi from "../api/dashboard";
+import { Button } from "../components/ui/Button";
+import { Input } from "../components/ui/Input";
 import { StatCard } from "../components/ui/StatCard";
 import { Table, Thead, Tbody, Th, Td } from "../components/ui/Table";
 import { Badge } from "../components/ui/Badge";
 import { STATUS_COLORS, STATUS_LABEL_KEYS } from "./orders/OrdersListPage";
 
+function toDateStr(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+function daysAgo(n: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return toDateStr(d);
+}
+
 export function DashboardPage() {
   const { t } = useTranslation();
-  const query = useQuery({ queryKey: ["dashboard", "summary"], queryFn: dashboardApi.getSummary });
+  const today = toDateStr(new Date());
+  const [from, setFrom] = useState(daysAgo(30));
+  const [to, setTo] = useState(today);
+
+  function applyPreset(days: number) {
+    setFrom(days === 0 ? today : daysAgo(days));
+    setTo(today);
+  }
+
+  const query = useQuery({
+    queryKey: ["dashboard", "summary", from, to],
+    queryFn: () => dashboardApi.getSummary(`${from}T00:00:00.000Z`, `${to}T23:59:59.999Z`),
+  });
   const data = query.data;
 
   return (
     <div>
-      <h1 className="mb-4 text-xl font-semibold text-gray-900">{t("dashboard.title")}</h1>
+      <div className="mb-4 flex flex-wrap items-end gap-3">
+        <h1 className="text-xl font-semibold text-gray-900">{t("dashboard.title")}</h1>
+        <div className="ml-auto flex flex-wrap items-end gap-2">
+          <div>
+            <label className="mb-1 block text-xs text-gray-500">{t("reports.from")}</label>
+            <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-gray-500">{t("reports.to")}</label>
+            <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+          </div>
+          <Button variant="secondary" onClick={() => applyPreset(0)}>{t("reports.presetToday")}</Button>
+          <Button variant="secondary" onClick={() => applyPreset(7)}>{t("reports.preset7Days")}</Button>
+          <Button variant="secondary" onClick={() => applyPreset(30)}>{t("reports.preset30Days")}</Button>
+        </div>
+      </div>
 
       {data && (
         <>
@@ -47,7 +87,9 @@ export function DashboardPage() {
             </Link>
           )}
 
-          <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("dashboard.salesOverTime")}</h2>
+          <h2 className="mb-3 text-lg font-semibold text-gray-900">
+            {t("dashboard.salesOverTime")} ({from} — {to})
+          </h2>
           <div className="mb-6 h-64 rounded-xl border border-gray-200 bg-white p-4">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data.salesOverTime}>

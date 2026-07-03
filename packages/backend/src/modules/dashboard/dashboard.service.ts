@@ -16,17 +16,20 @@ function startOfWeek(): Date {
   return d;
 }
 
-export async function getSummary(tenantId: string) {
+export async function getSummary(tenantId: string, from?: Date, to?: Date) {
   const now = new Date();
   const todayStart = startOfToday();
   const weekStart = startOfWeek();
   const thirtyDaysAgo = new Date(now);
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  const [todayAnalytics, weekAnalytics, monthAnalytics, lowStock, recentOrders, kassaBalance, unreadChatCount] = await Promise.all([
+  const rangeFrom = from ?? thirtyDaysAgo;
+  const rangeTo = to ? new Date(to.getTime() + 24 * 60 * 60 * 1000 - 1) : now;
+
+  const [todayAnalytics, weekAnalytics, rangeAnalytics, lowStock, recentOrders, kassaBalance, unreadChatCount] = await Promise.all([
     getAnalytics(tenantId, todayStart, now),
     getAnalytics(tenantId, weekStart, now),
-    getAnalytics(tenantId, thirtyDaysAgo, now, "day"),
+    getAnalytics(tenantId, rangeFrom, rangeTo, "day"),
     listLowStock(tenantId),
     listOrders(tenantId, { page: 1, pageSize: 5 }),
     getBalance(tenantId),
@@ -38,8 +41,8 @@ export async function getSummary(tenantId: string) {
     week: { revenue: weekAnalytics.revenue, orderCount: weekAnalytics.orderCount },
     lowStockCount: lowStock.length,
     recentOrders: recentOrders.items,
-    salesOverTime: monthAnalytics.salesOverTime,
-    topProducts: monthAnalytics.topProducts,
+    salesOverTime: rangeAnalytics.salesOverTime,
+    topProducts: rangeAnalytics.topProducts,
     kassaBalance,
     unreadChatCount,
   };

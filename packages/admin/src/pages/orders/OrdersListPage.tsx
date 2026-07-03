@@ -98,6 +98,15 @@ export function OrdersListPage({ archivedOnly = false }: Props) {
     queryClient.invalidateQueries({ queryKey: ["orders"] });
   }
 
+  async function handleArchiveSelected() {
+    setBulkResult(null);
+    const results = await Promise.allSettled(selectedIds.map((id) => ordersApi.updateOrderStatus(id, "ARCHIVED")));
+    const succeeded = results.filter((r) => r.status === "fulfilled").length;
+    setBulkResult(t("orders.archivedCount", { succeeded, total: selectedIds.length }));
+    setSelectedIds([]);
+    queryClient.invalidateQueries({ queryKey: ["orders"] });
+  }
+
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
@@ -144,15 +153,20 @@ export function OrdersListPage({ archivedOnly = false }: Props) {
                 <label className="mb-1 block text-xs text-gray-500">{t("orders.changeStatus")}</label>
                 <Select value={bulkStatus} onChange={(e) => setBulkStatus(e.target.value as OrderStatus | "")}>
                   <option value="">{t("common.select")}</option>
-                  {Object.entries(STATUS_LABEL_KEYS).map(([value, key]) => (
-                    <option key={value} value={value}>
-                      {t(key)}
-                    </option>
-                  ))}
+                  {Object.entries(STATUS_LABEL_KEYS)
+                    .filter(([value]) => value !== "ARCHIVED")
+                    .map(([value, key]) => (
+                      <option key={value} value={value}>
+                        {t(key)}
+                      </option>
+                    ))}
                 </Select>
               </div>
               <Button variant="secondary" disabled={!bulkStatus} onClick={handleBulkStatusChange}>
                 {t("orders.applyToSelected", { count: selectedIds.length })}
+              </Button>
+              <Button variant="secondary" onClick={handleArchiveSelected}>
+                {t("orders.archiveSelected", { count: selectedIds.length })}
               </Button>
             </div>
           )}
