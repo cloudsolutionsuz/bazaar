@@ -42,6 +42,7 @@ export function ProductPage() {
         productName: product!.name,
         variantName: variant.name,
         unitPrice,
+        originalPrice: basePrice,
         imageUrl: product!.images[0]?.url ?? null,
         maxStock: variant.stockQuantity,
       },

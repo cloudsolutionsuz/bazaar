@@ -62,6 +62,45 @@ export function Layout() {
       </main>
 
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+
+      {meta && (meta.companyName || meta.inn || meta.contactPhone || meta.instagram || meta.facebook || meta.youtube) && (
+        <footer className="mt-8 border-t border-clay-200 bg-white py-6">
+          <div className="mx-auto max-w-5xl px-4 text-sm text-gray-600">
+            <div className="flex flex-wrap gap-x-8 gap-y-2">
+              {(meta.companyName || meta.inn) && (
+                <div>
+                  {meta.companyName && <span className="font-medium">{meta.companyName}</span>}
+                  {meta.inn && <span className="ml-2 text-gray-400">{t("footer.inn")}: {meta.inn}</span>}
+                </div>
+              )}
+              {meta.contactPhone && (
+                <a href={`tel:${meta.contactPhone}`} className="hover:text-clay-700">
+                  {meta.contactPhone}
+                </a>
+              )}
+              {(meta.instagram || meta.facebook || meta.youtube) && (
+                <div className="flex items-center gap-3">
+                  {meta.instagram && (
+                    <a href={meta.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-clay-700">
+                      Instagram
+                    </a>
+                  )}
+                  {meta.facebook && (
+                    <a href={meta.facebook} target="_blank" rel="noopener noreferrer" className="hover:text-clay-700">
+                      Facebook
+                    </a>
+                  )}
+                  {meta.youtube && (
+                    <a href={meta.youtube} target="_blank" rel="noopener noreferrer" className="hover:text-clay-700">
+                      YouTube
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }

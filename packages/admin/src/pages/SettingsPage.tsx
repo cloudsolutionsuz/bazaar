@@ -12,6 +12,12 @@ export function SettingsPage() {
   const [telegramChatId, setTelegramChatId] = useState(tenant?.telegramChatId ?? "");
   const [themeColor, setThemeColor] = useState(tenant?.themeColor ?? "#1f7a64");
   const [description, setDescription] = useState(tenant?.description ?? "");
+  const [inn, setInn] = useState(tenant?.inn ?? "");
+  const [companyName, setCompanyName] = useState(tenant?.companyName ?? "");
+  const [contactPhone, setContactPhone] = useState(tenant?.contactPhone ?? "");
+  const [instagram, setInstagram] = useState(tenant?.instagram ?? "");
+  const [facebook, setFacebook] = useState(tenant?.facebook ?? "");
+  const [youtube, setYoutube] = useState(tenant?.youtube ?? "");
   const [saved, setSaved] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -21,6 +27,12 @@ export function SettingsPage() {
         telegramChatId: telegramChatId || null,
         themeColor: themeColor || null,
         description: description || null,
+        inn: inn || null,
+        companyName: companyName || null,
+        contactPhone: contactPhone || null,
+        instagram: instagram || null,
+        facebook: facebook || null,
+        youtube: youtube || null,
       }),
     onSuccess: async () => {
       await refreshTenant();
@@ -67,6 +79,44 @@ export function SettingsPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-gray-200 bg-white p-6">
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            {t("settings.inn")} <span className="text-red-500">*</span>
+          </label>
+          <Input required value={inn} onChange={(e) => setInn(e.target.value)} className="w-full" />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            {t("settings.companyName")} <span className="text-red-500">*</span>
+          </label>
+          <Input required value={companyName} onChange={(e) => setCompanyName(e.target.value)} className="w-full" />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">{t("settings.contactPhone")}</label>
+          <Input value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} className="w-full" />
+        </div>
+
+        <hr className="border-gray-100" />
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">{t("settings.instagram")}</label>
+          <Input value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="https://instagram.com/..." className="w-full" />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">{t("settings.facebook")}</label>
+          <Input value={facebook} onChange={(e) => setFacebook(e.target.value)} placeholder="https://facebook.com/..." className="w-full" />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">{t("settings.youtube")}</label>
+          <Input value={youtube} onChange={(e) => setYoutube(e.target.value)} placeholder="https://youtube.com/@..." className="w-full" />
+        </div>
+
+        <hr className="border-gray-100" />
+
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">{t("settings.telegramChatId")}</label>
           <Input value={telegramChatId} onChange={(e) => setTelegramChatId(e.target.value)} className="w-full" />

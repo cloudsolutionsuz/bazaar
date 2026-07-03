@@ -6,6 +6,7 @@ export interface CartItem {
   productName: string;
   variantName: string | null;
   unitPrice: number;
+  originalPrice: number;
   quantity: number;
   imageUrl: string | null;
   maxStock: number;

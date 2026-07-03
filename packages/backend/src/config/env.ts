@@ -18,7 +18,7 @@ export const env = {
   jwtAccessTtl: process.env.JWT_ACCESS_TTL ?? "15m",
   jwtRefreshTtlDays: Number(process.env.JWT_REFRESH_TTL_DAYS ?? 30),
 
-  trialDays: Number(process.env.TRIAL_DAYS ?? 7),
+  trialDays: Number(process.env.TRIAL_DAYS ?? 10),
   landingUrl: process.env.LANDING_URL ?? "http://localhost:5175",
   adminUrl: process.env.ADMIN_URL ?? "http://localhost:5173",
 

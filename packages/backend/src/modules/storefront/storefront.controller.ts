@@ -58,6 +58,6 @@ export async function listBanners(req: Request, res: Response): Promise<void> {
 }
 
 export async function getMeta(req: Request, res: Response): Promise<void> {
-  const { name, logoUrl, themeColor, description } = req.tenant!;
-  res.json({ name, logoUrl, themeColor, description });
+  const { name, logoUrl, themeColor, description, inn, companyName, contactPhone, instagram, facebook, youtube } = req.tenant!;
+  res.json({ name, logoUrl, themeColor, description, inn, companyName, contactPhone, instagram, facebook, youtube });
 }

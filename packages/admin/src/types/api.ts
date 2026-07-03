@@ -16,6 +16,12 @@ export interface Tenant {
   themeColor: string | null;
   description: string | null;
   isVip: boolean;
+  inn: string | null;
+  companyName: string | null;
+  contactPhone: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  youtube: string | null;
   createdAt: string;
 }
 

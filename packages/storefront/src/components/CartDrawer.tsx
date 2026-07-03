@@ -6,6 +6,9 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   const { t } = useTranslation();
   const { items, updateQuantity, removeItem, total } = useCart();
 
+  const originalTotal = items.reduce((sum, i) => sum + i.originalPrice * i.quantity, 0);
+  const discountTotal = originalTotal - total;
+
   if (!open) return null;
 
   return (
@@ -37,7 +40,12 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                       onChange={(e) => updateQuantity(item.variantId, Number(e.target.value))}
                       className="w-16 rounded border border-clay-200 px-2 py-1 text-sm"
                     />
-                    <span className="text-sm text-gray-600">x {item.unitPrice.toLocaleString()}</span>
+                    <div className="text-sm">
+                      <span className="text-gray-900">{item.unitPrice.toLocaleString()}</span>
+                      {item.originalPrice !== item.unitPrice && (
+                        <span className="ml-1 text-gray-400 line-through">{item.originalPrice.toLocaleString()}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <button onClick={() => removeItem(item.variantId)} className="self-start text-xs text-red-600 hover:underline">
@@ -49,6 +57,18 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
         )}
 
         <div className="mt-4 border-t border-clay-200 pt-4">
+          {discountTotal > 0 && (
+            <div className="mb-1 space-y-1 text-sm text-gray-600">
+              <div className="flex justify-between">
+                <span>{t("cart.subtotal")}</span>
+                <span>{originalTotal.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-red-600">
+                <span>{t("cart.discount")}</span>
+                <span>−{discountTotal.toLocaleString()}</span>
+              </div>
+            </div>
+          )}
           <div className="mb-3 flex items-center justify-between text-lg font-semibold text-gray-900">
             <span>{t("cart.total")}</span>
             <span>{total.toLocaleString()}</span>

@@ -182,6 +182,7 @@ export function OrdersListPage({ archivedOnly = false }: Props) {
             <Th>{t("orders.time")}</Th>
             <Th>{t("common.status")}</Th>
             <Th>{t("orders.items")}</Th>
+            <Th>{t("orders.paymentMethod")}</Th>
             <Th>{t("orders.total")}</Th>
             <Th>{t("common.actions")}</Th>
           </tr>
@@ -207,6 +208,7 @@ export function OrdersListPage({ archivedOnly = false }: Props) {
                   <Badge color={STATUS_COLORS[o.status]}>{t(STATUS_LABEL_KEYS[o.status])}</Badge>
                 </Td>
                 <Td>{t("orders.itemsCount", { count: o.items.length })}</Td>
+                <Td>{o.paymentMethod ?? "—"}</Td>
                 <Td>{o.totalAmount.toLocaleString()}</Td>
                 <Td>
                   <Link to={`/orders/${o.id}`} className="text-brand-600 hover:underline">
@@ -218,7 +220,7 @@ export function OrdersListPage({ archivedOnly = false }: Props) {
           })}
           {orders.length === 0 && (
             <tr>
-              <Td colSpan={14} className="text-center text-gray-400">
+              <Td colSpan={15} className="text-center text-gray-400">
                 {t("common.noData")}
               </Td>
             </tr>

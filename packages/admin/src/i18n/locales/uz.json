@@ -40,6 +40,7 @@
     "tenants": "Do'konlar",
     "plans": "Tariflar",
     "billingTimeline": "Vaqt jadvali",
+    "categories": "Kategoriyalar",
     "settings": "Sozlamalar",
     "logout": "Chiqish"
   },
@@ -344,6 +345,12 @@
   },
   "settings": {
     "title": "Sozlamalar",
+    "inn": "INN",
+    "companyName": "Kompaniya nomi",
+    "contactPhone": "Aloqa telefoni",
+    "instagram": "Instagram",
+    "facebook": "Facebook",
+    "youtube": "YouTube",
     "telegramChatId": "Telegram Chat ID",
     "telegramChatIdHint": "Yangi buyurtmalar va past qoldiq haqida Telegram orqali xabar olish uchun @userinfobot botiga yozing va chat ID'ingizni shu yerga kiriting",
     "logo": "Do'kon logotipi",
@@ -352,6 +359,13 @@
     "themeColor": "Do'kon rangi",
     "description": "Do'kon tavsifi",
     "saved": "Saqlandi"
+  },
+  "categories": {
+    "title": "Kategoriyalar",
+    "name": "Nomi",
+    "slug": "Slug",
+    "namePlaceholder": "Yangi kategoriya",
+    "confirmDelete": "Bu kategoriyani o'chirishni tasdiqlaysizmi? Tovarlar qoladi, lekin kategoriyasiz."
   },
   "dashboard": {
     "title": "Boshqaruv paneli",

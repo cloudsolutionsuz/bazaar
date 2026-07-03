@@ -33,9 +33,14 @@
   "cart": {
     "title": "Savat",
     "empty": "Savat bo'sh",
+    "subtotal": "Chegirmasiz summa",
+    "discount": "Chegirma",
     "total": "Jami",
     "checkout": "Buyurtma berish",
     "remove": "O'chirish"
+  },
+  "footer": {
+    "inn": "INN"
   },
   "checkout": {
     "title": "Buyurtmani rasmiylashtirish",

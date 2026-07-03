@@ -40,6 +40,7 @@
     "tenants": "Магазины",
     "plans": "Тарифы",
     "billingTimeline": "Таймлайн",
+    "categories": "Категории",
     "settings": "Настройки",
     "logout": "Выйти"
   },
@@ -344,6 +345,12 @@
   },
   "settings": {
     "title": "Настройки",
+    "inn": "ИНН",
+    "companyName": "Название компании",
+    "contactPhone": "Контактный телефон",
+    "instagram": "Instagram",
+    "facebook": "Facebook",
+    "youtube": "YouTube",
     "telegramChatId": "Telegram Chat ID",
     "telegramChatIdHint": "Чтобы получать уведомления о новых заказах и низком остатке в Telegram, напишите боту @userinfobot и укажите здесь свой chat ID",
     "logo": "Логотип магазина",
@@ -352,6 +359,13 @@
     "themeColor": "Цвет магазина",
     "description": "Описание магазина",
     "saved": "Сохранено"
+  },
+  "categories": {
+    "title": "Категории",
+    "name": "Название",
+    "slug": "Slug",
+    "namePlaceholder": "Новая категория",
+    "confirmDelete": "Удалить эту категорию? Товары в ней останутся, но без категории."
   },
   "dashboard": {
     "title": "Дашборд",

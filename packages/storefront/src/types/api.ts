@@ -82,6 +82,12 @@ export interface TenantMeta {
   logoUrl: string | null;
   themeColor: string | null;
   description: string | null;
+  inn: string | null;
+  companyName: string | null;
+  contactPhone: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  youtube: string | null;
 }
 
 export interface ApiErrorBody {

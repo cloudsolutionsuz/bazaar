@@ -9,6 +9,13 @@ import { UZBEKISTAN_REGIONS } from "../data/uzbekistanRegions";
 
 const MAX_ADDITIONAL_PHONES = 5;
 
+const PHONE_PREFIXES = [
+  { label: "🇺🇿 +998", value: "+998" },
+  { label: "🇹🇯 +992", value: "+992" },
+  { label: "🇰🇬 +996", value: "+996" },
+  { label: "🇰🇿 +7", value: "+7" },
+];
+
 export function CheckoutPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -17,6 +24,7 @@ export function CheckoutPage() {
   const accentStyle = metaQuery.data?.themeColor ? { backgroundColor: metaQuery.data.themeColor } : undefined;
 
   const [customerName, setCustomerName] = useState("");
+  const [phonePrefix, setPhonePrefix] = useState("+998");
   const [customerPhone, setCustomerPhone] = useState("");
   const [additionalPhones, setAdditionalPhones] = useState<string[]>([]);
   const [addressRegion, setAddressRegion] = useState("");
@@ -53,7 +61,7 @@ export function CheckoutPage() {
     try {
       const result = await storefrontApi.placeOrder({
         customerName,
-        customerPhone,
+        customerPhone: phonePrefix + customerPhone.replace(/\D/g, ""),
         additionalPhones: additionalPhones.filter((p) => p.trim() !== ""),
         addressRegion,
         addressDistrict,
@@ -98,12 +106,26 @@ export function CheckoutPage() {
 
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">{t("checkout.phone")}</label>
-          <input
-            required
-            value={customerPhone}
-            onChange={(e) => setCustomerPhone(e.target.value)}
-            className="w-full rounded-md border border-clay-200 px-3 py-2 text-sm focus:border-clay-500 focus:outline-none"
-          />
+          <div className="flex gap-2">
+            <select
+              value={phonePrefix}
+              onChange={(e) => setPhonePrefix(e.target.value)}
+              className="rounded-md border border-clay-200 px-2 py-2 text-sm focus:border-clay-500 focus:outline-none"
+            >
+              {PHONE_PREFIXES.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+            <input
+              required
+              value={customerPhone}
+              onChange={(e) => setCustomerPhone(e.target.value)}
+              placeholder="901234567"
+              className="flex-1 rounded-md border border-clay-200 px-3 py-2 text-sm focus:border-clay-500 focus:outline-none"
+            />
+          </div>
         </div>
 
         {additionalPhones.map((phone, index) => (

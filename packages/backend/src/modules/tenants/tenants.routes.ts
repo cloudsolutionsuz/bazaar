@@ -35,6 +35,12 @@ const updateMySettingsSchema = z.object({
     .nullable()
     .optional(),
   description: z.string().trim().max(1000).nullable().optional(),
+  inn: z.string().trim().max(20).nullable().optional(),
+  companyName: z.string().trim().max(255).nullable().optional(),
+  contactPhone: z.string().trim().max(30).nullable().optional(),
+  instagram: z.string().trim().max(255).nullable().optional(),
+  facebook: z.string().trim().max(255).nullable().optional(),
+  youtube: z.string().trim().max(255).nullable().optional(),
 });
 
 tenantsRouter.patch(
@@ -43,13 +49,20 @@ tenantsRouter.patch(
   requireRole("OWNER"),
   validateBody(updateMySettingsSchema),
   asyncHandler(async (req, res) => {
-    const { telegramChatId, themeColor, description } = req.body as z.infer<typeof updateMySettingsSchema>;
+    const { telegramChatId, themeColor, description, inn, companyName, contactPhone, instagram, facebook, youtube } =
+      req.body as z.infer<typeof updateMySettingsSchema>;
     const tenant = await prisma.tenant.update({
       where: { id: req.authUser!.tenantId! },
       data: {
         ...(telegramChatId !== undefined ? { telegramChatId: telegramChatId || null } : {}),
         ...(themeColor !== undefined ? { themeColor } : {}),
         ...(description !== undefined ? { description: description || null } : {}),
+        ...(inn !== undefined ? { inn: inn || null } : {}),
+        ...(companyName !== undefined ? { companyName: companyName || null } : {}),
+        ...(contactPhone !== undefined ? { contactPhone: contactPhone || null } : {}),
+        ...(instagram !== undefined ? { instagram: instagram || null } : {}),
+        ...(facebook !== undefined ? { facebook: facebook || null } : {}),
+        ...(youtube !== undefined ? { youtube: youtube || null } : {}),
       },
     });
     res.json({ tenant });

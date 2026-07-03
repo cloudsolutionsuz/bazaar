@@ -104,6 +104,12 @@ model Tenant {
   themeColor   String?
   description  String?
   isVip        Boolean      @default(false)
+  inn          String?
+  companyName  String?
+  contactPhone String?
+  instagram    String?
+  facebook     String?
+  youtube      String?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
