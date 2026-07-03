@@ -129,6 +129,52 @@ export async function adjustLoyaltyPoints(tenantId: string, customerId: string, 
   return prisma.customer.update({ where: { id: customerId }, data: { loyaltyPoints: newPoints } });
 }
 
+export async function getPaymentsReport(tenantId: string, from: Date, to: Date) {
+  // Find customers who have at least one non-cancelled order in the period
+  const customerIdsInPeriod = await prisma.order.findMany({
+    where: {
+      tenantId,
+      createdAt: { gte: from, lte: to },
+      status: { notIn: EXCLUDED_ORDER_STATUSES },
+      customerId: { not: null },
+    },
+    select: { customerId: true },
+    distinct: ["customerId"],
+  });
+  const ids = customerIdsInPeriod.map((r) => r.customerId as string);
+  if (ids.length === 0) return [];
+
+  const customers = await prisma.customer.findMany({
+    where: { id: { in: ids } },
+    include: {
+      orders: {
+        where: { status: { notIn: EXCLUDED_ORDER_STATUSES } },
+        select: { totalAmount: true, createdAt: true },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const paidAmounts = await computePaidAmounts(tenantId, ids);
+
+  return customers.map((c) => {
+    const purchaseAmount = c.orders.reduce((sum, o) => sum + o.totalAmount, 0);
+    const paidAmount = paidAmounts.get(c.id) ?? 0;
+    const balance = purchaseAmount - paidAmount;
+    const status = balance <= 0 ? "paid" : paidAmount > 0 ? "partial" : "unpaid";
+    return {
+      id: c.id,
+      name: c.name,
+      phone: c.phone,
+      orderCount: c.orders.length,
+      purchaseAmount,
+      paidAmount,
+      balance,
+      status,
+    };
+  }).sort((a, b) => b.balance - a.balance);
+}
+
 export async function exportCustomersToExcel(tenantId: string): Promise<Buffer> {
   const customers = await prisma.customer.findMany({
     where: { tenantId },

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import * as financeApi from "../../api/finance";
+import * as customersApi from "../../api/customers";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
@@ -389,48 +390,62 @@ function ProductReportTab({ from, to }: { from: string; to: string }) {
   const { t } = useTranslation();
   const { fromIso, toIso } = rangeToIso(from, to);
   const query = useQuery({
-    queryKey: ["finance", "analytics", fromIso, toIso, "day"],
-    queryFn: () => financeApi.getAnalytics(fromIso, toIso, "day"),
+    queryKey: ["finance", "reports", "products", fromIso, toIso],
+    queryFn: () => financeApi.getProductSalesReport(fromIso, toIso),
   });
-  const data = query.data;
-  if (!data) return null;
+  const products = query.data?.products ?? [];
 
-  const products = data.topProducts;
   return (
     <div>
       <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("reports.productReport")}</h2>
-      <Table>
-        <Thead>
-          <tr>
-            <Th>{t("products.name")}</Th>
-            <Th>{t("inventory.quantity")}</Th>
-            <Th>{t("reports.revenue")}</Th>
-          </tr>
-        </Thead>
-        <Tbody>
-          {products.map((p) => (
-            <tr key={p.productId}>
-              <Td>{p.productName}</Td>
-              <Td>{p.quantity}</Td>
-              <Td>{p.revenue.toLocaleString()}</Td>
-            </tr>
-          ))}
-          {products.length === 0 && (
+      <div className="overflow-x-auto">
+        <Table>
+          <Thead>
             <tr>
-              <Td colSpan={3} className="text-center text-gray-400">
-                {t("common.noData")}
-              </Td>
+              <Th>{t("products.name")}</Th>
+              <Th>{t("products.category")}</Th>
+              <Th>{t("products.brand")}</Th>
+              <Th>{t("products.price")}</Th>
+              <Th>{t("products.discount")}</Th>
+              <Th>{t("reports.productQtySold")}</Th>
+              <Th>{t("reports.productRevenuePerUnit")}</Th>
+              <Th>{t("reports.margin")}</Th>
+              <Th>{t("reports.revenue")}</Th>
             </tr>
-          )}
-          {products.length > 0 && (
-            <tr className="border-t-2 border-gray-200 font-semibold">
-              <Td>{t("common.total")}</Td>
-              <Td>{products.reduce((s, p) => s + p.quantity, 0)}</Td>
-              <Td>{products.reduce((s, p) => s + p.revenue, 0).toLocaleString()}</Td>
-            </tr>
-          )}
-        </Tbody>
-      </Table>
+          </Thead>
+          <Tbody>
+            {products.map((p) => (
+              <tr key={p.productId}>
+                <Td>{p.name}</Td>
+                <Td>{p.categoryName ?? "—"}</Td>
+                <Td>{p.brand ?? "—"}</Td>
+                <Td>{p.price.toLocaleString()}</Td>
+                <Td>{p.avgDiscountPercent > 0 ? `${p.avgDiscountPercent}%` : "—"}</Td>
+                <Td>{p.quantity}</Td>
+                <Td>{p.revenuePerUnit.toLocaleString()}</Td>
+                <Td>{p.marginPercent}%</Td>
+                <Td>{p.totalRevenue.toLocaleString()}</Td>
+              </tr>
+            ))}
+            {products.length === 0 && (
+              <tr>
+                <Td colSpan={9} className="text-center text-gray-400">
+                  {t("common.noData")}
+                </Td>
+              </tr>
+            )}
+            {products.length > 0 && (
+              <tr className="border-t-2 border-gray-200 font-semibold">
+                <Td colSpan={5}>{t("common.total")}</Td>
+                <Td>{products.reduce((s, p) => s + p.quantity, 0)}</Td>
+                <Td>{""}</Td>
+                <Td>{""}</Td>
+                <Td>{products.reduce((s, p) => s + p.totalRevenue, 0).toLocaleString()}</Td>
+              </tr>
+            )}
+          </Tbody>
+        </Table>
+      </div>
     </div>
   );
 }
@@ -439,46 +454,62 @@ function PaymentsReportTab({ from, to }: { from: string; to: string }) {
   const { t } = useTranslation();
   const { fromIso, toIso } = rangeToIso(from, to);
   const query = useQuery({
-    queryKey: ["finance", "transactions", "INCOME", fromIso, toIso],
-    queryFn: () => financeApi.listTransactions({ type: "INCOME", from: fromIso, to: toIso, pageSize: 200 }),
+    queryKey: ["customers", "payments-report", fromIso, toIso],
+    queryFn: () => customersApi.getPaymentsReport(fromIso, toIso),
   });
-  const data = query.data;
-  if (!data) return null;
+  const items = query.data?.items ?? [];
 
-  const items = data.items;
+  function statusLabel(status: string) {
+    if (status === "paid") return t("reports.paymentStatusPaid");
+    if (status === "partial") return t("reports.paymentStatusPartial");
+    return t("reports.paymentStatusUnpaid");
+  }
+  function statusColor(status: string) {
+    if (status === "paid") return "text-green-600";
+    if (status === "partial") return "text-yellow-600";
+    return "text-red-600";
+  }
+
   return (
     <div>
       <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("reports.paymentReport")}</h2>
       <Table>
         <Thead>
           <tr>
-            <Th>{t("reports.paymentDate")}</Th>
-            <Th>{t("reports.paymentCategory")}</Th>
-            <Th>{t("reports.paymentAmount")}</Th>
-            <Th>{t("reports.paymentDescription")}</Th>
+            <Th>{t("customers.name")}</Th>
+            <Th>{t("customers.phone")}</Th>
+            <Th>{t("reports.paymentStatus")}</Th>
+            <Th>{t("reports.orderCount")}</Th>
+            <Th>{t("reports.paymentDebt")}</Th>
+            <Th>{t("reports.paymentPaid")}</Th>
+            <Th>{t("reports.paymentBalance")}</Th>
           </tr>
         </Thead>
         <Tbody>
-          {items.map((tx) => (
-            <tr key={tx.id}>
-              <Td>{new Date(tx.createdAt).toLocaleDateString()}</Td>
-              <Td>{tx.category}</Td>
-              <Td>{tx.amount.toLocaleString()}</Td>
-              <Td>{tx.description ?? "—"}</Td>
+          {items.map((c) => (
+            <tr key={c.id}>
+              <Td>{c.name}</Td>
+              <Td>{c.phone}</Td>
+              <Td><span className={statusColor(c.status)}>{statusLabel(c.status)}</span></Td>
+              <Td>{c.orderCount}</Td>
+              <Td>{c.purchaseAmount.toLocaleString()}</Td>
+              <Td>{c.paidAmount.toLocaleString()}</Td>
+              <Td className={c.balance > 0 ? "font-semibold text-red-600" : "text-gray-700"}>{c.balance.toLocaleString()}</Td>
             </tr>
           ))}
           {items.length === 0 && (
             <tr>
-              <Td colSpan={4} className="text-center text-gray-400">
+              <Td colSpan={7} className="text-center text-gray-400">
                 {t("common.noData")}
               </Td>
             </tr>
           )}
           {items.length > 0 && (
             <tr className="border-t-2 border-gray-200 font-semibold">
-              <Td colSpan={2}>{t("common.total")}</Td>
-              <Td>{items.reduce((s, tx) => s + tx.amount, 0).toLocaleString()}</Td>
-              <Td>{""}</Td>
+              <Td colSpan={4}>{t("common.total")}</Td>
+              <Td>{items.reduce((s, c) => s + c.purchaseAmount, 0).toLocaleString()}</Td>
+              <Td>{items.reduce((s, c) => s + c.paidAmount, 0).toLocaleString()}</Td>
+              <Td>{items.reduce((s, c) => s + c.balance, 0).toLocaleString()}</Td>
             </tr>
           )}
         </Tbody>

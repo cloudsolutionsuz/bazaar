@@ -84,3 +84,9 @@ export async function getDailySummary(req: Request, res: Response): Promise<void
   const result = await financeService.getDailySummary(req.authUser!.tenantId!, req.query as unknown as DailySummaryQuery);
   res.json(result);
 }
+
+export async function getProductSalesReport(req: Request, res: Response): Promise<void> {
+  const { from, to } = req.query as unknown as ReportQuery;
+  const products = await financeService.getProductSalesReport(req.authUser!.tenantId!, from, to);
+  res.json({ products });
+}

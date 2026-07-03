@@ -35,3 +35,14 @@ export async function adjustLoyalty(req: Request, res: Response): Promise<void> 
   );
   res.json({ customer });
 }
+
+const paymentsReportQuerySchema = z.object({
+  from: z.coerce.date(),
+  to: z.coerce.date(),
+});
+
+export async function getPaymentsReport(req: Request, res: Response): Promise<void> {
+  const { from, to } = paymentsReportQuerySchema.parse(req.query);
+  const items = await customersService.getPaymentsReport(req.authUser!.tenantId!, from, to);
+  res.json({ items });
+}

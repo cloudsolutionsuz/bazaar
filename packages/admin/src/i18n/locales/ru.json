@@ -344,7 +344,16 @@
     "paymentDate": "Дата",
     "paymentAmount": "Сумма",
     "paymentCategory": "Категория",
-    "paymentDescription": "Описание"
+    "paymentDescription": "Описание",
+    "productQtySold": "Продано",
+    "productRevenuePerUnit": "Выручка/ед",
+    "paymentStatus": "Статус оплаты",
+    "paymentStatusPaid": "Оплачено",
+    "paymentStatusPartial": "Частично",
+    "paymentStatusUnpaid": "Не оплачено",
+    "paymentDebt": "Сумма долга",
+    "paymentPaid": "Оплачено",
+    "paymentBalance": "Остаток"
   },
   "platform": {
     "tenantsTitle": "Магазины",

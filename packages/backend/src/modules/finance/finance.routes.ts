@@ -39,3 +39,4 @@ financeRouter.get("/pnl/export", validateQuery(reportQuerySchema), asyncHandler(
 financeRouter.get("/analytics", validateQuery(analyticsQuerySchema), asyncHandler(financeController.getAnalytics));
 financeRouter.get("/analytics/export", validateQuery(analyticsQuerySchema), asyncHandler(financeController.exportAnalytics));
 financeRouter.get("/forecast", validateQuery(forecastQuerySchema), asyncHandler(financeController.getForecast));
+financeRouter.get("/reports/products", validateQuery(reportQuerySchema), asyncHandler(financeController.getProductSalesReport));

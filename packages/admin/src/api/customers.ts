@@ -1,5 +1,5 @@
 import { apiRequest } from "./client";
-import type { Customer, CustomerDetail, Paginated } from "../types/api";
+import type { Customer, CustomerDetail, CustomerPaymentRow, Paginated } from "../types/api";
 
 export interface ListCustomersParams {
   search?: string;
@@ -21,4 +21,8 @@ export function exportCustomers(): Promise<Blob> {
 
 export function adjustLoyaltyPoints(id: string, delta: number, reason?: string): Promise<{ customer: object }> {
   return apiRequest(`/api/customers/${id}/loyalty`, { method: "PATCH", body: { delta, reason: reason ?? "" } });
+}
+
+export function getPaymentsReport(from: string, to: string): Promise<{ items: CustomerPaymentRow[] }> {
+  return apiRequest("/api/customers/payments-report", { query: { from, to } });
 }

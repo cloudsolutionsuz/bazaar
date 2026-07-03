@@ -478,3 +478,27 @@ export interface DeliveryZone {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface ProductSalesRow {
+  productId: string;
+  name: string;
+  categoryName: string | null;
+  brand: string | null;
+  price: number;
+  avgDiscountPercent: number;
+  quantity: number;
+  revenuePerUnit: number;
+  totalRevenue: number;
+  marginPercent: number;
+}
+
+export interface CustomerPaymentRow {
+  id: string;
+  name: string;
+  phone: string;
+  orderCount: number;
+  purchaseAmount: number;
+  paidAmount: number;
+  balance: number;
+  status: "paid" | "partial" | "unpaid";
+}

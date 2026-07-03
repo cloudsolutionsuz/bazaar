@@ -344,7 +344,16 @@
     "paymentDate": "Sana",
     "paymentAmount": "Summa",
     "paymentCategory": "Kategoriya",
-    "paymentDescription": "Tavsifi"
+    "paymentDescription": "Tavsifi",
+    "productQtySold": "Sotilgan",
+    "productRevenuePerUnit": "Tushum/dona",
+    "paymentStatus": "To'lov holati",
+    "paymentStatusPaid": "To'langan",
+    "paymentStatusPartial": "Qisman",
+    "paymentStatusUnpaid": "To'lanmagan",
+    "paymentDebt": "Qarz summasi",
+    "paymentPaid": "To'langan",
+    "paymentBalance": "Qoldiq"
   },
   "platform": {
     "tenantsTitle": "Do'konlar",

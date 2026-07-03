@@ -6,6 +6,7 @@ import type {
   Paginated,
   PendingTransaction,
   PnLResult,
+  ProductSalesRow,
   SalesForecastResult,
   TransactionType,
 } from "../types/api";
@@ -71,4 +72,8 @@ export function confirmTransaction(id: string, cashRegisterId: string): Promise<
 
 export function getDailySummary(date?: string, cashRegisterId?: string): Promise<DailySummary> {
   return apiRequest("/api/finance/daily-summary", { query: { date, cashRegisterId } });
+}
+
+export function getProductSalesReport(from: string, to: string): Promise<{ products: ProductSalesRow[] }> {
+  return apiRequest("/api/finance/reports/products", { query: { from, to } });
 }

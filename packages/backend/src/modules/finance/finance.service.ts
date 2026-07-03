@@ -523,6 +523,79 @@ export async function exportAnalyticsToExcel(tenantId: string, from: Date, to: D
   return Buffer.from(arrayBuffer);
 }
 
+export interface ProductSalesRow {
+  productId: string;
+  name: string;
+  categoryName: string | null;
+  brand: string | null;
+  price: number;
+  avgDiscountPercent: number;
+  quantity: number;
+  revenuePerUnit: number;
+  totalRevenue: number;
+  marginPercent: number;
+}
+
+export async function getProductSalesReport(tenantId: string, from: Date, to: Date): Promise<ProductSalesRow[]> {
+  const orders = await prisma.order.findMany({
+    where: { tenantId, createdAt: { gte: from, lte: to }, status: { notIn: EXCLUDED_ORDER_STATUSES } },
+    include: {
+      items: {
+        include: {
+          variant: {
+            include: { product: { include: { category: true } } },
+          },
+        },
+      },
+    },
+  });
+
+  const variantIds = Array.from(new Set(orders.flatMap((o) => o.items.map((i) => i.variantId))));
+  const fifoCostByOrderVariant = await computeFifoCogs(tenantId, variantIds, from, to);
+
+  const byProduct = new Map<
+    string,
+    { name: string; categoryName: string | null; brand: string | null; price: number; discountPercents: number[]; quantity: number; revenue: number; cogs: number }
+  >();
+
+  for (const order of orders) {
+    for (const item of order.items) {
+      const product = item.variant.product;
+      const entry = byProduct.get(product.id) ?? {
+        name: product.name,
+        categoryName: product.category?.name ?? null,
+        brand: product.brand ?? null,
+        price: product.price,
+        discountPercents: [],
+        quantity: 0,
+        revenue: 0,
+        cogs: 0,
+      };
+      if (product.discountPercent != null) entry.discountPercents.push(product.discountPercent);
+      entry.quantity += item.quantity;
+      entry.revenue += item.totalPrice;
+      entry.cogs += fifoCostByOrderVariant.get(`${order.id}:${item.variantId}`) ?? 0;
+      byProduct.set(product.id, entry);
+    }
+  }
+
+  return Array.from(byProduct.entries())
+    .map(([productId, v]) => ({
+      productId,
+      name: v.name,
+      categoryName: v.categoryName,
+      brand: v.brand,
+      price: v.price,
+      avgDiscountPercent:
+        v.discountPercents.length > 0 ? Math.round(v.discountPercents.reduce((s, d) => s + d, 0) / v.discountPercents.length) : 0,
+      quantity: v.quantity,
+      revenuePerUnit: v.quantity > 0 ? Math.round(v.revenue / v.quantity) : 0,
+      totalRevenue: v.revenue,
+      marginPercent: v.revenue > 0 ? Math.round(((v.revenue - v.cogs) / v.revenue) * 100) : 0,
+    }))
+    .sort((a, b) => b.totalRevenue - a.totalRevenue);
+}
+
 export async function exportPnLToExcel(tenantId: string, from: Date, to: Date): Promise<Buffer> {
   const data = await getPnL(tenantId, from, to);
 

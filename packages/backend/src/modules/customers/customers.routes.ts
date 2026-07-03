@@ -11,6 +11,7 @@ export const customersRouter = Router();
 customersRouter.use(requireAuth(), requireRole("OWNER", "MANAGER"));
 
 customersRouter.get("/export", asyncHandler(customersController.exportCustomers));
+customersRouter.get("/payments-report", asyncHandler(customersController.getPaymentsReport));
 customersRouter.get("/", validateQuery(listCustomersQuerySchema), asyncHandler(customersController.list));
 customersRouter.get("/:id", asyncHandler(customersController.get));
 customersRouter.patch("/:id/loyalty", asyncHandler(customersController.adjustLoyalty));
