@@ -21,6 +21,11 @@ export function SettingsPage() {
   const [loyaltyEnabled, setLoyaltyEnabled] = useState(tenant?.loyaltyEnabled ?? false);
   const [loyaltyPointsRate, setLoyaltyPointsRate] = useState(String(tenant?.loyaltyPointsRate ?? 1));
   const [loyaltyMinRedeem, setLoyaltyMinRedeem] = useState(String(tenant?.loyaltyMinRedeem ?? 0));
+  const [minOrderAmount, setMinOrderAmount] = useState(String(tenant?.minOrderAmount ?? 0));
+  const [paymentMethods, setPaymentMethods] = useState<string[]>(
+    tenant?.paymentMethods?.length ? tenant.paymentMethods : []
+  );
+  const [newPaymentMethod, setNewPaymentMethod] = useState("");
   const [saved, setSaved] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -39,6 +44,8 @@ export function SettingsPage() {
         loyaltyEnabled,
         loyaltyPointsRate: Number(loyaltyPointsRate) || 1,
         loyaltyMinRedeem: Number(loyaltyMinRedeem) || 0,
+        minOrderAmount: Number(minOrderAmount) || 0,
+        paymentMethods,
       }),
     onSuccess: async () => {
       await refreshTenant();
@@ -196,6 +203,76 @@ export function SettingsPage() {
             </div>
           </>
         )}
+
+        <hr className="border-gray-100" />
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">{t("settings.minOrderAmount")}</label>
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              min={0}
+              value={minOrderAmount}
+              onChange={(e) => setMinOrderAmount(e.target.value)}
+              className="w-32"
+            />
+            <span className="text-sm text-gray-500">{t("settings.minOrderAmountHint")}</span>
+          </div>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-gray-700">{t("settings.paymentMethods")}</label>
+          <p className="mb-2 text-xs text-gray-500">{t("settings.paymentMethodsHint")}</p>
+          <div className="space-y-2">
+            {paymentMethods.map((method, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <Input
+                  value={method}
+                  onChange={(e) => setPaymentMethods((prev) => prev.map((m, j) => j === i ? e.target.value : m))}
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="danger"
+                  onClick={() => setPaymentMethods((prev) => prev.filter((_, j) => j !== i))}
+                >
+                  ×
+                </Button>
+              </div>
+            ))}
+            <div className="flex items-center gap-2">
+              <Input
+                value={newPaymentMethod}
+                onChange={(e) => setNewPaymentMethod(e.target.value)}
+                placeholder={t("settings.paymentMethodPlaceholder")}
+                className="flex-1"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    const v = newPaymentMethod.trim();
+                    if (v && paymentMethods.length < 10) {
+                      setPaymentMethods((prev) => [...prev, v]);
+                      setNewPaymentMethod("");
+                    }
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  const v = newPaymentMethod.trim();
+                  if (v && paymentMethods.length < 10) {
+                    setPaymentMethods((prev) => [...prev, v]);
+                    setNewPaymentMethod("");
+                  }
+                }}
+              >
+                {t("common.add")}
+              </Button>
+            </div>
+          </div>
+        </div>
 
         {saved && <p className="text-sm text-green-600">{t("settings.saved")}</p>}
 

@@ -397,7 +397,12 @@
     "loyaltyRate": "Ball hisoblash foizi",
     "loyaltyRateHint": "Buyurtma summasidan % → balllar (1 ball = 1 so'm)",
     "loyaltyMinRedeem": "Yechish uchun minimal balllar",
-    "loyaltyMinRedeemHint": "0 = cheklovsiz"
+    "loyaltyMinRedeemHint": "0 = cheklovsiz",
+    "minOrderAmount": "Minimal buyurtma summasi (so'm)",
+    "minOrderAmountHint": "0 = cheklovsiz",
+    "paymentMethods": "To'lov usullari",
+    "paymentMethodsHint": "Vitrinadagi to'lov usullari ro'yxati. Bo'sh bo'lsa — «Naqd» va «Karta» ko'rsatiladi.",
+    "paymentMethodPlaceholder": "Masalan: Payme, Click, Naqd..."
   },
   "categories": {
     "title": "Kategoriyalar",

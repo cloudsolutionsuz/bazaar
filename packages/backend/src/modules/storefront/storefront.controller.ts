@@ -26,7 +26,7 @@ export async function getProduct(req: Request, res: Response): Promise<void> {
 }
 
 export async function createOrder(req: Request, res: Response): Promise<void> {
-  const order = await ordersService.createOrder(req.tenant!.id, null, req.body as CreateOrderInput);
+  const order = await ordersService.createOrder(req.tenant!.id, null, req.body as CreateOrderInput, req.tenant!.minOrderAmount);
   res.status(201).json({ order });
 }
 
@@ -58,8 +58,8 @@ export async function listBanners(req: Request, res: Response): Promise<void> {
 }
 
 export async function getMeta(req: Request, res: Response): Promise<void> {
-  const { name, logoUrl, themeColor, description, inn, companyName, contactPhone, instagram, facebook, youtube } = req.tenant!;
-  res.json({ name, logoUrl, themeColor, description, inn, companyName, contactPhone, instagram, facebook, youtube });
+  const { name, logoUrl, themeColor, description, inn, companyName, contactPhone, instagram, facebook, youtube, minOrderAmount, paymentMethods } = req.tenant!;
+  res.json({ name, logoUrl, themeColor, description, inn, companyName, contactPhone, instagram, facebook, youtube, minOrderAmount, paymentMethods });
 }
 
 export async function getPushVapidKey(req: Request, res: Response): Promise<void> {

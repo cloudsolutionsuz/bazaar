@@ -44,6 +44,8 @@ const updateMySettingsSchema = z.object({
   loyaltyEnabled: z.boolean().optional(),
   loyaltyPointsRate: z.number().int().min(1).max(50).optional(),
   loyaltyMinRedeem: z.number().int().min(0).optional(),
+  minOrderAmount: z.number().int().min(0).optional(),
+  paymentMethods: z.array(z.string().min(1).max(100)).max(10).optional(),
 });
 
 tenantsRouter.patch(
@@ -55,6 +57,7 @@ tenantsRouter.patch(
     const {
       telegramChatId, themeColor, description, inn, companyName, contactPhone,
       instagram, facebook, youtube, loyaltyEnabled, loyaltyPointsRate, loyaltyMinRedeem,
+      minOrderAmount, paymentMethods,
     } = req.body as z.infer<typeof updateMySettingsSchema>;
     const tenant = await prisma.tenant.update({
       where: { id: req.authUser!.tenantId! },
@@ -71,6 +74,8 @@ tenantsRouter.patch(
         ...(loyaltyEnabled !== undefined ? { loyaltyEnabled } : {}),
         ...(loyaltyPointsRate !== undefined ? { loyaltyPointsRate } : {}),
         ...(loyaltyMinRedeem !== undefined ? { loyaltyMinRedeem } : {}),
+        ...(minOrderAmount !== undefined ? { minOrderAmount } : {}),
+        ...(paymentMethods !== undefined ? { paymentMethods } : {}),
       },
     });
     res.json({ tenant });

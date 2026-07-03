@@ -90,7 +90,9 @@
     "loyaltyNoPoints": "У вас пока нет баллов",
     "loyaltyNotEnabled": "Программа лояльности в этом магазине не активна",
     "shippingCost": "Доставка",
-    "shippingFree": "Бесплатно"
+    "shippingFree": "Бесплатно",
+    "minOrderWarning": "Минимальная сумма заказа: {{amount}} сум",
+    "errorMinOrderAmount": "Минимальная сумма заказа: {{amount}} сум"
   },
   "confirmation": {
     "title": "Заказ принят!",

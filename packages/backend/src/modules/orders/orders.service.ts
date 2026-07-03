@@ -73,7 +73,8 @@ export async function listOrders(tenantId: string, query: ListOrdersQuery) {
 
 // userId is null for storefront-originated orders (no staff member involved) -
 // propagated to OrderStatusHistory/InventoryMovement, both of which allow null.
-export async function createOrder(tenantId: string, userId: string | null, input: CreateOrderInput) {
+// minOrderAmount enforces a cart floor for storefront orders (0 = no limit).
+export async function createOrder(tenantId: string, userId: string | null, input: CreateOrderInput, minOrderAmount = 0) {
   await assertWithinPlanLimit(tenantId, "orders");
 
   const variantIds = input.items.map((i) => i.variantId);
@@ -101,6 +102,10 @@ export async function createOrder(tenantId: string, userId: string | null, input
   });
 
   const subtotal = orderItemsData.reduce((sum, i) => sum + i.totalPrice, 0);
+
+  if (minOrderAmount > 0 && subtotal < minOrderAmount) {
+    throw new AppError(400, "MIN_ORDER_AMOUNT", `Minimum order amount is ${minOrderAmount}`);
+  }
 
   let promoCodeId: string | undefined;
   let discountAmount = 0;

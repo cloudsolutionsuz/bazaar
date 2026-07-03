@@ -90,7 +90,9 @@
     "loyaltyNoPoints": "Sizda hali balllar yo'q",
     "loyaltyNotEnabled": "Bu do'konda sodiqlik dasturi faol emas",
     "shippingCost": "Yetkazib berish",
-    "shippingFree": "Bepul"
+    "shippingFree": "Bepul",
+    "minOrderWarning": "Minimal buyurtma summasi: {{amount}} so'm",
+    "errorMinOrderAmount": "Minimal buyurtma summasi: {{amount}} so'm"
   },
   "confirmation": {
     "title": "Buyurtma qabul qilindi!",

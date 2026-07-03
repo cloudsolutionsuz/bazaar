@@ -28,7 +28,9 @@ export function CheckoutPage() {
   const navigate = useNavigate();
   const { items, total, clear } = useCart();
   const metaQuery = useQuery({ queryKey: ["tenant-meta"], queryFn: storefrontApi.getMeta });
-  const accentStyle = metaQuery.data?.themeColor ? { backgroundColor: metaQuery.data.themeColor } : undefined;
+  const meta = metaQuery.data;
+  const accentStyle = meta?.themeColor ? { backgroundColor: meta.themeColor } : undefined;
+  const configuredPaymentMethods = meta?.paymentMethods?.length ? meta.paymentMethods : null;
 
   const [customerName, setCustomerName] = useState("");
   const [phonePrefix, setPhonePrefix] = useState("+998");
@@ -38,7 +40,7 @@ export function CheckoutPage() {
   const [addressDistrict, setAddressDistrict] = useState("");
   const [addressMahalla, setAddressMahalla] = useState("");
   const [addressNote, setAddressNote] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("cash");
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [promoCodeInput, setPromoCodeInput] = useState("");
   const [appliedPromo, setAppliedPromo] = useState<{ code: string; discountAmount: number } | null>(null);
   const [promoError, setPromoError] = useState<string | null>(null);
@@ -128,7 +130,7 @@ export function CheckoutPage() {
         addressDistrict,
         addressMahalla,
         addressNote: addressNote || undefined,
-        paymentMethod: paymentMethod === "cash" ? t("checkout.paymentCash") : t("checkout.paymentCard"),
+        paymentMethod: paymentMethod || undefined,
         promoCode: appliedPromo?.code,
         loyaltyPointsToRedeem: loyaltyToRedeem > 0 ? loyaltyToRedeem : undefined,
         items: items.map((i) => ({ variantId: i.variantId, quantity: i.quantity })),
@@ -140,6 +142,8 @@ export function CheckoutPage() {
         setError(t("checkout.errorInsufficientStock"));
       } else if (err instanceof ApiError && err.code === "PLAN_LIMIT_REACHED") {
         setError(t("checkout.errorLimitReached"));
+      } else if (err instanceof ApiError && err.code === "MIN_ORDER_AMOUNT") {
+        setError(t("checkout.errorMinOrderAmount", { amount: (meta?.minOrderAmount ?? 0).toLocaleString() }));
       } else {
         setError(err instanceof Error ? err.message : String(err));
       }
@@ -278,14 +282,25 @@ export function CheckoutPage() {
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">{t("checkout.paymentMethod")}</label>
           <div className="flex flex-wrap gap-4 text-sm">
-            <label className="flex items-center gap-2">
-              <input type="radio" name="paymentMethod" checked={paymentMethod === "cash"} onChange={() => setPaymentMethod("cash")} />
-              {t("checkout.paymentCash")}
-            </label>
-            <label className="flex items-center gap-2">
-              <input type="radio" name="paymentMethod" checked={paymentMethod === "card"} onChange={() => setPaymentMethod("card")} />
-              {t("checkout.paymentCard")}
-            </label>
+            {configuredPaymentMethods === null ? (
+              <>
+                <label className="flex items-center gap-2">
+                  <input type="radio" name="paymentMethod" checked={paymentMethod === "cash"} onChange={() => setPaymentMethod("cash")} />
+                  {t("checkout.paymentCash")}
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="radio" name="paymentMethod" checked={paymentMethod === "card"} onChange={() => setPaymentMethod("card")} />
+                  {t("checkout.paymentCard")}
+                </label>
+              </>
+            ) : (
+              configuredPaymentMethods.map((method) => (
+                <label key={method} className="flex items-center gap-2">
+                  <input type="radio" name="paymentMethod" checked={paymentMethod === method} onChange={() => setPaymentMethod(method)} />
+                  {method}
+                </label>
+              ))
+            )}
           </div>
         </div>
 
@@ -402,6 +417,12 @@ export function CheckoutPage() {
             return (afterPromoAmount + shippingCost - loyaltyDiscount).toLocaleString();
           })()}</span>
         </div>
+
+        {meta && meta.minOrderAmount > 0 && total < meta.minOrderAmount && (
+          <p className="text-sm text-amber-600">
+            {t("checkout.minOrderWarning", { amount: meta.minOrderAmount.toLocaleString() })}
+          </p>
+        )}
 
         <button
           type="submit"

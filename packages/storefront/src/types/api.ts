@@ -90,6 +90,8 @@ export interface TenantMeta {
   instagram: string | null;
   facebook: string | null;
   youtube: string | null;
+  minOrderAmount: number;
+  paymentMethods: string[];
 }
 
 export interface ApiErrorBody {

@@ -114,6 +114,8 @@ model Tenant {
   loyaltyEnabled    Boolean @default(false)
   loyaltyPointsRate Int     @default(1)
   loyaltyMinRedeem  Int     @default(0)
+  minOrderAmount    Int     @default(0)
+  paymentMethods    String[] @default([])
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
@@ -135,6 +137,7 @@ model Tenant {
   promotions         Promotion[]
   promoCodes         PromoCode[]
   productReviews     ProductReview[]
+  deliveryZones      DeliveryZone[]
 
   @@map("tenants")
 }
@@ -416,6 +419,7 @@ model Order {
   promoCodeId            String?
   promoCode              PromoCode?  @relation(fields: [promoCodeId], references: [id])
   discountAmount         Int         @default(0)
+  shippingCost           Int         @default(0)
   loyaltyPointsEarned    Int         @default(0)
   loyaltyPointsRedeemed  Int         @default(0)
   totalAmount            Int
@@ -606,4 +610,21 @@ model OrderStatusHistory {
 
   @@index([orderId])
   @@map("order_status_history")
+}
+
+model DeliveryZone {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  name        String
+  regions     String[]
+  cost        Int
+  freeAbove   Int?
+  isActive    Boolean  @default(true)
+  position    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId])
+  @@map("delivery_zones")
 }

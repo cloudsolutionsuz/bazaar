@@ -397,7 +397,12 @@
     "loyaltyRate": "Процент начисления баллов",
     "loyaltyRateHint": "% от суммы заказа → баллы (1 балл = 1 сум)",
     "loyaltyMinRedeem": "Минимум баллов для списания",
-    "loyaltyMinRedeemHint": "0 = без ограничений"
+    "loyaltyMinRedeemHint": "0 = без ограничений",
+    "minOrderAmount": "Минимальная сумма заказа (сум)",
+    "minOrderAmountHint": "0 = без ограничений",
+    "paymentMethods": "Способы оплаты",
+    "paymentMethodsHint": "Список способов оплаты на витрине. Если пусто — показываются «Наличными» и «Картой».",
+    "paymentMethodPlaceholder": "Например: Payme, Click, Наличными..."
   },
   "categories": {
     "title": "Категории",

@@ -25,6 +25,8 @@ export interface Tenant {
   loyaltyEnabled: boolean;
   loyaltyPointsRate: number;
   loyaltyMinRedeem: number;
+  minOrderAmount: number;
+  paymentMethods: string[];
   createdAt: string;
 }
 

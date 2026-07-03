@@ -14,6 +14,8 @@ export interface UpdateMySettingsInput {
   loyaltyEnabled?: boolean;
   loyaltyPointsRate?: number;
   loyaltyMinRedeem?: number;
+  minOrderAmount?: number;
+  paymentMethods?: string[];
 }
 
 export function updateMySettings(input: UpdateMySettingsInput): Promise<{ tenant: Tenant }> {
