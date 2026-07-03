@@ -335,6 +335,7 @@
     "forecastDisclaimer": "Базовый прогноз по линейному тренду за последние 90 дней — не учитывает сезонность, акции и другие факторы",
     "presetToday": "Сегодня",
     "presetYesterday": "Вчера",
+    "presetWeek": "Неделя",
     "preset7Days": "7 дней",
     "preset30Days": "30 дней",
     "preset90Days": "90 дней",

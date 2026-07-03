@@ -258,7 +258,7 @@ export function TenantDetailPage() {
                 <Th>{t("products.category")}</Th>
                 <Th>{t("products.brand")}</Th>
                 <Th>{t("products.price")}</Th>
-                <Th>{t("reports.avgDiscount")}</Th>
+                <Th>{t("products.discount")}</Th>
                 <Th>{t("reports.productQtySold")}</Th>
                 <Th>{t("reports.productRevenuePerUnit")}</Th>
                 <Th>{t("reports.margin")}</Th>
