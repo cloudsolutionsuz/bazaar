@@ -1,5 +1,5 @@
 import { apiRequest } from "./client";
-import type { AnalyticsResult, BillingTimelineTenant, FinanceTransaction, PlatformStats, Paginated, TenantStatus, TenantWithRelations } from "../types/api";
+import type { AnalyticsResult, BillingTimelineTenant, CustomerPaymentRow, FinanceTransaction, PlatformStats, Paginated, ProductSalesRow, TenantStatus, TenantWithRelations } from "../types/api";
 
 export interface ListTenantsParams {
   status?: TenantStatus;
@@ -34,4 +34,12 @@ export function getBillingTimeline(params: ListTenantsParams = {}): Promise<Pagi
 
 export function getTenantReports(id: string, from?: string, to?: string): Promise<{ analytics: AnalyticsResult; payments: FinanceTransaction[] }> {
   return apiRequest(`/api/platform/tenants/${id}/reports`, { query: { from, to } });
+}
+
+export function getTenantProductsReport(id: string, from: string, to: string): Promise<{ products: ProductSalesRow[] }> {
+  return apiRequest(`/api/platform/tenants/${id}/reports/products`, { query: { from, to } });
+}
+
+export function getTenantPaymentsReport(id: string, from: string, to: string): Promise<{ items: CustomerPaymentRow[] }> {
+  return apiRequest(`/api/platform/tenants/${id}/reports/payments`, { query: { from, to } });
 }

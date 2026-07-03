@@ -5,10 +5,20 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as platformApi from "../../api/platform";
 import * as plansApi from "../../api/plans";
 import { Button } from "../../components/ui/Button";
+import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
 import { Badge } from "../../components/ui/Badge";
 import { Table, Thead, Tbody, Th, Td } from "../../components/ui/Table";
 import type { InvoiceStatus, TenantStatus } from "../../types/api";
+
+function toDateInputValue(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+function daysAgo(n: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return toDateInputValue(d);
+}
 
 const TENANT_STATUS_COLORS: Record<TenantStatus, "green" | "blue" | "yellow" | "red"> = {
   TRIAL: "blue",
@@ -50,9 +60,25 @@ export function TenantDetailPage() {
   const queryClient = useQueryClient();
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
 
+  const [from, setFrom] = useState(daysAgo(30));
+  const [to, setTo] = useState(toDateInputValue(new Date()));
+
   const tenantQuery = useQuery({ queryKey: ["platform", "tenant", id], queryFn: () => platformApi.getTenant(id as string) });
   const plansQuery = useQuery({ queryKey: ["plans"], queryFn: plansApi.listPlans });
-  const reportsQuery = useQuery({ queryKey: ["platform", "tenant", id, "reports"], queryFn: () => platformApi.getTenantReports(id as string) });
+  const productsQuery = useQuery({
+    queryKey: ["platform", "tenant", id, "products-report", from, to],
+    queryFn: () => platformApi.getTenantProductsReport(id as string, from, to),
+  });
+  const paymentsQuery = useQuery({
+    queryKey: ["platform", "tenant", id, "payments-report", from, to],
+    queryFn: () => platformApi.getTenantPaymentsReport(id as string, from, to),
+  });
+
+  function applyPreset(days: number): void {
+    const t2 = toDateInputValue(new Date());
+    if (days === 1) { setFrom(daysAgo(1)); setTo(daysAgo(1)); }
+    else { setFrom(daysAgo(days)); setTo(t2); }
+  }
 
   const changePlanMutation = useMutation({
     mutationFn: (planId: string) => platformApi.updateTenantPlan(id as string, planId),
@@ -73,7 +99,6 @@ export function TenantDetailPage() {
 
   const tenant = tenantQuery.data?.tenant;
   const plans = plansQuery.data?.plans ?? [];
-  const reports = reportsQuery.data;
   if (!tenant) return null;
 
   const owner = tenant.users.find((u) => u.role === "OWNER");
@@ -205,48 +230,99 @@ export function TenantDetailPage() {
         </Table>
       </section>
 
-      {reports && (
-        <section className="mb-6">
-          <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("platform.shopReports")}</h2>
-          <div className="mb-4 grid grid-cols-3 gap-4">
-            <div className="rounded-xl border border-gray-200 bg-white p-4">
-              <div className="text-sm text-gray-500">{t("reports.revenue")}</div>
-              <div className="text-xl font-semibold text-gray-900">{reports.analytics.revenue.toLocaleString()}</div>
-            </div>
-            <div className="rounded-xl border border-gray-200 bg-white p-4">
-              <div className="text-sm text-gray-500">{t("reports.orderCount")}</div>
-              <div className="text-xl font-semibold text-gray-900">{reports.analytics.orderCount}</div>
-            </div>
-            <div className="rounded-xl border border-gray-200 bg-white p-4">
-              <div className="text-sm text-gray-500">{t("reports.averageOrderValue")}</div>
-              <div className="text-xl font-semibold text-gray-900">{reports.analytics.averageOrderValue.toLocaleString()}</div>
-            </div>
+      <section className="mb-6">
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">{t("platform.shopReports")}</h2>
+
+        <div className="mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-gray-200 bg-white p-4">
+          <div>
+            <label className="mb-1 block text-xs text-gray-500">{t("reports.from")}</label>
+            <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
           </div>
-          {reports.payments.length > 0 && (
-            <>
-              <h3 className="mb-2 text-sm font-semibold text-gray-700">{t("platform.shopPayments")}</h3>
-              <Table>
-                <Thead>
-                  <tr>
-                    <Th>{t("reports.paymentDate")}</Th>
-                    <Th>{t("reports.paymentAmount")}</Th>
-                    <Th>{t("reports.paymentDescription")}</Th>
-                  </tr>
-                </Thead>
-                <Tbody>
-                  {reports.payments.map((tx) => (
-                    <tr key={tx.id}>
-                      <Td>{new Date(tx.createdAt).toLocaleDateString()}</Td>
-                      <Td>{tx.amount.toLocaleString()}</Td>
-                      <Td>{tx.description ?? "—"}</Td>
-                    </tr>
-                  ))}
-                </Tbody>
-              </Table>
-            </>
-          )}
-        </section>
-      )}
+          <div>
+            <label className="mb-1 block text-xs text-gray-500">{t("reports.to")}</label>
+            <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+          </div>
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={() => applyPreset(0)}>{t("reports.presetToday")}</Button>
+            <Button variant="secondary" onClick={() => applyPreset(1)}>{t("reports.presetYesterday")}</Button>
+            <Button variant="secondary" onClick={() => applyPreset(7)}>{t("reports.presetWeek")}</Button>
+          </div>
+        </div>
+
+        <h3 className="mb-2 text-sm font-semibold text-gray-700">{t("platform.reportProducts")}</h3>
+        <div className="mb-6 overflow-x-auto">
+          <Table>
+            <Thead>
+              <tr>
+                <Th>{t("products.name")}</Th>
+                <Th>{t("products.category")}</Th>
+                <Th>{t("products.brand")}</Th>
+                <Th>{t("products.price")}</Th>
+                <Th>{t("reports.avgDiscount")}</Th>
+                <Th>{t("reports.productQtySold")}</Th>
+                <Th>{t("reports.productRevenuePerUnit")}</Th>
+                <Th>{t("reports.margin")}</Th>
+                <Th>{t("reports.revenue")}</Th>
+              </tr>
+            </Thead>
+            <Tbody>
+              {(productsQuery.data?.products ?? []).map((row) => (
+                <tr key={row.productId}>
+                  <Td>{row.name}</Td>
+                  <Td>{row.categoryName ?? "—"}</Td>
+                  <Td>{row.brand ?? "—"}</Td>
+                  <Td>{row.price.toLocaleString()}</Td>
+                  <Td>{row.avgDiscountPercent}%</Td>
+                  <Td>{row.quantity}</Td>
+                  <Td>{row.revenuePerUnit.toLocaleString()}</Td>
+                  <Td>{row.marginPercent}%</Td>
+                  <Td>{row.totalRevenue.toLocaleString()}</Td>
+                </tr>
+              ))}
+              {(productsQuery.data?.products ?? []).length === 0 && (
+                <tr><Td colSpan={9} className="text-center text-gray-400">{t("common.noData")}</Td></tr>
+              )}
+            </Tbody>
+          </Table>
+        </div>
+
+        <h3 className="mb-2 text-sm font-semibold text-gray-700">{t("platform.reportPayments")}</h3>
+        <div className="overflow-x-auto">
+          <Table>
+            <Thead>
+              <tr>
+                <Th>{t("customers.name")}</Th>
+                <Th>{t("customers.phone")}</Th>
+                <Th>{t("reports.paymentStatus")}</Th>
+                <Th>{t("reports.orderCount")}</Th>
+                <Th>{t("reports.paymentDebt")}</Th>
+                <Th>{t("reports.paymentPaid")}</Th>
+                <Th>{t("reports.paymentBalance")}</Th>
+              </tr>
+            </Thead>
+            <Tbody>
+              {(paymentsQuery.data?.items ?? []).map((row) => (
+                <tr key={row.id}>
+                  <Td>{row.name}</Td>
+                  <Td>{row.phone}</Td>
+                  <Td>
+                    <Badge color={row.status === "paid" ? "green" : row.status === "partial" ? "yellow" : "red"}>
+                      {t(`reports.paymentStatus${row.status.charAt(0).toUpperCase() + row.status.slice(1)}`)}
+                    </Badge>
+                  </Td>
+                  <Td>{row.orderCount}</Td>
+                  <Td>{row.purchaseAmount.toLocaleString()}</Td>
+                  <Td>{row.paidAmount.toLocaleString()}</Td>
+                  <Td>{row.balance.toLocaleString()}</Td>
+                </tr>
+              ))}
+              {(paymentsQuery.data?.items ?? []).length === 0 && (
+                <tr><Td colSpan={7} className="text-center text-gray-400">{t("common.noData")}</Td></tr>
+              )}
+            </Tbody>
+          </Table>
+        </div>
+      </section>
     </div>
   );
 }

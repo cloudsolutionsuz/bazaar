@@ -384,8 +384,10 @@
     "confirmVip": "Bu do'konni VIP qilasizmi? Billing endi unga hisob-faktura chiqarmaydi va bloklamaydi, holati darhol «Faol»ga o'tadi.",
     "confirmRemoveVip": "Bu do'kondan VIP holatini olib tashlaysizmi? Billing yana odatdagi qoidalar bo'yicha hisob-fakturalarni tekshira boshlaydi.",
     "billingTimeline": "Billing vaqt jadvali",
-    "shopReports": "Do'kon hisobotlari (30 kun)",
-    "shopPayments": "Kiruvchi to'lovlar"
+    "shopReports": "Do'kon hisobotlari",
+    "shopPayments": "Kiruvchi to'lovlar",
+    "reportProducts": "Tovarlar bo'yicha hisobot",
+    "reportPayments": "Xaridorlar to'lovlari"
   },
   "settings": {
     "title": "Sozlamalar",
