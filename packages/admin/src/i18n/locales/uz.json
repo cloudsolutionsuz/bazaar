@@ -385,7 +385,13 @@
     "uploadLogo": "Logotip yuklash",
     "themeColor": "Do'kon rangi",
     "description": "Do'kon tavsifi",
-    "saved": "Saqlandi"
+    "saved": "Saqlandi",
+    "loyalty": "Sodiqlik dasturi",
+    "loyaltyEnabled": "Ball to'plashni yoqish",
+    "loyaltyRate": "Ball hisoblash foizi",
+    "loyaltyRateHint": "Buyurtma summasidan % → balllar (1 ball = 1 so'm)",
+    "loyaltyMinRedeem": "Yechish uchun minimal balllar",
+    "loyaltyMinRedeemHint": "0 = cheklovsiz"
   },
   "categories": {
     "title": "Kategoriyalar",
@@ -424,7 +430,14 @@
     "payAmount": "To'lov summasi",
     "pay": "Qayd etish",
     "paySuccess": "To'lov qayd etildi",
-    "paymentHistory": "To'lovlar tarixi"
+    "paymentHistory": "To'lovlar tarixi",
+    "loyaltyPoints": "Balllar",
+    "adjustLoyalty": "Ballarni tuzatish",
+    "loyaltyDelta": "O'zgarish (+ yoki −)",
+    "loyaltyReason": "Sabab",
+    "loyaltyAdjust": "Qo'llash",
+    "loyaltySuccess": "Balllar tuzatildi",
+    "loyaltyError": "Tuzatishda xatolik"
   },
   "banners": {
     "title": "Bannerlar",

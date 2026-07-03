@@ -43,6 +43,9 @@ export function CheckoutPage() {
   const [appliedPromo, setAppliedPromo] = useState<{ code: string; discountAmount: number } | null>(null);
   const [promoError, setPromoError] = useState<string | null>(null);
   const [promoApplying, setPromoApplying] = useState(false);
+  const [loyaltyBalance, setLoyaltyBalance] = useState<storefrontApi.LoyaltyBalance | null>(null);
+  const [loyaltyChecking, setLoyaltyChecking] = useState(false);
+  const [useLoyalty, setUseLoyalty] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -63,6 +66,21 @@ export function CheckoutPage() {
 
   function removePhoneField(index: number) {
     setAdditionalPhones((phones) => phones.filter((_, i) => i !== index));
+  }
+
+  async function handleCheckLoyalty() {
+    const phone = phonePrefix + customerPhone.replace(/\D/g, "");
+    if (!phone || phone.length < 7) return;
+    setLoyaltyChecking(true);
+    try {
+      const balance = await storefrontApi.getLoyaltyBalance(phone);
+      setLoyaltyBalance(balance);
+      if (!balance.loyaltyEnabled || balance.loyaltyPoints === 0) {
+        setUseLoyalty(false);
+      }
+    } finally {
+      setLoyaltyChecking(false);
+    }
   }
 
   async function handleApplyPromo(e: FormEvent) {
@@ -89,6 +107,10 @@ export function CheckoutPage() {
     setError(null);
     setSubmitting(true);
     try {
+      const afterPromoTotal = total - (appliedPromo?.discountAmount ?? 0);
+      const loyaltyToRedeem = useLoyalty && loyaltyBalance?.loyaltyEnabled && loyaltyBalance.loyaltyPoints > 0
+        ? Math.min(loyaltyBalance.loyaltyPoints, afterPromoTotal)
+        : 0;
       const result = await storefrontApi.placeOrder({
         customerName,
         customerPhone: phonePrefix + customerPhone.replace(/\D/g, ""),
@@ -99,6 +121,7 @@ export function CheckoutPage() {
         addressNote: addressNote || undefined,
         paymentMethod: paymentMethod === "cash" ? t("checkout.paymentCash") : t("checkout.paymentCard"),
         promoCode: appliedPromo?.code,
+        loyaltyPointsToRedeem: loyaltyToRedeem > 0 ? loyaltyToRedeem : undefined,
         items: items.map((i) => ({ variantId: i.variantId, quantity: i.quantity })),
       });
       clear();
@@ -291,6 +314,43 @@ export function CheckoutPage() {
           {promoError && <p className="mt-1 text-sm text-red-600">{promoError}</p>}
         </div>
 
+        <div className="border-t border-clay-100 pt-4">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium text-gray-700">{t("checkout.loyaltyPoints")}</label>
+            <button
+              type="button"
+              disabled={loyaltyChecking || !customerPhone.trim()}
+              onClick={handleCheckLoyalty}
+              className="text-sm text-clay-600 hover:underline disabled:opacity-40"
+            >
+              {loyaltyChecking ? t("common.loading") : t("checkout.loyaltyCheck")}
+            </button>
+          </div>
+          {loyaltyBalance && loyaltyBalance.loyaltyEnabled && loyaltyBalance.loyaltyPoints > 0 &&
+            (loyaltyBalance.loyaltyMinRedeem === 0 || loyaltyBalance.loyaltyPoints >= loyaltyBalance.loyaltyMinRedeem) && (
+            <label className="mt-2 flex cursor-pointer items-center gap-2 rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2 text-sm">
+              <input
+                type="checkbox"
+                checked={useLoyalty}
+                onChange={(e) => setUseLoyalty(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300"
+              />
+              <span className="text-yellow-800">
+                {t("checkout.loyaltyUse", {
+                  points: loyaltyBalance.loyaltyPoints.toLocaleString(),
+                  amount: Math.min(loyaltyBalance.loyaltyPoints, total - (appliedPromo?.discountAmount ?? 0)).toLocaleString(),
+                })}
+              </span>
+            </label>
+          )}
+          {loyaltyBalance && loyaltyBalance.loyaltyEnabled && loyaltyBalance.loyaltyPoints === 0 && (
+            <p className="mt-1 text-sm text-gray-500">{t("checkout.loyaltyNoPoints")}</p>
+          )}
+          {loyaltyBalance && !loyaltyBalance.loyaltyEnabled && (
+            <p className="mt-1 text-sm text-gray-500">{t("checkout.loyaltyNotEnabled")}</p>
+          )}
+        </div>
+
         {error && <p className="text-sm text-red-600">{error}</p>}
 
         <div className="flex items-center justify-between border-t border-clay-100 pt-4 text-base text-gray-900">
@@ -303,9 +363,25 @@ export function CheckoutPage() {
             <span className="font-medium">−{appliedPromo.discountAmount.toLocaleString()}</span>
           </div>
         )}
+        {useLoyalty && loyaltyBalance && loyaltyBalance.loyaltyPoints > 0 && (() => {
+          const afterPromo = total - (appliedPromo?.discountAmount ?? 0);
+          const loyaltyDiscount = Math.min(loyaltyBalance.loyaltyPoints, afterPromo);
+          return loyaltyDiscount > 0 ? (
+            <div className="flex items-center justify-between text-base text-yellow-700">
+              <span className="text-sm">{t("checkout.loyaltyDiscount")}</span>
+              <span className="font-medium">−{loyaltyDiscount.toLocaleString()}</span>
+            </div>
+          ) : null;
+        })()}
         <div className="flex items-center justify-between text-lg font-semibold text-gray-900">
           <span>{t("checkout.finalTotal")}</span>
-          <span>{(total - (appliedPromo?.discountAmount ?? 0)).toLocaleString()}</span>
+          <span>{(() => {
+            const afterPromo = total - (appliedPromo?.discountAmount ?? 0);
+            const loyaltyDiscount = useLoyalty && loyaltyBalance?.loyaltyEnabled && loyaltyBalance.loyaltyPoints > 0
+              ? Math.min(loyaltyBalance.loyaltyPoints, afterPromo)
+              : 0;
+            return (afterPromo - loyaltyDiscount).toLocaleString();
+          })()}</span>
         </div>
 
         <button

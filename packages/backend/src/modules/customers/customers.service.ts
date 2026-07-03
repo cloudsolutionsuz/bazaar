@@ -67,6 +67,7 @@ export async function listCustomers(tenantId: string, query: ListCustomersQuery)
       addressRegion: c.addressRegion,
       addressDistrict: c.addressDistrict,
       addressMahalla: c.addressMahalla,
+      loyaltyPoints: c.loyaltyPoints,
       createdAt: c.createdAt,
       orderCount: c.orders.length,
       purchaseAmount,
@@ -110,6 +111,7 @@ export async function getCustomer(tenantId: string, customerId: string) {
     addressRegion: customer.addressRegion,
     addressDistrict: customer.addressDistrict,
     addressMahalla: customer.addressMahalla,
+    loyaltyPoints: customer.loyaltyPoints,
     createdAt: customer.createdAt,
     orderCount: billableOrders.length,
     purchaseAmount,
@@ -117,6 +119,14 @@ export async function getCustomer(tenantId: string, customerId: string) {
     balance: purchaseAmount - paidAmount,
     orders: customer.orders,
   };
+}
+
+export async function adjustLoyaltyPoints(tenantId: string, customerId: string, delta: number, reason: string) {
+  const customer = await prisma.customer.findFirst({ where: { id: customerId, tenantId } });
+  if (!customer) throw new AppError(404, "NOT_FOUND", "Customer not found");
+  const newPoints = customer.loyaltyPoints + delta;
+  if (newPoints < 0) throw new AppError(400, "INSUFFICIENT_POINTS", "Customer has insufficient loyalty points");
+  return prisma.customer.update({ where: { id: customerId }, data: { loyaltyPoints: newPoints } });
 }
 
 export async function exportCustomersToExcel(tenantId: string): Promise<Buffer> {

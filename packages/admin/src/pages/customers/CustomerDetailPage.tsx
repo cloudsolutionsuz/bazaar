@@ -21,6 +21,9 @@ export function CustomerDetailPage() {
   const [payDescription, setPayDescription] = useState("");
   const [payCashRegisterId, setPayCashRegisterId] = useState("");
   const [paySuccess, setPaySuccess] = useState(false);
+  const [loyaltyDelta, setLoyaltyDelta] = useState("");
+  const [loyaltyReason, setLoyaltyReason] = useState("");
+  const [loyaltySuccess, setLoyaltySuccess] = useState(false);
   const { activeRegisters, defaultRegisterId } = useActiveCashRegisters();
 
   const query = useQuery({
@@ -36,6 +39,18 @@ export function CustomerDetailPage() {
       setPayDescription("");
       setPaySuccess(true);
       setTimeout(() => setPaySuccess(false), 3000);
+    },
+  });
+
+  const loyaltyMutation = useMutation({
+    mutationFn: ({ delta, reason }: { delta: number; reason: string }) =>
+      customersApi.adjustLoyaltyPoints(id as string, delta, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customer", id] });
+      setLoyaltyDelta("");
+      setLoyaltyReason("");
+      setLoyaltySuccess(true);
+      setTimeout(() => setLoyaltySuccess(false), 3000);
     },
   });
 
@@ -90,6 +105,10 @@ export function CustomerDetailPage() {
             <div className="text-xl font-semibold text-gray-900">{customer.orderCount}</div>
           </div>
           <div>
+            <div className="text-sm text-gray-500">{t("customers.loyaltyPoints")}</div>
+            <div className="text-xl font-semibold text-yellow-700">{customer.loyaltyPoints.toLocaleString()}</div>
+          </div>
+          <div>
             <div className="text-sm text-gray-500">{t("customers.customerSince")}</div>
             <div className="text-xl font-semibold text-gray-900">{new Date(customer.createdAt).toLocaleDateString()}</div>
           </div>
@@ -132,6 +151,39 @@ export function CustomerDetailPage() {
             {t("customers.pay")}
           </Button>
           {paySuccess && <span className="text-sm text-green-600">{t("customers.paySuccess")}</span>}
+        </form>
+      </div>
+
+      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-6">
+        <h2 className="mb-4 text-base font-semibold text-gray-900">{t("customers.adjustLoyalty")}</h2>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const delta = Number(loyaltyDelta);
+            if (delta === 0) return;
+            loyaltyMutation.mutate({ delta, reason: loyaltyReason });
+          }}
+          className="flex flex-wrap items-end gap-3"
+        >
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">{t("customers.loyaltyDelta")}</label>
+            <Input
+              type="number"
+              value={loyaltyDelta}
+              onChange={(e) => setLoyaltyDelta(e.target.value)}
+              placeholder="+100 / -50"
+              className="w-32"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">{t("customers.loyaltyReason")}</label>
+            <Input value={loyaltyReason} onChange={(e) => setLoyaltyReason(e.target.value)} className="w-52" />
+          </div>
+          <Button type="submit" disabled={!loyaltyDelta || loyaltyMutation.isPending}>
+            {t("customers.loyaltyAdjust")}
+          </Button>
+          {loyaltySuccess && <span className="text-sm text-green-600">{t("customers.loyaltySuccess")}</span>}
+          {loyaltyMutation.isError && <span className="text-sm text-red-600">{t("customers.loyaltyError")}</span>}
         </form>
       </div>
 

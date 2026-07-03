@@ -31,3 +31,4 @@ storefrontRouter.get("/push/vapid-key", asyncHandler(storefrontController.getPus
 storefrontRouter.post("/push/subscribe", validateBody(pushSubscribeSchema), asyncHandler(storefrontController.subscribeToPush));
 storefrontRouter.get("/products/:productId/reviews", asyncHandler(reviewsController.listStorefrontReviews));
 storefrontRouter.post("/products/:productId/reviews", validateBody(submitReviewSchema), asyncHandler(reviewsController.submitReview));
+storefrontRouter.get("/loyalty", asyncHandler(storefrontController.getLoyaltyBalance));

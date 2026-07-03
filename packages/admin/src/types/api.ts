@@ -22,6 +22,9 @@ export interface Tenant {
   instagram: string | null;
   facebook: string | null;
   youtube: string | null;
+  loyaltyEnabled: boolean;
+  loyaltyPointsRate: number;
+  loyaltyMinRedeem: number;
   createdAt: string;
 }
 
@@ -196,6 +199,7 @@ export interface Customer {
   addressRegion: string | null;
   addressDistrict: string | null;
   addressMahalla: string | null;
+  loyaltyPoints: number;
   orderCount: number;
   purchaseAmount: number;
   paidAmount: number;
@@ -211,6 +215,7 @@ export interface CustomerDetail {
   addressRegion: string | null;
   addressDistrict: string | null;
   addressMahalla: string | null;
+  loyaltyPoints: number;
   orderCount: number;
   purchaseAmount: number;
   paidAmount: number;

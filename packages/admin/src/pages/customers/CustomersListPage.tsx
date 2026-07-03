@@ -64,6 +64,7 @@ export function CustomersListPage() {
             <Th>{t("customers.purchaseAmount")}</Th>
             <Th>{t("customers.paidAmount")}</Th>
             <Th>{t("customers.balance")}</Th>
+            <Th>{t("customers.loyaltyPoints")}</Th>
             <Th>{t("customers.lastOrderAt")}</Th>
             <Th>{t("customers.customerSince")}</Th>
           </tr>
@@ -84,13 +85,14 @@ export function CustomersListPage() {
               <Td>{c.purchaseAmount.toLocaleString()}</Td>
               <Td>{c.paidAmount.toLocaleString()}</Td>
               <Td className={c.balance > 0 ? "text-red-600" : ""}>{c.balance.toLocaleString()}</Td>
+              <Td className="font-medium text-yellow-700">{c.loyaltyPoints > 0 ? c.loyaltyPoints.toLocaleString() : "—"}</Td>
               <Td>{c.lastOrderAt ? new Date(c.lastOrderAt).toLocaleDateString() : "—"}</Td>
               <Td>{new Date(c.createdAt).toLocaleDateString()}</Td>
             </tr>
           ))}
           {customers.length === 0 && (
             <tr>
-              <Td colSpan={11} className="text-center text-gray-400">
+              <Td colSpan={12} className="text-center text-gray-400">
                 {t("common.noData")}
               </Td>
             </tr>

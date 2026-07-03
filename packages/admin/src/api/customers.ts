@@ -18,3 +18,7 @@ export function getCustomer(id: string): Promise<{ customer: CustomerDetail }> {
 export function exportCustomers(): Promise<Blob> {
   return apiRequest("/api/customers/export", { responseType: "blob" });
 }
+
+export function adjustLoyaltyPoints(id: string, delta: number, reason?: string): Promise<{ customer: object }> {
+  return apiRequest(`/api/customers/${id}/loyalty`, { method: "PATCH", body: { delta, reason: reason ?? "" } });
+}

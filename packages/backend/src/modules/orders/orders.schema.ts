@@ -23,6 +23,7 @@ export const createOrderSchema = z
     addressNote: z.string().max(500).optional(),
     paymentMethod: z.string().max(50).optional(),
     promoCode: z.string().max(50).optional(),
+    loyaltyPointsToRedeem: z.number().int().min(0).optional(),
     items: z.array(orderItemInputSchema).min(1),
   })
   .refine((data) => DISTRICTS_BY_REGION.get(data.addressRegion)?.has(data.addressDistrict) ?? false, {

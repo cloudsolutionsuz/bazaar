@@ -82,7 +82,13 @@
     "promoExpired": "Промокод истёк",
     "promoExhausted": "Промокод больше не действует",
     "promoMinAmount": "Сумма заказа недостаточна для применения промокода",
-    "promoInvalid": "Промокод недействителен"
+    "promoInvalid": "Промокод недействителен",
+    "loyaltyPoints": "Баллы лояльности",
+    "loyaltyCheck": "Проверить баллы",
+    "loyaltyUse": "Использовать {{points}} баллов (−{{amount}} сум)",
+    "loyaltyDiscount": "Баллы лояльности",
+    "loyaltyNoPoints": "У вас пока нет баллов",
+    "loyaltyNotEnabled": "Программа лояльности в этом магазине не активна"
   },
   "confirmation": {
     "title": "Заказ принят!",

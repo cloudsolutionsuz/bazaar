@@ -13,3 +13,4 @@ customersRouter.use(requireAuth(), requireRole("OWNER", "MANAGER"));
 customersRouter.get("/export", asyncHandler(customersController.exportCustomers));
 customersRouter.get("/", validateQuery(listCustomersQuerySchema), asyncHandler(customersController.list));
 customersRouter.get("/:id", asyncHandler(customersController.get));
+customersRouter.patch("/:id/loyalty", asyncHandler(customersController.adjustLoyalty));

@@ -82,7 +82,13 @@
     "promoExpired": "Promokod muddati o'tgan",
     "promoExhausted": "Promokod endi amal qilmaydi",
     "promoMinAmount": "Buyurtma summasi promokod uchun yetarli emas",
-    "promoInvalid": "Promokod yaroqsiz"
+    "promoInvalid": "Promokod yaroqsiz",
+    "loyaltyPoints": "Sodiqlik ballari",
+    "loyaltyCheck": "Ballarni tekshirish",
+    "loyaltyUse": "{{points}} ball ishlatish (−{{amount}} so'm)",
+    "loyaltyDiscount": "Sodiqlik ballari",
+    "loyaltyNoPoints": "Sizda hali balllar yo'q",
+    "loyaltyNotEnabled": "Bu do'konda sodiqlik dasturi faol emas"
   },
   "confirmation": {
     "title": "Buyurtma qabul qilindi!",

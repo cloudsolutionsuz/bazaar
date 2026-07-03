@@ -41,6 +41,9 @@ const updateMySettingsSchema = z.object({
   instagram: z.string().trim().max(255).nullable().optional(),
   facebook: z.string().trim().max(255).nullable().optional(),
   youtube: z.string().trim().max(255).nullable().optional(),
+  loyaltyEnabled: z.boolean().optional(),
+  loyaltyPointsRate: z.number().int().min(1).max(50).optional(),
+  loyaltyMinRedeem: z.number().int().min(0).optional(),
 });
 
 tenantsRouter.patch(
@@ -49,8 +52,10 @@ tenantsRouter.patch(
   requireRole("OWNER"),
   validateBody(updateMySettingsSchema),
   asyncHandler(async (req, res) => {
-    const { telegramChatId, themeColor, description, inn, companyName, contactPhone, instagram, facebook, youtube } =
-      req.body as z.infer<typeof updateMySettingsSchema>;
+    const {
+      telegramChatId, themeColor, description, inn, companyName, contactPhone,
+      instagram, facebook, youtube, loyaltyEnabled, loyaltyPointsRate, loyaltyMinRedeem,
+    } = req.body as z.infer<typeof updateMySettingsSchema>;
     const tenant = await prisma.tenant.update({
       where: { id: req.authUser!.tenantId! },
       data: {
@@ -63,6 +68,9 @@ tenantsRouter.patch(
         ...(instagram !== undefined ? { instagram: instagram || null } : {}),
         ...(facebook !== undefined ? { facebook: facebook || null } : {}),
         ...(youtube !== undefined ? { youtube: youtube || null } : {}),
+        ...(loyaltyEnabled !== undefined ? { loyaltyEnabled } : {}),
+        ...(loyaltyPointsRate !== undefined ? { loyaltyPointsRate } : {}),
+        ...(loyaltyMinRedeem !== undefined ? { loyaltyMinRedeem } : {}),
       },
     });
     res.json({ tenant });

@@ -70,3 +70,19 @@ export async function subscribeToPush(req: Request, res: Response): Promise<void
   await storefrontService.subscribeToPush(req.tenant!.id, req.body as PushSubscribeInput);
   res.status(201).json({ ok: true });
 }
+
+export async function getLoyaltyBalance(req: Request, res: Response): Promise<void> {
+  const phone = String(req.query.phone ?? "").trim();
+  const tenant = req.tenant!;
+  if (!tenant.loyaltyEnabled) {
+    res.json({ loyaltyEnabled: false, loyaltyPoints: 0, loyaltyMinRedeem: 0, loyaltyPointsRate: 1 });
+    return;
+  }
+  const customer = await storefrontService.getCustomerByPhone(tenant.id, phone);
+  res.json({
+    loyaltyEnabled: true,
+    loyaltyPoints: customer?.loyaltyPoints ?? 0,
+    loyaltyMinRedeem: tenant.loyaltyMinRedeem,
+    loyaltyPointsRate: tenant.loyaltyPointsRate,
+  });
+}

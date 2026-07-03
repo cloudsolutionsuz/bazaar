@@ -11,6 +11,9 @@ export interface UpdateMySettingsInput {
   instagram?: string | null;
   facebook?: string | null;
   youtube?: string | null;
+  loyaltyEnabled?: boolean;
+  loyaltyPointsRate?: number;
+  loyaltyMinRedeem?: number;
 }
 
 export function updateMySettings(input: UpdateMySettingsInput): Promise<{ tenant: Tenant }> {

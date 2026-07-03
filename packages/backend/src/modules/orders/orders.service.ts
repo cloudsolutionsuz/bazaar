@@ -108,7 +108,37 @@ export async function createOrder(tenantId: string, userId: string | null, input
     promoCodeId = promo.promoCodeId;
     discountAmount = promo.discountAmount;
   }
-  const totalAmount = subtotal - discountAmount;
+
+  const tenant = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: { telegramChatId: true, loyaltyEnabled: true, loyaltyPointsRate: true, loyaltyMinRedeem: true },
+  });
+
+  let loyaltyPointsRedeemed = 0;
+  let customerId: string | null = null;
+
+  if (tenant?.loyaltyEnabled && (input.loyaltyPointsToRedeem ?? 0) > 0) {
+    const existingCustomer = await prisma.customer.findUnique({
+      where: { tenantId_phone: { tenantId, phone: input.customerPhone } },
+      select: { id: true, loyaltyPoints: true },
+    });
+    if (existingCustomer) {
+      customerId = existingCustomer.id;
+      const requested = input.loyaltyPointsToRedeem!;
+      const available = existingCustomer.loyaltyPoints;
+      const minRedeem = tenant.loyaltyMinRedeem ?? 0;
+      if (available >= minRedeem && available > 0) {
+        const afterPromo = subtotal - discountAmount;
+        loyaltyPointsRedeemed = Math.min(requested, available, afterPromo);
+      }
+    }
+  }
+
+  const preLoyaltyTotal = subtotal - discountAmount;
+  const loyaltyPointsEarned = tenant?.loyaltyEnabled
+    ? Math.round(preLoyaltyTotal * (tenant.loyaltyPointsRate ?? 1) / 100)
+    : 0;
+  const totalAmount = preLoyaltyTotal - loyaltyPointsRedeemed;
 
   const orderId = await prisma.$transaction(async (tx) => {
     // Atomic, race-safe stock guard: only decrements if enough stock is
@@ -161,6 +191,8 @@ export async function createOrder(tenantId: string, userId: string | null, input
         paymentMethod: input.paymentMethod,
         promoCodeId,
         discountAmount,
+        loyaltyPointsEarned,
+        loyaltyPointsRedeemed,
         totalAmount,
         items: { create: orderItemsData },
       },
@@ -171,6 +203,23 @@ export async function createOrder(tenantId: string, userId: string | null, input
         where: { id: promoCodeId },
         data: { usedCount: { increment: 1 } },
       });
+    }
+
+    if (loyaltyPointsRedeemed > 0 || loyaltyPointsEarned > 0) {
+      await tx.customer.update({
+        where: { id: customer.id },
+        data: {
+          loyaltyPoints: {
+            decrement: loyaltyPointsRedeemed,
+          },
+        },
+      });
+      if (loyaltyPointsEarned > 0) {
+        await tx.customer.update({
+          where: { id: customer.id },
+          data: { loyaltyPoints: { increment: loyaltyPointsEarned } },
+        });
+      }
     }
 
     await tx.orderStatusHistory.create({ data: { orderId: order.id, toStatus: "NEW", changedByUserId: userId } });
@@ -208,7 +257,6 @@ export async function createOrder(tenantId: string, userId: string | null, input
     return order.id;
   });
 
-  const tenant = await prisma.tenant.findUnique({ where: { id: tenantId }, select: { telegramChatId: true } });
   const chatId = tenant?.telegramChatId ?? null;
 
   await notifyNewOrder(chatId, input.customerName, totalAmount);
@@ -289,6 +337,18 @@ export async function updateOrderStatus(
         });
       } else if (incomeTransaction) {
         await tx.transaction.delete({ where: { id: incomeTransaction.id } });
+      }
+
+      if (order.customerId && (order.loyaltyPointsEarned > 0 || order.loyaltyPointsRedeemed > 0)) {
+        await tx.customer.update({
+          where: { id: order.customerId },
+          data: {
+            loyaltyPoints: {
+              decrement: order.loyaltyPointsEarned,
+              increment: order.loyaltyPointsRedeemed,
+            },
+          },
+        });
       }
     }
   });

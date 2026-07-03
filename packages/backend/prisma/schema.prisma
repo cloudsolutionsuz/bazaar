@@ -111,6 +111,9 @@ model Tenant {
   instagram    String?
   facebook     String?
   youtube      String?
+  loyaltyEnabled    Boolean @default(false)
+  loyaltyPointsRate Int     @default(1)
+  loyaltyMinRedeem  Int     @default(0)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
@@ -410,10 +413,12 @@ model Order {
   status           OrderStatus @default(NEW)
   courierName      String?
   paymentMethod    String?
-  promoCodeId      String?
-  promoCode        PromoCode?  @relation(fields: [promoCodeId], references: [id])
-  discountAmount   Int         @default(0)
-  totalAmount      Int
+  promoCodeId            String?
+  promoCode              PromoCode?  @relation(fields: [promoCodeId], references: [id])
+  discountAmount         Int         @default(0)
+  loyaltyPointsEarned    Int         @default(0)
+  loyaltyPointsRedeemed  Int         @default(0)
+  totalAmount            Int
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
 
@@ -437,6 +442,7 @@ model Customer {
   addressRegion   String?
   addressDistrict String?
   addressMahalla  String?
+  loyaltyPoints   Int      @default(0)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

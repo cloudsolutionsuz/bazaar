@@ -41,7 +41,19 @@ export interface CheckoutInput {
   addressNote?: string;
   paymentMethod?: string;
   promoCode?: string;
+  loyaltyPointsToRedeem?: number;
   items: { variantId: string; quantity: number }[];
+}
+
+export interface LoyaltyBalance {
+  loyaltyEnabled: boolean;
+  loyaltyPoints: number;
+  loyaltyMinRedeem: number;
+  loyaltyPointsRate: number;
+}
+
+export function getLoyaltyBalance(phone: string): Promise<LoyaltyBalance> {
+  return apiRequest("/api/storefront/loyalty", { query: { phone } });
 }
 
 export function getProductReviews(productId: string): Promise<ProductReviewsResult> {

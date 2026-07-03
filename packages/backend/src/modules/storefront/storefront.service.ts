@@ -201,3 +201,13 @@ export async function pushToCustomer(tenantId: string, phone: string, title: str
   if (!sub) return;
   await sendWebPush(sub, { title, body });
 }
+
+
+export async function getCustomerByPhone(tenantId: string, phone: string) {
+  if (!phone) return null;
+  const normalized = normalizePhone(phone);
+  return prisma.customer.findUnique({
+    where: { tenantId_phone: { tenantId, phone: normalized } },
+    select: { loyaltyPoints: true },
+  });
+}

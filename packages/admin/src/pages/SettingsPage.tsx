@@ -18,6 +18,9 @@ export function SettingsPage() {
   const [instagram, setInstagram] = useState(tenant?.instagram ?? "");
   const [facebook, setFacebook] = useState(tenant?.facebook ?? "");
   const [youtube, setYoutube] = useState(tenant?.youtube ?? "");
+  const [loyaltyEnabled, setLoyaltyEnabled] = useState(tenant?.loyaltyEnabled ?? false);
+  const [loyaltyPointsRate, setLoyaltyPointsRate] = useState(String(tenant?.loyaltyPointsRate ?? 1));
+  const [loyaltyMinRedeem, setLoyaltyMinRedeem] = useState(String(tenant?.loyaltyMinRedeem ?? 0));
   const [saved, setSaved] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -33,6 +36,9 @@ export function SettingsPage() {
         instagram: instagram || null,
         facebook: facebook || null,
         youtube: youtube || null,
+        loyaltyEnabled,
+        loyaltyPointsRate: Number(loyaltyPointsRate) || 1,
+        loyaltyMinRedeem: Number(loyaltyMinRedeem) || 0,
       }),
     onSuccess: async () => {
       await refreshTenant();
@@ -143,6 +149,53 @@ export function SettingsPage() {
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
           />
         </div>
+
+        <hr className="border-gray-100" />
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-gray-700">{t("settings.loyalty")}</label>
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={loyaltyEnabled}
+              onChange={(e) => setLoyaltyEnabled(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300"
+            />
+            <span className="text-sm text-gray-700">{t("settings.loyaltyEnabled")}</span>
+          </label>
+        </div>
+
+        {loyaltyEnabled && (
+          <>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t("settings.loyaltyRate")}</label>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min={1}
+                  max={50}
+                  value={loyaltyPointsRate}
+                  onChange={(e) => setLoyaltyPointsRate(e.target.value)}
+                  className="w-24"
+                />
+                <span className="text-sm text-gray-500">{t("settings.loyaltyRateHint")}</span>
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t("settings.loyaltyMinRedeem")}</label>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min={0}
+                  value={loyaltyMinRedeem}
+                  onChange={(e) => setLoyaltyMinRedeem(e.target.value)}
+                  className="w-24"
+                />
+                <span className="text-sm text-gray-500">{t("settings.loyaltyMinRedeemHint")}</span>
+              </div>
+            </div>
+          </>
+        )}
 
         {saved && <p className="text-sm text-green-600">{t("settings.saved")}</p>}
 
