@@ -45,6 +45,7 @@ export function BillingPage() {
   const [justPaid, setJustPaid] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [planChanged, setPlanChanged] = useState(false);
+  const [prepayCreated, setPrepayCreated] = useState(false);
 
   const summaryQuery = useQuery({ queryKey: ["billing", "summary"], queryFn: billingApi.getBillingSummary });
   const plansQuery = useQuery({ queryKey: ["plans"], queryFn: plansApi.listPlans });
@@ -66,6 +67,15 @@ export function BillingPage() {
       setSelectedPlanId(null);
       setPlanChanged(true);
       setTimeout(() => setPlanChanged(false), 3000);
+    },
+  });
+
+  const prepayMutation = useMutation({
+    mutationFn: (months: 3 | 6 | 12) => billingApi.createPrepayInvoice(months),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["billing"] });
+      setPrepayCreated(true);
+      setTimeout(() => setPrepayCreated(false), 5000);
     },
   });
 
@@ -107,6 +117,31 @@ export function BillingPage() {
           >
             {t("billing.changePlanConfirm")}
           </Button>
+        </div>
+      </div>
+
+      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-6">
+        <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("billing.prepay")}</h2>
+        <p className="mb-4 text-sm text-gray-500">{t("billing.prepayHint")}</p>
+        {prepayCreated && <p className="mb-3 text-sm text-green-600">{t("billing.prepayInvoiceCreated")}</p>}
+        <div className="grid grid-cols-3 gap-3">
+          {([3, 6, 12] as const).map((months) => {
+            const discounts: Record<number, number> = { 3: 0.05, 6: 0.10, 12: 0.15 };
+            const discount = discounts[months];
+            const amount = Math.round(tenant.plan.priceSum * months * (1 - discount));
+            const labelKey = `billing.prepay${months}months` as const;
+            return (
+              <button
+                key={months}
+                disabled={prepayMutation.isPending}
+                onClick={() => prepayMutation.mutate(months)}
+                className="rounded-xl border border-gray-200 p-4 text-left hover:border-brand-400 hover:bg-brand-50 disabled:opacity-50"
+              >
+                <div className="mb-1 text-sm font-medium text-gray-900">{t(labelKey)}</div>
+                <div className="text-sm text-brand-700">{t("billing.prepayAmount", { amount: amount.toLocaleString() })}</div>
+              </button>
+            );
+          })}
         </div>
       </div>
 

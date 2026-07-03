@@ -120,7 +120,9 @@
     "downloadTemplate": "Скачать шаблон",
     "applyDiscount": "Применить скидку",
     "clearDiscount": "Убрать скидку",
-    "discountApplied": "Скидка применена к товарам: {{count}}"
+    "discountApplied": "Скидка применена к товарам: {{count}}",
+    "arrange": "Раскладчик",
+    "arrangeHint": "Перетащите товары вверх/вниз, чтобы изменить порядок в витрине"
   },
   "inventory": {
     "title": "Склад",
@@ -248,7 +250,15 @@
     "paySuccess": "Оплата прошла успешно",
     "changePlan": "Изменить тариф",
     "changePlanConfirm": "Сменить тариф",
-    "changePlanSuccess": "Тариф успешно изменён"
+    "changePlanSuccess": "Тариф успешно изменён",
+    "prepay": "Оплата вперёд",
+    "prepayHint": "Оплатите несколько месяцев сразу и сэкономьте",
+    "prepay3months": "3 месяца (скидка 5%)",
+    "prepay6months": "6 месяцев (скидка 10%)",
+    "prepay12months": "12 месяцев (скидка 15%)",
+    "prepayAmount": "Сумма: {{amount}} сум",
+    "prepayConfirm": "Создать счёт",
+    "prepayInvoiceCreated": "Счёт на предоплату создан — оплатите его ниже"
   },
   "kassa": {
     "title": "Касса",

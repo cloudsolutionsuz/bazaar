@@ -120,7 +120,9 @@
     "downloadTemplate": "Shablonni yuklab olish",
     "applyDiscount": "Chegirma qo'llash",
     "clearDiscount": "Chegirmani olib tashlash",
-    "discountApplied": "Tovarlarga chegirma qo'llandi: {{count}}"
+    "discountApplied": "Tovarlarga chegirma qo'llandi: {{count}}",
+    "arrange": "Joylashtiruvchi",
+    "arrangeHint": "Vitrinadagi tartibni o'zgartirish uchun tovarlarni yuqori/pastga suring"
   },
   "inventory": {
     "title": "Ombor",
@@ -248,7 +250,15 @@
     "paySuccess": "To'lov muvaffaqiyatli amalga oshirildi",
     "changePlan": "Tarifni o'zgartirish",
     "changePlanConfirm": "Tarifni almashtirish",
-    "changePlanSuccess": "Tarif muvaffaqiyatli o'zgartirildi"
+    "changePlanSuccess": "Tarif muvaffaqiyatli o'zgartirildi",
+    "prepay": "Oldindan to'lash",
+    "prepayHint": "Bir necha oyni birdan to'lang va tejang",
+    "prepay3months": "3 oy (5% chegirma)",
+    "prepay6months": "6 oy (10% chegirma)",
+    "prepay12months": "12 oy (15% chegirma)",
+    "prepayAmount": "Summa: {{amount}} so'm",
+    "prepayConfirm": "Hisob-faktura yaratish",
+    "prepayInvoiceCreated": "Oldindan to'lov hisob-fakturasi yaratildi — quyida to'lang"
   },
   "kassa": {
     "title": "Kassa",

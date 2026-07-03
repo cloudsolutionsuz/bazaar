@@ -35,6 +35,7 @@ export interface Product {
   color: string | null;
   currency: string;
   status: ProductStatus;
+  position: number;
   variants: ProductVariant[];
   images: ProductImage[];
   promotionName: string | null;

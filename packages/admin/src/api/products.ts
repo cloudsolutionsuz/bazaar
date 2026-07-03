@@ -85,6 +85,10 @@ export function reorderImages(productId: string, imageIds: string[]): Promise<vo
   return apiRequest(`/api/products/${productId}/images/reorder`, { method: "PATCH", body: { imageIds }, responseType: "none" });
 }
 
+export function reorderProducts(ids: string[]): Promise<void> {
+  return apiRequest("/api/products/reorder", { method: "PATCH", body: { ids }, responseType: "none" });
+}
+
 export function exportProducts(): Promise<Blob> {
   return apiRequest("/api/products/export", { responseType: "blob" });
 }

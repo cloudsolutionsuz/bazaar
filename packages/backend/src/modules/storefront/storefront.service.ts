@@ -87,8 +87,12 @@ export async function listProducts(tenantId: string, query: ListStorefrontProduc
       : {}),
   };
 
-  const orderBy: Prisma.ProductOrderByWithRelationInput =
-    query.sort === "price_asc" ? { price: "asc" } : query.sort === "price_desc" ? { price: "desc" } : { createdAt: "desc" };
+  const orderBy: Prisma.ProductOrderByWithRelationInput[] =
+    query.sort === "price_asc"
+      ? [{ price: "asc" }]
+      : query.sort === "price_desc"
+        ? [{ price: "desc" }]
+        : [{ position: "asc" }, { createdAt: "desc" }];
 
   const [rawItems, total] = await Promise.all([
     prisma.product.findMany({

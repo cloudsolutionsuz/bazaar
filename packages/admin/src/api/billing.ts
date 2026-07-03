@@ -16,3 +16,14 @@ export function confirmSandboxPayment(invoiceId: string): Promise<{ invoice: Bil
 export function changePlan(planId: string): Promise<{ plan: Plan }> {
   return apiRequest("/api/billing/change-plan", { method: "POST", body: { planId } });
 }
+
+export interface PrepayResult {
+  invoice: BillingInvoice;
+  discount: number;
+  months: number;
+  baseAmount: number;
+}
+
+export function createPrepayInvoice(months: 3 | 6 | 12): Promise<PrepayResult> {
+  return apiRequest("/api/billing/prepay", { method: "POST", body: { months } });
+}

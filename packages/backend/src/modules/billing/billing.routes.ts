@@ -24,3 +24,4 @@ billingRouter.post(
 );
 billingRouter.post("/run-cycle", requireRole("SUPER_ADMIN"), asyncHandler(billingController.runCycle));
 billingRouter.post("/change-plan", requireRole("OWNER"), asyncHandler(billingController.changePlan));
+billingRouter.post("/prepay", requireRole("OWNER"), asyncHandler(billingController.createPrepayInvoice));

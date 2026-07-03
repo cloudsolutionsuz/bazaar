@@ -5,6 +5,7 @@ import type {
   CreateProductInput,
   CreateVariantInput,
   ListProductsQuery,
+  ReorderProductsInput,
   UpdateProductInput,
   UpdateVariantInput,
 } from "./products.schema";
@@ -78,6 +79,11 @@ export async function deleteImage(req: Request, res: Response): Promise<void> {
 
 export async function reorderImages(req: Request, res: Response): Promise<void> {
   await productsService.reorderImages(req.authUser!.tenantId!, req.params.id, req.body.imageIds as string[]);
+  res.status(204).send();
+}
+
+export async function reorderProducts(req: Request, res: Response): Promise<void> {
+  await productsService.reorderProducts(req.authUser!.tenantId!, (req.body as ReorderProductsInput).ids);
   res.status(204).send();
 }
 

@@ -67,7 +67,7 @@ export async function listProducts(tenantId: string, query: ListProductsQuery) {
     prisma.product.findMany({
       where,
       include: productInclude,
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ position: "asc" }, { createdAt: "desc" }],
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),
@@ -75,6 +75,14 @@ export async function listProducts(tenantId: string, query: ListProductsQuery) {
   ]);
 
   return { items, total, page, pageSize };
+}
+
+export async function reorderProducts(tenantId: string, ids: string[]): Promise<void> {
+  await prisma.$transaction(
+    ids.map((id, index) =>
+      prisma.product.updateMany({ where: { id, tenantId }, data: { position: index } }),
+    ),
+  );
 }
 
 export async function createProduct(tenantId: string, userId: string, input: CreateProductInput) {

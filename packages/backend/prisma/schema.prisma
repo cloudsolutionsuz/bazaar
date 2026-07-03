@@ -104,6 +104,7 @@ model Tenant {
   themeColor   String?
   description  String?
   isVip        Boolean      @default(false)
+  prepaidUntil DateTime?
   inn          String?
   companyName  String?
   contactPhone String?
@@ -146,6 +147,7 @@ model BillingInvoice {
   paidAt                DateTime?
   provider              PaymentProviderType?
   providerTransactionId String?
+  prepayMonths          Int?
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 
@@ -291,6 +293,7 @@ model Product {
   code            String?
   currency        String        @default("UZS")
   status          ProductStatus @default(ACTIVE)
+  position        Int           @default(0)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 

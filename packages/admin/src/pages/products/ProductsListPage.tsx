@@ -136,6 +136,9 @@ export function ProductsListPage() {
           <Button variant="secondary" onClick={() => setDiscountModalOpen(true)}>
             {t("products.applyDiscount")}
           </Button>
+          <Link to="/products/arrange">
+            <Button variant="secondary">{t("products.arrange")}</Button>
+          </Link>
           <Link to="/products/new">
             <Button>{t("products.addProduct")}</Button>
           </Link>

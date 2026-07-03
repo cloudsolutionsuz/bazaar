@@ -80,6 +80,7 @@ export interface Product {
   code: string | null;
   currency: string;
   status: ProductStatus;
+  position: number;
   variants: ProductVariant[];
   images: ProductImage[];
   createdAt: string;
@@ -281,6 +282,7 @@ export interface BillingInvoice {
   dueDate: string;
   paidAt: string | null;
   provider: "PAYME" | "CLICK" | "MANUAL" | null;
+  prepayMonths: number | null;
 }
 
 export interface BillingSummary {

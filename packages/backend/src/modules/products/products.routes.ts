@@ -9,6 +9,7 @@ import {
   createVariantSchema,
   listProductsQuerySchema,
   reorderImagesSchema,
+  reorderProductsSchema,
   updateProductSchema,
   updateVariantSchema,
 } from "./products.schema";
@@ -22,6 +23,7 @@ productsRouter.get("/export", asyncHandler(productsController.exportProducts));
 productsRouter.get("/import-template", asyncHandler(productsController.importTemplate));
 productsRouter.post("/import", uploadSpreadsheet, asyncHandler(productsController.importProducts));
 
+productsRouter.patch("/reorder", validateBody(reorderProductsSchema), asyncHandler(productsController.reorderProducts));
 productsRouter.get("/", validateQuery(listProductsQuerySchema), asyncHandler(productsController.list));
 productsRouter.post("/", validateBody(createProductSchema), asyncHandler(productsController.create));
 productsRouter.get("/:id", asyncHandler(productsController.get));

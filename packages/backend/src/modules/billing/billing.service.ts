@@ -51,6 +51,8 @@ async function renewExpiredPeriods(now: Date): Promise<void> {
   const activeTenants = await prisma.tenant.findMany({ where: { status: "ACTIVE", isVip: false }, include: { plan: true } });
 
   for (const tenant of activeTenants) {
+    if (tenant.prepaidUntil && tenant.prepaidUntil > now) continue;
+
     const latestInvoice = await prisma.billingInvoice.findFirst({
       where: { tenantId: tenant.id },
       orderBy: { periodEnd: "desc" },
@@ -129,6 +131,8 @@ export async function runBillingCycle(): Promise<void> {
   await sendExpiryReminders(now);
 }
 
+const PREPAY_DISCOUNTS: Record<number, number> = { 3: 0.05, 6: 0.10, 12: 0.15 };
+
 export async function payInvoice(invoiceId: string, provider: PaymentProviderType, providerTransactionId?: string) {
   const invoice = await prisma.billingInvoice.findUnique({ where: { id: invoiceId } });
   if (!invoice) {
@@ -138,15 +142,47 @@ export async function payInvoice(invoiceId: string, provider: PaymentProviderTyp
     return invoice;
   }
 
+  const tenantUpdate: Record<string, unknown> = { status: "ACTIVE" };
+  if (invoice.prepayMonths) {
+    tenantUpdate.prepaidUntil = invoice.periodEnd;
+  }
+
   const [updated] = await prisma.$transaction([
     prisma.billingInvoice.update({
       where: { id: invoiceId },
       data: { status: "PAID", paidAt: new Date(), provider, providerTransactionId },
     }),
-    prisma.tenant.update({ where: { id: invoice.tenantId }, data: { status: "ACTIVE" } }),
+    prisma.tenant.update({ where: { id: invoice.tenantId }, data: tenantUpdate }),
   ]);
 
   return updated;
+}
+
+export async function createPrepayInvoice(tenantId: string, months: 3 | 6 | 12) {
+  const tenant = await prisma.tenant.findUniqueOrThrow({ where: { id: tenantId }, include: { plan: true } });
+  const discount = PREPAY_DISCOUNTS[months] ?? 0;
+  const baseAmount = tenant.plan.priceSum * months;
+  const amount = Math.round(baseAmount * (1 - discount));
+
+  const now = new Date();
+  const periodStart = now;
+  const periodEnd = addMonths(now, months);
+  const dueDate = addDays(now, DUE_GRACE_DAYS);
+
+  const invoice = await prisma.billingInvoice.create({
+    data: {
+      tenantId,
+      planId: tenant.planId,
+      planCode: tenant.plan.code,
+      amount,
+      periodStart,
+      periodEnd,
+      dueDate,
+      prepayMonths: months,
+    },
+  });
+
+  return { invoice, discount, months, baseAmount };
 }
 
 export async function getInvoiceForTenant(tenantId: string, invoiceId: string) {

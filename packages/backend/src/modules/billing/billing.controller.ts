@@ -30,6 +30,16 @@ export async function changePlan(req: Request, res: Response): Promise<void> {
   res.json({ plan });
 }
 
+export async function createPrepayInvoice(req: Request, res: Response): Promise<void> {
+  const months = Number(req.body.months) as 3 | 6 | 12;
+  if (![3, 6, 12].includes(months)) {
+    res.status(400).json({ error: { code: "INVALID_MONTHS", message: "months must be 3, 6, or 12" } });
+    return;
+  }
+  const result = await billingService.createPrepayInvoice(req.authUser!.tenantId!, months);
+  res.status(201).json(result);
+}
+
 export async function paymeWebhook(_req: Request, res: Response): Promise<void> {
   // TODO: once real merchant credentials exist, verify the request via Basic
   // Auth against PAYME_SECRET_KEY and dispatch on the JSON-RPC `method`
