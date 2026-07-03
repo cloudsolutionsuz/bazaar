@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as ordersApi from "../../api/orders";
+import { ApiError } from "../../api/client";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Badge } from "../../components/ui/Badge";
@@ -130,6 +131,16 @@ export function OrderDetailPage() {
                 </Button>
               ))}
             </div>
+            {statusMutation.isError && (
+              <p className="text-sm text-red-600">
+                {statusMutation.error instanceof ApiError
+                  ? statusMutation.error.message
+                  : t("common.error")}
+              </p>
+            )}
+            {statusMutation.isSuccess && (
+              <p className="text-sm text-green-600">{t("orders.statusChanged")}</p>
+            )}
           </div>
         )}
       </section>

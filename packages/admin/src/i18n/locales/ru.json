@@ -228,7 +228,8 @@
     "archiveSelected": "Архивировать выбранные ({{count}})",
     "applyToSelected": "Применить к выбранным ({{count}})",
     "archivedCount": "Изменено {{succeeded}} из {{total}}",
-    "noTransitions": "Это финальный статус"
+    "noTransitions": "Это финальный статус",
+    "statusChanged": "Статус успешно изменён"
   },
   "billing": {
     "title": "Биллинг",

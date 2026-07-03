@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as promoCodesApi from "../../api/promoCodes";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
+import { NumberInput } from "../../components/ui/NumberInput";
 import { Badge } from "../../components/ui/Badge";
 import { Table, Thead, Tbody, Th, Td } from "../../components/ui/Table";
 
@@ -117,12 +118,12 @@ export function PromoCodesPage() {
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">{t("promoCodes.minOrderAmount")}</label>
-              <Input
-                type="number"
+              <NumberInput
                 min={0}
                 value={minOrderAmount}
                 onChange={(e) => setMinOrderAmount(e.target.value)}
                 placeholder="0"
+                className="w-full text-left"
               />
             </div>
             <div>

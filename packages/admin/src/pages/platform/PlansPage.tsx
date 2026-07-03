@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as plansApi from "../../api/plans";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
+import { NumberInput } from "../../components/ui/NumberInput";
 import { Table, Thead, Tbody, Th, Td } from "../../components/ui/Table";
 import type { Plan } from "../../types/api";
 
@@ -117,13 +118,12 @@ export function PlansPage() {
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">{t("platform.priceSum")}</label>
-              <Input
+              <NumberInput
                 required
-                type="number"
                 min={1}
                 value={form.priceSum}
                 onChange={(e) => setForm({ ...form, priceSum: e.target.value })}
-                className="w-full"
+                className="w-full text-left"
               />
             </div>
             <div>

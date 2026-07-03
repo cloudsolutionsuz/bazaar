@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as financeApi from "../../api/finance";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
+import { NumberInput } from "../../components/ui/NumberInput";
 import { Select } from "../../components/ui/Select";
 import { Badge } from "../../components/ui/Badge";
 import { StatCard } from "../../components/ui/StatCard";
@@ -139,7 +140,7 @@ export function KassaPage() {
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">{t("kassa.amount")}</label>
-            <Input required type="number" min={1} value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full" />
+            <NumberInput required min={1} value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full text-left" />
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">{t("kassa.description")}</label>

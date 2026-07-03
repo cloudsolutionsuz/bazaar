@@ -7,6 +7,7 @@ import * as financeApi from "../../api/finance";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
+import { NumberInput } from "../../components/ui/NumberInput";
 import { Select } from "../../components/ui/Select";
 import { Table, Thead, Tbody, Th, Td } from "../../components/ui/Table";
 import { STATUS_COLORS, STATUS_LABEL_KEYS } from "../orders/OrdersListPage";
@@ -120,13 +121,12 @@ export function CustomerDetailPage() {
         <form onSubmit={handlePay} className="flex flex-wrap items-end gap-3">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">{t("customers.payAmount")}</label>
-            <Input
-              type="number"
+            <NumberInput
               min={1}
               required
               value={payAmount}
               onChange={(e) => setPayAmount(e.target.value)}
-              className="w-40"
+              className="w-40 text-left"
             />
           </div>
           <div>

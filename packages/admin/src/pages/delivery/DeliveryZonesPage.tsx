@@ -6,6 +6,7 @@ import type { DeliveryZone } from "../../types/api";
 import { UZBEKISTAN_REGIONS } from "../../data/uzbekistanRegions";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
+import { NumberInput } from "../../components/ui/NumberInput";
 import { Badge } from "../../components/ui/Badge";
 import { Table, Thead, Tbody, Th, Td } from "../../components/ui/Table";
 
@@ -152,23 +153,23 @@ export function DeliveryZonesPage() {
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">{t("delivery.cost")}</label>
-              <Input
+              <NumberInput
                 required
-                type="number"
                 min={0}
                 value={form.cost}
                 onChange={(e) => setForm((p) => ({ ...p, cost: e.target.value }))}
                 placeholder="0"
+                className="w-full text-left"
               />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">{t("delivery.freeAbove")}</label>
-              <Input
-                type="number"
+              <NumberInput
                 min={0}
                 value={form.freeAbove}
                 onChange={(e) => setForm((p) => ({ ...p, freeAbove: e.target.value }))}
                 placeholder={t("delivery.freeAbovePlaceholder")}
+                className="w-full text-left"
               />
             </div>
             <div>

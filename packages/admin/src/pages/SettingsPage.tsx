@@ -5,6 +5,7 @@ import { useAuth } from "../auth/AuthContext";
 import * as tenantsApi from "../api/tenants";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
+import { NumberInput } from "../components/ui/NumberInput";
 
 export function SettingsPage() {
   const { t } = useTranslation();
@@ -209,12 +210,11 @@ export function SettingsPage() {
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">{t("settings.minOrderAmount")}</label>
           <div className="flex items-center gap-2">
-            <Input
-              type="number"
+            <NumberInput
               min={0}
               value={minOrderAmount}
               onChange={(e) => setMinOrderAmount(e.target.value)}
-              className="w-32"
+              className="w-36 text-left"
             />
             <span className="text-sm text-gray-500">{t("settings.minOrderAmountHint")}</span>
           </div>

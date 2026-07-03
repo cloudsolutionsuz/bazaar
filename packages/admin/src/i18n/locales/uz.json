@@ -225,6 +225,7 @@
     "archiveSelected": "Tanlanganlarni arxivlash ({{count}})",
     "archivedCount": "{{total}} tadan {{succeeded}} tasi o'zgartirildi",
     "noTransitions": "Bu yakuniy holat",
+    "statusChanged": "Holat muvaffaqiyatli o'zgartirildi",
     "archivedTitle": "Arxivlangan buyurtmalar",
     "viewArchived": "Buyurtmalar arxivi",
     "time": "Vaqt",
