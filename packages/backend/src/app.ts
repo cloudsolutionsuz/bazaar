@@ -24,6 +24,7 @@ import { chatRouter } from "./modules/chat/chat.routes";
 import { aiAdvisorRouter } from "./modules/aiAdvisor/aiAdvisor.routes";
 import { promotionsRouter } from "./modules/promotions/promotions.routes";
 import { promoCodesRouter } from "./modules/promo-codes/promo-codes.routes";
+import { reviewsRouter } from "./modules/reviews/reviews.routes";
 
 export function createApp(): Express {
   const app = express();
@@ -58,6 +59,7 @@ export function createApp(): Express {
   app.use("/api/ai-advisor", aiAdvisorRouter);
   app.use("/api/promotions", promotionsRouter);
   app.use("/api/promo-codes", promoCodesRouter);
+  app.use("/api/reviews", reviewsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

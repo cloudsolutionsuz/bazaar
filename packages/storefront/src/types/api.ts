@@ -102,3 +102,17 @@ export interface ChatMessage {
   text: string;
   createdAt: string;
 }
+
+export interface ProductReview {
+  id: string;
+  customerName: string;
+  rating: number;
+  text: string | null;
+  createdAt: string;
+}
+
+export interface ProductReviewsResult {
+  reviews: ProductReview[];
+  averageRating: number | null;
+  reviewCount: number;
+}

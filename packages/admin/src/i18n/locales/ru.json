@@ -31,6 +31,7 @@
     "banners": "Баннеры",
     "promotions": "Акции",
     "promoCodes": "Промокоды",
+    "reviews": "Отзывы",
     "customers": "Покупатели",
     "orders": "Заказы",
     "chat": "Чат",
@@ -478,6 +479,22 @@
     "deactivate": "Деактивировать",
     "confirmDeactivate": "Деактивировать этот промокод?",
     "empty": "Промокодов пока нет"
+  },
+  "reviews": {
+    "title": "Отзывы покупателей",
+    "tabPending": "На проверке",
+    "tabApproved": "Одобренные",
+    "tabAll": "Все",
+    "product": "Товар",
+    "customer": "Покупатель",
+    "rating": "Оценка",
+    "comment": "Комментарий",
+    "status": "Статус",
+    "approved": "Одобрен",
+    "pending": "На проверке",
+    "approve": "Одобрить",
+    "confirmDelete": "Удалить этот отзыв?",
+    "empty": "Отзывов нет"
   },
   "chat": {
     "title": "Чат",

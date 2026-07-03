@@ -28,7 +28,20 @@
     "quantity": "Количество",
     "addToCart": "В корзину",
     "added": "Добавлено в корзину",
-    "discountPercent": "-{{percent}}%"
+    "discountPercent": "-{{percent}}%",
+    "reviews": "Отзывы",
+    "noReviews": "Отзывов пока нет. Будьте первым!",
+    "reviewAverage": "{{avg}} / 5 ({{count}} отзыв)",
+    "leaveReview": "Оставить отзыв",
+    "reviewName": "Ваше имя",
+    "reviewPhone": "Телефон",
+    "reviewRating": "Ваша оценка",
+    "reviewText": "Комментарий (необязательно)",
+    "reviewTextPlaceholder": "Расскажите о товаре...",
+    "reviewSubmit": "Отправить отзыв",
+    "reviewThanks": "Спасибо! Ваш отзыв отправлен на проверку.",
+    "reviewAlreadySubmitted": "Вы уже оставляли отзыв на этот товар.",
+    "reviewError": "Не удалось отправить отзыв. Попробуйте позже."
   },
   "cart": {
     "title": "Корзина",

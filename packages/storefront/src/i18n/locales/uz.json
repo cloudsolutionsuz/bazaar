@@ -28,7 +28,20 @@
     "quantity": "Miqdori",
     "addToCart": "Savatga",
     "added": "Savatga qo'shildi",
-    "discountPercent": "-{{percent}}%"
+    "discountPercent": "-{{percent}}%",
+    "reviews": "Sharhlar",
+    "noReviews": "Hali sharhlar yo'q. Birinchi bo'ling!",
+    "reviewAverage": "{{avg}} / 5 ({{count}} sharh)",
+    "leaveReview": "Sharh qoldirish",
+    "reviewName": "Ismingiz",
+    "reviewPhone": "Telefon",
+    "reviewRating": "Bahongiz",
+    "reviewText": "Izoh (ixtiyoriy)",
+    "reviewTextPlaceholder": "Mahsulot haqida aytib bering...",
+    "reviewSubmit": "Sharh yuborish",
+    "reviewThanks": "Rahmat! Sharhingiz tekshiruvga yuborildi.",
+    "reviewAlreadySubmitted": "Siz bu mahsulotga allaqachon sharh qoldirdingiz.",
+    "reviewError": "Sharh yuborib bo'lmadi. Keyinroq urinib ko'ring."
   },
   "cart": {
     "title": "Savat",

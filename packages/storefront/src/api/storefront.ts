@@ -1,6 +1,6 @@
 import { apiRequest } from "./client";
 import { getSessionId } from "../utils/session";
-import type { Banner, Category, ChatMessage, OrderResult, Paginated, Product, TenantMeta } from "../types/api";
+import type { Banner, Category, ChatMessage, OrderResult, Paginated, Product, ProductReviewsResult, TenantMeta } from "../types/api";
 
 export function listCategories(): Promise<{ categories: Category[] }> {
   return apiRequest("/api/storefront/categories");
@@ -42,6 +42,21 @@ export interface CheckoutInput {
   paymentMethod?: string;
   promoCode?: string;
   items: { variantId: string; quantity: number }[];
+}
+
+export function getProductReviews(productId: string): Promise<ProductReviewsResult> {
+  return apiRequest(`/api/storefront/products/${productId}/reviews`);
+}
+
+export interface SubmitReviewInput {
+  customerPhone: string;
+  customerName: string;
+  rating: number;
+  text?: string;
+}
+
+export function submitProductReview(productId: string, input: SubmitReviewInput): Promise<{ review: object }> {
+  return apiRequest(`/api/storefront/products/${productId}/reviews`, { method: "POST", body: input });
 }
 
 export function validatePromoCode(

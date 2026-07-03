@@ -4,7 +4,9 @@ import { requireActiveTenant, requireResolvedTenant } from "../../middleware/req
 import { validateBody, validateQuery } from "../../middleware/validate";
 import { listStorefrontProductsQuerySchema, myOrdersQuerySchema, pushSubscribeSchema, sendChatMessageSchema, trackPageViewSchema } from "./storefront.schema";
 import { createOrderSchema } from "../orders/orders.schema";
+import { submitReviewSchema } from "../reviews/reviews.schema";
 import * as storefrontController from "./storefront.controller";
+import * as reviewsController from "../reviews/reviews.controller";
 
 export const storefrontRouter = Router();
 
@@ -27,3 +29,5 @@ storefrontRouter.post(
 );
 storefrontRouter.get("/push/vapid-key", asyncHandler(storefrontController.getPushVapidKey));
 storefrontRouter.post("/push/subscribe", validateBody(pushSubscribeSchema), asyncHandler(storefrontController.subscribeToPush));
+storefrontRouter.get("/products/:productId/reviews", asyncHandler(reviewsController.listStorefrontReviews));
+storefrontRouter.post("/products/:productId/reviews", validateBody(submitReviewSchema), asyncHandler(reviewsController.submitReview));

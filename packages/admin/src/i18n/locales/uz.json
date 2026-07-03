@@ -31,6 +31,7 @@
     "banners": "Bannerlar",
     "promotions": "Aksiyalar",
     "promoCodes": "Promokodlar",
+    "reviews": "Sharhlar",
     "customers": "Xaridorlar",
     "orders": "Buyurtmalar",
     "chat": "Chat",
@@ -478,6 +479,22 @@
     "deactivate": "O'chirish",
     "confirmDeactivate": "Bu promokodni o'chirmoqchimisiz?",
     "empty": "Hozircha promokodlar yo'q"
+  },
+  "reviews": {
+    "title": "Xaridorlar sharhlari",
+    "tabPending": "Tekshiruvda",
+    "tabApproved": "Tasdiqlangan",
+    "tabAll": "Barchasi",
+    "product": "Mahsulot",
+    "customer": "Xaridor",
+    "rating": "Baho",
+    "comment": "Izoh",
+    "status": "Holat",
+    "approved": "Tasdiqlangan",
+    "pending": "Tekshiruvda",
+    "approve": "Tasdiqlash",
+    "confirmDelete": "Bu sharhni o'chirmoqchimisiz?",
+    "empty": "Sharhlar yo'q"
   },
   "chat": {
     "title": "Chat",
