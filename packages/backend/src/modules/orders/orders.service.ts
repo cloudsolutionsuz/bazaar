@@ -4,6 +4,8 @@ import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
 import { assertWithinPlanLimit } from "../plans/limits";
 import { notifyLowStock, notifyNewOrder } from "../../utils/notifications";
+import { pushToCustomer } from "../storefront/storefront.service";
+import { validatePromoCode } from "../promo-codes/promo-codes.service";
 import type { CreateOrderInput, ListOrdersQuery } from "./orders.schema";
 
 const orderInclude = {
@@ -97,7 +99,16 @@ export async function createOrder(tenantId: string, userId: string | null, input
     return { variantId: item.variantId, quantity: item.quantity, unitPrice, totalPrice: unitPrice * item.quantity };
   });
 
-  const totalAmount = orderItemsData.reduce((sum, i) => sum + i.totalPrice, 0);
+  const subtotal = orderItemsData.reduce((sum, i) => sum + i.totalPrice, 0);
+
+  let promoCodeId: string | undefined;
+  let discountAmount = 0;
+  if (input.promoCode) {
+    const promo = await validatePromoCode(tenantId, input.promoCode, subtotal);
+    promoCodeId = promo.promoCodeId;
+    discountAmount = promo.discountAmount;
+  }
+  const totalAmount = subtotal - discountAmount;
 
   const orderId = await prisma.$transaction(async (tx) => {
     // Atomic, race-safe stock guard: only decrements if enough stock is
@@ -148,10 +159,19 @@ export async function createOrder(tenantId: string, userId: string | null, input
         addressMahalla: input.addressMahalla,
         addressNote: input.addressNote,
         paymentMethod: input.paymentMethod,
+        promoCodeId,
+        discountAmount,
         totalAmount,
         items: { create: orderItemsData },
       },
     });
+
+    if (promoCodeId) {
+      await tx.promoCode.update({
+        where: { id: promoCodeId },
+        data: { usedCount: { increment: 1 } },
+      });
+    }
 
     await tx.orderStatusHistory.create({ data: { orderId: order.id, toStatus: "NEW", changedByUserId: userId } });
 
@@ -272,6 +292,18 @@ export async function updateOrderStatus(
       }
     }
   });
+
+  const ORDER_PUSH_MESSAGES: Partial<Record<OrderStatus, { title: string; body: string }>> = {
+    SHIPPED: { title: "Ваш заказ отправлен", body: "Заказ передан курьеру и скоро прибудет." },
+    DELIVERED: { title: "Заказ доставлен", body: "Ваш заказ успешно доставлен. Спасибо за покупку!" },
+    CANCELLED: { title: "Заказ отменён", body: "К сожалению, ваш заказ был отменён." },
+    REFUNDED: { title: "Возврат оформлен", body: "По вашему заказу оформлен возврат." },
+  };
+
+  const pushMsg = ORDER_PUSH_MESSAGES[nextStatus];
+  if (pushMsg) {
+    await pushToCustomer(tenantId, order.customerPhone, pushMsg.title, pushMsg.body).catch(() => {});
+  }
 
   return getOrder(tenantId, orderId);
 }

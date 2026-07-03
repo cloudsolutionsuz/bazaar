@@ -22,6 +22,7 @@ export const createOrderSchema = z
     addressMahalla: z.string().min(1).max(200),
     addressNote: z.string().max(500).optional(),
     paymentMethod: z.string().max(50).optional(),
+    promoCode: z.string().max(50).optional(),
     items: z.array(orderItemInputSchema).min(1),
   })
   .refine((data) => DISTRICTS_BY_REGION.get(data.addressRegion)?.has(data.addressDistrict) ?? false, {

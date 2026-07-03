@@ -31,6 +31,7 @@ import { PlansPage } from "./pages/platform/PlansPage";
 import { BillingTimelinePage } from "./pages/platform/BillingTimelinePage";
 import { PromotionsListPage } from "./pages/promotions/PromotionsListPage";
 import { PromotionFormPage } from "./pages/promotions/PromotionFormPage";
+import { PromoCodesPage } from "./pages/promo-codes/PromoCodesPage";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,7 @@ export function App() {
                 <Route path="/banners" element={<BannersPage />} />
                 <Route path="/promotions" element={<PromotionsListPage />} />
                 <Route path="/promotions/:id" element={<PromotionFormPage />} />
+                <Route path="/promo-codes" element={<PromoCodesPage />} />
                 <Route path="/orders" element={<OrdersListPage />} />
                 <Route path="/orders/archived" element={<OrdersListPage archivedOnly />} />
                 <Route path="/orders/:id" element={<OrderDetailPage />} />

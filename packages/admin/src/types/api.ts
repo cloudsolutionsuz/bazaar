@@ -445,3 +445,16 @@ export interface ChatThread {
   lastMessageAt: string;
   unreadCount: number;
 }
+
+export interface PromoCode {
+  id: string;
+  code: string;
+  discountPercent: number | null;
+  discountFixed: number | null;
+  maxUses: number | null;
+  usedCount: number;
+  minOrderAmount: number | null;
+  expiresAt: string | null;
+  isActive: boolean;
+  createdAt: string;
+}

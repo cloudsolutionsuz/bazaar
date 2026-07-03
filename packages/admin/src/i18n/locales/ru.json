@@ -30,6 +30,7 @@
     "suppliers": "Поставщики",
     "banners": "Баннеры",
     "promotions": "Акции",
+    "promoCodes": "Промокоды",
     "customers": "Покупатели",
     "orders": "Заказы",
     "chat": "Чат",
@@ -455,6 +456,28 @@
       "brand": "По бренду",
       "supplier": "По поставщику"
     }
+  },
+  "promoCodes": {
+    "title": "Промокоды",
+    "add": "Добавить промокод",
+    "code": "Код",
+    "discount": "Скидка",
+    "discountType": "Тип скидки",
+    "discountPercent": "Процент (%)",
+    "discountFixed": "Фиксированная (сум)",
+    "discountPercentLabel": "Процент скидки (%)",
+    "discountFixedLabel": "Сумма скидки (сум)",
+    "maxUses": "Макс. использований",
+    "maxUsesPlaceholder": "Без ограничений",
+    "minOrderAmount": "Мин. сумма заказа",
+    "expiresAt": "Действует до",
+    "uses": "Использований",
+    "status": "Статус",
+    "active": "Активен",
+    "inactive": "Неактивен",
+    "deactivate": "Деактивировать",
+    "confirmDeactivate": "Деактивировать этот промокод?",
+    "empty": "Промокодов пока нет"
   },
   "chat": {
     "title": "Чат",

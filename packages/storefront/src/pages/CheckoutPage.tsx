@@ -7,6 +7,13 @@ import * as storefrontApi from "../api/storefront";
 import { ApiError } from "../api/client";
 import { UZBEKISTAN_REGIONS } from "../data/uzbekistanRegions";
 
+const PROMO_ERROR_KEYS: Record<string, string> = {
+  PROMO_NOT_FOUND: "checkout.promoNotFound",
+  PROMO_EXPIRED: "checkout.promoExpired",
+  PROMO_EXHAUSTED: "checkout.promoExhausted",
+  PROMO_MIN_AMOUNT: "checkout.promoMinAmount",
+};
+
 const MAX_ADDITIONAL_PHONES = 5;
 
 const PHONE_PREFIXES = [
@@ -32,6 +39,10 @@ export function CheckoutPage() {
   const [addressMahalla, setAddressMahalla] = useState("");
   const [addressNote, setAddressNote] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("cash");
+  const [promoCodeInput, setPromoCodeInput] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<{ code: string; discountAmount: number } | null>(null);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoApplying, setPromoApplying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -54,6 +65,25 @@ export function CheckoutPage() {
     setAdditionalPhones((phones) => phones.filter((_, i) => i !== index));
   }
 
+  async function handleApplyPromo(e: FormEvent) {
+    e.preventDefault();
+    const code = promoCodeInput.trim().toUpperCase();
+    if (!code) return;
+    setPromoError(null);
+    setPromoApplying(true);
+    try {
+      const res = await storefrontApi.validatePromoCode(code, total);
+      setAppliedPromo({ code, discountAmount: res.discountAmount });
+    } catch (err) {
+      const errCode = err instanceof ApiError ? err.code : "";
+      const key = PROMO_ERROR_KEYS[errCode] ?? "checkout.promoInvalid";
+      setPromoError(t(key));
+      setAppliedPromo(null);
+    } finally {
+      setPromoApplying(false);
+    }
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
@@ -68,6 +98,7 @@ export function CheckoutPage() {
         addressMahalla,
         addressNote: addressNote || undefined,
         paymentMethod: paymentMethod === "cash" ? t("checkout.paymentCash") : t("checkout.paymentCard"),
+        promoCode: appliedPromo?.code,
         items: items.map((i) => ({ variantId: i.variantId, quantity: i.quantity })),
       });
       clear();
@@ -226,11 +257,55 @@ export function CheckoutPage() {
           </div>
         </div>
 
+        <div className="border-t border-clay-100 pt-4">
+          <label className="mb-1 block text-sm font-medium text-gray-700">{t("checkout.promoCode")}</label>
+          {appliedPromo ? (
+            <div className="flex items-center justify-between rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm">
+              <span className="font-mono font-semibold text-green-800">{appliedPromo.code}</span>
+              <span className="text-green-700">−{appliedPromo.discountAmount.toLocaleString()}</span>
+              <button
+                type="button"
+                onClick={() => { setAppliedPromo(null); setPromoCodeInput(""); }}
+                className="ml-3 text-gray-400 hover:text-gray-600"
+              >
+                ×
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleApplyPromo} className="flex gap-2">
+              <input
+                value={promoCodeInput}
+                onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase())}
+                placeholder={t("checkout.promoCodePlaceholder")}
+                className="flex-1 rounded-md border border-clay-200 px-3 py-2 text-sm uppercase focus:border-clay-500 focus:outline-none"
+              />
+              <button
+                type="submit"
+                disabled={!promoCodeInput.trim() || promoApplying}
+                className="rounded-md border border-clay-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-clay-50 disabled:opacity-50"
+              >
+                {t("checkout.promoApply")}
+              </button>
+            </form>
+          )}
+          {promoError && <p className="mt-1 text-sm text-red-600">{promoError}</p>}
+        </div>
+
         {error && <p className="text-sm text-red-600">{error}</p>}
 
-        <div className="flex items-center justify-between border-t border-clay-100 pt-4 text-lg font-semibold text-gray-900">
-          <span>{t("cart.total")}</span>
-          <span>{total.toLocaleString()}</span>
+        <div className="flex items-center justify-between border-t border-clay-100 pt-4 text-base text-gray-900">
+          <span className="text-sm text-gray-500">{t("cart.total")}</span>
+          <span className="font-medium">{total.toLocaleString()}</span>
+        </div>
+        {appliedPromo && (
+          <div className="flex items-center justify-between text-base text-green-700">
+            <span className="text-sm">{t("checkout.promoDiscount")}</span>
+            <span className="font-medium">−{appliedPromo.discountAmount.toLocaleString()}</span>
+          </div>
+        )}
+        <div className="flex items-center justify-between text-lg font-semibold text-gray-900">
+          <span>{t("checkout.finalTotal")}</span>
+          <span>{(total - (appliedPromo?.discountAmount ?? 0)).toLocaleString()}</span>
         </div>
 
         <button

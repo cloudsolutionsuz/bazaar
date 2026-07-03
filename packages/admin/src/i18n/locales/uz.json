@@ -30,6 +30,7 @@
     "suppliers": "Yetkazib beruvchilar",
     "banners": "Bannerlar",
     "promotions": "Aksiyalar",
+    "promoCodes": "Promokodlar",
     "customers": "Xaridorlar",
     "orders": "Buyurtmalar",
     "chat": "Chat",
@@ -455,6 +456,28 @@
       "brand": "Brend bo'yicha",
       "supplier": "Yetkazib beruvchi bo'yicha"
     }
+  },
+  "promoCodes": {
+    "title": "Promokodlar",
+    "add": "Promokod qo'shish",
+    "code": "Kod",
+    "discount": "Chegirma",
+    "discountType": "Chegirma turi",
+    "discountPercent": "Foiz (%)",
+    "discountFixed": "Belgilangan (so'm)",
+    "discountPercentLabel": "Chegirma foizi (%)",
+    "discountFixedLabel": "Chegirma miqdori (so'm)",
+    "maxUses": "Maks. foydalanish",
+    "maxUsesPlaceholder": "Cheksiz",
+    "minOrderAmount": "Min. buyurtma summasi",
+    "expiresAt": "Amal qilish muddati",
+    "uses": "Foydalanildi",
+    "status": "Holat",
+    "active": "Faol",
+    "inactive": "Nofaol",
+    "deactivate": "O'chirish",
+    "confirmDeactivate": "Bu promokodni o'chirmoqchimisiz?",
+    "empty": "Hozircha promokodlar yo'q"
   },
   "chat": {
     "title": "Chat",

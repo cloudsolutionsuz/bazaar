@@ -59,7 +59,17 @@
     "paymentCard": "Yetkazib berishda karta",
     "submit": "Buyurtmani tasdiqlash",
     "errorInsufficientStock": "Afsuski, tovarning bir qismi allaqachon sotilgan — savatni yangilang",
-    "errorLimitReached": "Do'kon hozircha buyurtma qabul qilmayapti, keyinroq urinib ko'ring"
+    "errorLimitReached": "Do'kon hozircha buyurtma qabul qilmayapti, keyinroq urinib ko'ring",
+    "promoCode": "Promokod",
+    "promoCodePlaceholder": "Promokod kiriting",
+    "promoApply": "Qo'llash",
+    "promoDiscount": "Promokod chegirmasi",
+    "finalTotal": "To'lov summasi",
+    "promoNotFound": "Promokod topilmadi yoki nofaol",
+    "promoExpired": "Promokod muddati o'tgan",
+    "promoExhausted": "Promokod endi amal qilmaydi",
+    "promoMinAmount": "Buyurtma summasi promokod uchun yetarli emas",
+    "promoInvalid": "Promokod yaroqsiz"
   },
   "confirmation": {
     "title": "Buyurtma qabul qilindi!",

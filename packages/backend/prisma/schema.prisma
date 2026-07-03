@@ -130,6 +130,7 @@ model Tenant {
   chatMessages       ChatMessage[]
   pushSubscriptions  PushSubscription[]
   promotions         Promotion[]
+  promoCodes         PromoCode[]
 
   @@map("tenants")
 }
@@ -407,6 +408,9 @@ model Order {
   status           OrderStatus @default(NEW)
   courierName      String?
   paymentMethod    String?
+  promoCodeId      String?
+  promoCode        PromoCode?  @relation(fields: [promoCodeId], references: [id])
+  discountAmount   Int         @default(0)
   totalAmount      Int
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
@@ -527,6 +531,27 @@ model PromotionProduct {
   @@id([promotionId, productId])
   @@index([productId])
   @@map("promotion_products")
+}
+
+model PromoCode {
+  id              String    @id @default(uuid())
+  tenantId        String
+  tenant          Tenant    @relation(fields: [tenantId], references: [id])
+  code            String
+  discountPercent Int?
+  discountFixed   Int?
+  maxUses         Int?
+  usedCount       Int       @default(0)
+  minOrderAmount  Int?
+  expiresAt       DateTime?
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+
+  orders          Order[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@map("promo_codes")
 }
 
 model OrderItem {

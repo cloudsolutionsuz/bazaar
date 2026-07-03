@@ -40,7 +40,15 @@ export interface CheckoutInput {
   addressMahalla: string;
   addressNote?: string;
   paymentMethod?: string;
+  promoCode?: string;
   items: { variantId: string; quantity: number }[];
+}
+
+export function validatePromoCode(
+  code: string,
+  amount: number,
+): Promise<{ promoCodeId: string; discountAmount: number }> {
+  return apiRequest("/api/promo-codes/validate", { query: { code, amount } });
 }
 
 export function placeOrder(input: CheckoutInput): Promise<{ order: OrderResult }> {
