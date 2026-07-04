@@ -147,7 +147,7 @@ export function OrdersListPage({ archivedOnly = false }: Props) {
             <Select value={status} onChange={(e) => setStatus(e.target.value as OrderStatus | "")}>
               <option value="">{t("common.all")}</option>
               {Object.entries(STATUS_LABEL_KEYS)
-                .filter(([value]) => value !== "ARCHIVED")
+                .filter(([value]) => value !== "ARCHIVED" && value !== "PROCESSING")
                 .map(([value, key]) => (
                   <option key={value} value={value}>
                     {t(key)}

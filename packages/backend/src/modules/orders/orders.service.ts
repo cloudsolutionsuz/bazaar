@@ -19,7 +19,7 @@ const orderInclude = {
 // admin list page lets staff archive test/junk orders without stepping through
 // every intermediate status.
 const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  NEW: ["PROCESSING", "CANCELLED", "ARCHIVED"],
+  NEW: ["SHIPPED", "CANCELLED", "ARCHIVED"],
   PROCESSING: ["SHIPPED", "CANCELLED", "ARCHIVED"],
   SHIPPED: ["DELIVERED", "REFUNDED", "ARCHIVED"],
   DELIVERED: ["REFUNDED", "ARCHIVED"],
@@ -379,7 +379,7 @@ export async function updateOrderStatus(
 
 const STATUS_LABELS: Record<string, string> = {
   NEW: "Новый",
-  PROCESSING: "В обработке",
+  PROCESSING: "В обработке", // legacy — kept for historical orders
   SHIPPED: "В доставке",
   DELIVERED: "Доставлен",
   CANCELLED: "Отменён",

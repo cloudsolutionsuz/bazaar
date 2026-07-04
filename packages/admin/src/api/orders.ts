@@ -47,7 +47,7 @@ export function exportOrders(): Promise<Blob> {
 // Mirrors the backend ALLOWED_TRANSITIONS — ARCHIVED is reachable from any
 // state so admins can clean up orders without stepping through every status.
 export const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  NEW: ["PROCESSING", "CANCELLED", "ARCHIVED"],
+  NEW: ["SHIPPED", "CANCELLED", "ARCHIVED"],
   PROCESSING: ["SHIPPED", "CANCELLED", "ARCHIVED"],
   SHIPPED: ["DELIVERED", "REFUNDED", "ARCHIVED"],
   DELIVERED: ["REFUNDED", "ARCHIVED"],
