@@ -293,7 +293,7 @@ async function computeFifoCogs(
 export async function getPnL(tenantId: string, from: Date, to: Date): Promise<PnLResult> {
   const orders = await prisma.order.findMany({
     where: { tenantId, createdAt: { gte: from, lte: to }, status: { notIn: EXCLUDED_ORDER_STATUSES } },
-    include: { items: { include: { variant: { include: { product: true } } } } },
+    include: { items: { include: { variant: { select: { productId: true, costPrice: true, product: true } } } } },
   });
 
   const variantIds = Array.from(new Set(orders.flatMap((o) => o.items.map((i) => i.variantId))));
@@ -306,7 +306,9 @@ export async function getPnL(tenantId: string, from: Date, to: Date): Promise<Pn
   for (const order of orders) {
     for (const item of order.items) {
       revenue += item.totalPrice;
-      const itemCogs = fifoCostByOrderVariant.get(`${order.id}:${item.variantId}`) ?? 0;
+      const fifoCogs = fifoCostByOrderVariant.get(`${order.id}:${item.variantId}`);
+      // Fall back to variant.costPrice when no inventory receipts exist for FIFO
+      const itemCogs = fifoCogs ?? (item.variant.costPrice != null ? item.variant.costPrice * item.quantity : 0);
       cogs += itemCogs;
 
       const productId = item.variant.productId;
@@ -543,7 +545,7 @@ export async function getProductSalesReport(tenantId: string, from: Date, to: Da
       items: {
         include: {
           variant: {
-            include: { product: { include: { category: true } } },
+            select: { costPrice: true, product: { include: { category: true } } },
           },
         },
       },
@@ -574,7 +576,8 @@ export async function getProductSalesReport(tenantId: string, from: Date, to: Da
       if (product.discountPercent != null) entry.discountPercents.push(product.discountPercent);
       entry.quantity += item.quantity;
       entry.revenue += item.totalPrice;
-      entry.cogs += fifoCostByOrderVariant.get(`${order.id}:${item.variantId}`) ?? 0;
+      const fifoCogs = fifoCostByOrderVariant.get(`${order.id}:${item.variantId}`);
+      entry.cogs += fifoCogs ?? (item.variant.costPrice != null ? item.variant.costPrice * item.quantity : 0);
       byProduct.set(product.id, entry);
     }
   }
