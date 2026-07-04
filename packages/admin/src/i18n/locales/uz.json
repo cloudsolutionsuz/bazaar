@@ -228,7 +228,11 @@
     "statusChanged": "Holat muvaffaqiyatli o'zgartirildi",
     "bulkInvalidTransition": "Ba'zi buyurtmalar uchun o'tish mumkin emas",
     "archivedTitle": "Arxivlangan buyurtmalar",
+    "cancelledTitle": "Bekor qilingan buyurtmalar",
+    "refundedTitle": "Qaytarilgan buyurtmalar",
     "viewArchived": "Buyurtmalar arxivi",
+    "viewCancelled": "Bekor qilinganlar",
+    "viewRefunded": "Qaytarilganlar",
     "time": "Vaqt",
     "applyToSelected": "Tanlanganlarga qo'llash ({{count}})"
   },

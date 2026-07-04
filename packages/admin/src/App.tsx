@@ -76,7 +76,9 @@ export function App() {
                 <Route path="/reviews" element={<ReviewsPage />} />
                 <Route path="/delivery-zones" element={<DeliveryZonesPage />} />
                 <Route path="/orders" element={<OrdersListPage />} />
-                <Route path="/orders/archived" element={<OrdersListPage archivedOnly />} />
+                <Route path="/orders/cancelled" element={<OrdersListPage fixedStatus="CANCELLED" />} />
+                <Route path="/orders/refunded" element={<OrdersListPage fixedStatus="REFUNDED" />} />
+                <Route path="/orders/archived" element={<OrdersListPage fixedStatus="ARCHIVED" />} />
                 <Route path="/orders/:id" element={<OrderDetailPage />} />
                 <Route path="/chat" element={<ChatPage />} />
                 <Route path="/billing" element={<BillingPage />} />

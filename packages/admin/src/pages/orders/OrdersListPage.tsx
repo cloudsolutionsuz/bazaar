@@ -38,10 +38,11 @@ export function productNames(order: { items: { variant?: { product?: { name: str
 }
 
 interface Props {
-  archivedOnly?: boolean;
+  fixedStatus?: OrderStatus;
 }
 
-export function OrdersListPage({ archivedOnly = false }: Props) {
+export function OrdersListPage({ fixedStatus }: Props) {
+  const archivedOnly = fixedStatus === "ARCHIVED";
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<OrderStatus | "">("");
@@ -54,10 +55,10 @@ export function OrdersListPage({ archivedOnly = false }: Props) {
   const [bulkResult, setBulkResult] = useState<{ message: string; isError: boolean } | null>(null);
 
   const query = useQuery({
-    queryKey: ["orders", { archivedOnly, ...appliedFilters, page }],
+    queryKey: ["orders", { fixedStatus, ...appliedFilters, page }],
     queryFn: () =>
       ordersApi.listOrders({
-        status: archivedOnly ? "ARCHIVED" : appliedFilters.status || undefined,
+        status: fixedStatus ?? (appliedFilters.status || undefined),
         from: appliedFilters.from ? `${appliedFilters.from}T00:00:00` : undefined,
         to: appliedFilters.to ? `${appliedFilters.to}T23:59:59` : undefined,
         page,
@@ -127,12 +128,28 @@ export function OrdersListPage({ archivedOnly = false }: Props) {
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-gray-900">{archivedOnly ? t("orders.archivedTitle") : t("orders.title")}</h1>
+        <h1 className="text-xl font-semibold text-gray-900">
+          {fixedStatus === "ARCHIVED"
+            ? t("orders.archivedTitle")
+            : fixedStatus === "CANCELLED"
+            ? t("orders.cancelledTitle")
+            : fixedStatus === "REFUNDED"
+            ? t("orders.refundedTitle")
+            : t("orders.title")}
+        </h1>
         <div className="flex gap-2">
-          {!archivedOnly && (
-            <Link to="/orders/archived">
-              <Button variant="secondary">{t("orders.viewArchived")}</Button>
-            </Link>
+          {!fixedStatus && (
+            <>
+              <Link to="/orders/cancelled">
+                <Button variant="secondary">{t("orders.viewCancelled")}</Button>
+              </Link>
+              <Link to="/orders/refunded">
+                <Button variant="secondary">{t("orders.viewRefunded")}</Button>
+              </Link>
+              <Link to="/orders/archived">
+                <Button variant="secondary">{t("orders.viewArchived")}</Button>
+              </Link>
+            </>
           )}
           <Button variant="secondary" onClick={handleExport}>
             {t("common.export")}
@@ -140,7 +157,7 @@ export function OrdersListPage({ archivedOnly = false }: Props) {
         </div>
       </div>
 
-      {!archivedOnly && (
+      {!fixedStatus && (
         <div className="mb-4 flex flex-wrap items-end gap-3">
           <div>
             <label className="mb-1 block text-xs text-gray-500">{t("common.status")}</label>

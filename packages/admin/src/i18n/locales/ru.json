@@ -199,7 +199,11 @@
   "orders": {
     "title": "Заказы",
     "archivedTitle": "Архивированные заказы",
+    "cancelledTitle": "Отменённые заказы",
+    "refundedTitle": "Возвраты",
     "viewArchived": "Архив заказов",
+    "viewCancelled": "Отменённые",
+    "viewRefunded": "Возвраты",
     "customer": "Покупатель",
     "phone": "Телефон",
     "date": "Дата",
