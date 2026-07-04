@@ -377,51 +377,87 @@ export async function updateOrderStatus(
   return getOrder(tenantId, orderId);
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  NEW: "Новый",
+  PROCESSING: "В обработке",
+  SHIPPED: "В доставке",
+  DELIVERED: "Доставлен",
+  CANCELLED: "Отменён",
+  REFUNDED: "Возврат",
+  ARCHIVED: "Архив",
+};
+
 export async function exportOrdersToExcel(tenantId: string): Promise<Buffer> {
   const orders = await prisma.order.findMany({
     where: { tenantId },
-    include: { items: { include: { variant: true } } },
+    include: { items: { include: { variant: { include: { product: { select: { name: true } } } } } } },
     orderBy: { createdAt: "desc" },
   });
 
+  // Lazy-load address maps only when exporting (not in the hot path)
+  const { UZBEKISTAN_REGIONS } = await import("../../data/uzbekistanRegions");
+  function regionName(code: string | null): string {
+    if (!code) return "";
+    return UZBEKISTAN_REGIONS.find((r) => r.code === code)?.name ?? code;
+  }
+  function districtName(regionCode: string | null, districtCode: string | null): string {
+    if (!regionCode || !districtCode) return "";
+    const region = UZBEKISTAN_REGIONS.find((r) => r.code === regionCode);
+    return region?.districts.find((d) => d.code === districtCode)?.name ?? districtCode;
+  }
+
   const workbook = new ExcelJS.Workbook();
-  const sheet = workbook.addWorksheet("Orders");
-  sheet.addRow([
-    "Order ID",
-    "Date",
-    "Customer",
-    "Phone",
-    "Additional Phones",
-    "Region",
-    "District",
-    "Mahalla",
-    "Address Note",
-    "Status",
-    "Courier",
-    "Payment Method",
-    "Items",
-    "Total Amount",
+  const sheet = workbook.addWorksheet("Заказы");
+
+  // Column headers match the table in the admin list page
+  const headerRow = sheet.addRow([
+    "ПОКУПАТЕЛЬ",
+    "ТЕЛЕФОН",
+    "ДОП. ТЕЛЕФОНЫ",
+    "РЕГИОН",
+    "ГОРОД/РАЙОН",
+    "МАХАЛЛЯ",
+    "НАЗВАНИЕ",
+    "ДАТА",
+    "ВРЕМЯ",
+    "СТАТУС",
+    "СОСТАВ ЗАКАЗА",
+    "СПОСОБ ОПЛАТЫ",
+    "СУММА",
   ]);
+  headerRow.font = { bold: true };
+  headerRow.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE8F5E9" } };
 
   for (const order of orders) {
-    const itemsSummary = order.items.map((i) => `${i.variant.sku} x${i.quantity}`).join(", ");
+    const created = order.createdAt;
+    const productNames = [...new Set(order.items.map((i) => i.variant.product.name).filter(Boolean))].join(", ");
+    const itemsCount = order.items.reduce((sum, i) => sum + i.quantity, 0);
     sheet.addRow([
-      order.id,
-      order.createdAt.toISOString(),
       order.customerName,
       order.customerPhone,
       order.additionalPhones.join(", "),
-      order.addressRegion ?? "",
-      order.addressDistrict ?? "",
+      regionName(order.addressRegion),
+      districtName(order.addressRegion, order.addressDistrict),
       order.addressMahalla ?? "",
-      order.addressNote ?? "",
-      order.status,
-      order.courierName ?? "",
+      productNames,
+      created.toLocaleDateString("ru-RU"),
+      created.toLocaleTimeString("ru-RU"),
+      STATUS_LABELS[order.status] ?? order.status,
+      itemsCount,
       order.paymentMethod ?? "",
-      itemsSummary,
       order.totalAmount,
     ]);
   }
+
+  // Auto-fit column widths
+  sheet.columns.forEach((col) => {
+    let max = 10;
+    col.eachCell?.({ includeEmpty: false }, (cell) => {
+      const len = String(cell.value ?? "").length;
+      if (len > max) max = len;
+    });
+    col.width = Math.min(max + 2, 50);
+  });
 
   const arrayBuffer = await workbook.xlsx.writeBuffer();
   return Buffer.from(arrayBuffer);

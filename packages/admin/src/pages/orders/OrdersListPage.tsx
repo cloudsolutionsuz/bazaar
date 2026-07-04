@@ -168,15 +168,24 @@ export function OrdersListPage({ archivedOnly = false }: Props) {
             <div className="flex items-end gap-2">
               <div>
                 <label className="mb-1 block text-xs text-gray-500">{t("orders.changeStatus")}</label>
-                <Select value={bulkStatus} onChange={(e) => setBulkStatus(e.target.value as OrderStatus | "")}>
+                <Select
+                  value={bulkStatus}
+                  onChange={(e) => setBulkStatus(e.target.value as OrderStatus | "")}
+                >
                   <option value="">{t("common.select")}</option>
-                  {Object.entries(STATUS_LABEL_KEYS)
-                    .filter(([value]) => value !== "ARCHIVED")
-                    .map(([value, key]) => (
+                  {(() => {
+                    // Compute the intersection of valid next statuses for all selected orders
+                    const selectedOrders = orders.filter((o) => selectedIds.includes(o.id));
+                    const validSets = selectedOrders.map((o) => new Set(ordersApi.ORDER_STATUS_TRANSITIONS[o.status]));
+                    const common = validSets.length === 0
+                      ? []
+                      : [...validSets[0]].filter((s) => validSets.every((set) => set.has(s)));
+                    return common.map((value) => (
                       <option key={value} value={value}>
-                        {t(key)}
+                        {t(STATUS_LABEL_KEYS[value as OrderStatus])}
                       </option>
-                    ))}
+                    ));
+                  })()}
                 </Select>
               </div>
               <Button variant="secondary" disabled={!bulkStatus} onClick={handleBulkStatusChange}>
