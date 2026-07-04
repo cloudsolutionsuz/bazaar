@@ -226,6 +226,7 @@
     "archivedCount": "{{total}} tadan {{succeeded}} tasi o'zgartirildi",
     "noTransitions": "Bu yakuniy holat",
     "statusChanged": "Holat muvaffaqiyatli o'zgartirildi",
+    "bulkInvalidTransition": "Ba'zi buyurtmalar uchun o'tish mumkin emas",
     "archivedTitle": "Arxivlangan buyurtmalar",
     "viewArchived": "Buyurtmalar arxivi",
     "time": "Vaqt",

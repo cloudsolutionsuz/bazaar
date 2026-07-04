@@ -14,13 +14,14 @@ const orderInclude = {
   statusHistory: { orderBy: { createdAt: "asc" as const } },
 };
 
-// ARCHIVED is only reachable from terminal states - it's a purely organizational
-// move to declutter the working orders list, not a real business transition, so
-// active orders (NEW/PROCESSING/SHIPPED) can't be archived directly.
+// Admin can archive any order at any stage (organizational cleanup). For active
+// orders the business flow still shows only the forward transitions, but the
+// admin list page lets staff archive test/junk orders without stepping through
+// every intermediate status.
 const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  NEW: ["PROCESSING", "CANCELLED"],
-  PROCESSING: ["SHIPPED", "CANCELLED"],
-  SHIPPED: ["DELIVERED", "REFUNDED"],
+  NEW: ["PROCESSING", "CANCELLED", "ARCHIVED"],
+  PROCESSING: ["SHIPPED", "CANCELLED", "ARCHIVED"],
+  SHIPPED: ["DELIVERED", "REFUNDED", "ARCHIVED"],
   DELIVERED: ["REFUNDED", "ARCHIVED"],
   CANCELLED: ["ARCHIVED"],
   REFUNDED: ["ARCHIVED"],

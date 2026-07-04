@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as ordersApi from "../../api/orders";
+import { ApiError } from "../../api/client";
 import { Button } from "../../components/ui/Button";
 import { Select } from "../../components/ui/Select";
 import { Input } from "../../components/ui/Input";
@@ -50,7 +51,7 @@ export function OrdersListPage({ archivedOnly = false }: Props) {
   const [page, setPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [bulkStatus, setBulkStatus] = useState<OrderStatus | "">("");
-  const [bulkResult, setBulkResult] = useState<string | null>(null);
+  const [bulkResult, setBulkResult] = useState<{ message: string; isError: boolean } | null>(null);
 
   const query = useQuery({
     queryKey: ["orders", { archivedOnly, ...appliedFilters, page }],
@@ -92,7 +93,15 @@ export function OrdersListPage({ archivedOnly = false }: Props) {
     setBulkResult(null);
     const results = await Promise.allSettled(selectedIds.map((id) => ordersApi.updateOrderStatus(id, bulkStatus)));
     const succeeded = results.filter((r) => r.status === "fulfilled").length;
-    setBulkResult(t("orders.archivedCount", { succeeded, total: selectedIds.length }));
+    const failed = results.filter((r) => r.status === "rejected");
+    if (failed.length > 0) {
+      const reason = failed[0].status === "rejected" && failed[0].reason instanceof ApiError
+        ? failed[0].reason.message
+        : t("orders.bulkInvalidTransition");
+      setBulkResult({ message: t("orders.archivedCount", { succeeded, total: selectedIds.length }) + ` — ${reason}`, isError: true });
+    } else {
+      setBulkResult({ message: t("orders.archivedCount", { succeeded, total: selectedIds.length }), isError: false });
+    }
     setSelectedIds([]);
     setBulkStatus("");
     queryClient.invalidateQueries({ queryKey: ["orders"] });
@@ -102,7 +111,15 @@ export function OrdersListPage({ archivedOnly = false }: Props) {
     setBulkResult(null);
     const results = await Promise.allSettled(selectedIds.map((id) => ordersApi.updateOrderStatus(id, "ARCHIVED")));
     const succeeded = results.filter((r) => r.status === "fulfilled").length;
-    setBulkResult(t("orders.archivedCount", { succeeded, total: selectedIds.length }));
+    const failed = results.filter((r) => r.status === "rejected");
+    if (failed.length > 0) {
+      const reason = failed[0].status === "rejected" && failed[0].reason instanceof ApiError
+        ? failed[0].reason.message
+        : t("orders.bulkInvalidTransition");
+      setBulkResult({ message: t("orders.archivedCount", { succeeded, total: selectedIds.length }) + ` — ${reason}`, isError: true });
+    } else {
+      setBulkResult({ message: t("orders.archivedCount", { succeeded, total: selectedIds.length }), isError: false });
+    }
     setSelectedIds([]);
     queryClient.invalidateQueries({ queryKey: ["orders"] });
   }
@@ -173,7 +190,9 @@ export function OrdersListPage({ archivedOnly = false }: Props) {
         </div>
       )}
 
-      {bulkResult && <p className="mb-3 text-sm text-gray-600">{bulkResult}</p>}
+      {bulkResult && (
+        <p className={`mb-3 text-sm ${bulkResult.isError ? "text-red-600" : "text-green-600"}`}>{bulkResult.message}</p>
+      )}
 
       <Table>
         <Thead>

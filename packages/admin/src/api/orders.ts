@@ -44,12 +44,12 @@ export function exportOrders(): Promise<Blob> {
   return apiRequest("/api/orders/export", { responseType: "blob" });
 }
 
-// Mirrors the backend state machine (src/modules/orders/orders.service.ts)
-// so the UI never offers a transition the API would reject.
+// Mirrors the backend ALLOWED_TRANSITIONS — ARCHIVED is reachable from any
+// state so admins can clean up orders without stepping through every status.
 export const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  NEW: ["PROCESSING", "CANCELLED"],
-  PROCESSING: ["SHIPPED", "CANCELLED"],
-  SHIPPED: ["DELIVERED", "REFUNDED"],
+  NEW: ["PROCESSING", "CANCELLED", "ARCHIVED"],
+  PROCESSING: ["SHIPPED", "CANCELLED", "ARCHIVED"],
+  SHIPPED: ["DELIVERED", "REFUNDED", "ARCHIVED"],
   DELIVERED: ["REFUNDED", "ARCHIVED"],
   CANCELLED: ["ARCHIVED"],
   REFUNDED: ["ARCHIVED"],

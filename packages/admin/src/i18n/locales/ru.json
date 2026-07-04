@@ -229,7 +229,8 @@
     "applyToSelected": "Применить к выбранным ({{count}})",
     "archivedCount": "Изменено {{succeeded}} из {{total}}",
     "noTransitions": "Это финальный статус",
-    "statusChanged": "Статус успешно изменён"
+    "statusChanged": "Статус успешно изменён",
+    "bulkInvalidTransition": "Переход недопустим для некоторых заказов"
   },
   "billing": {
     "title": "Биллинг",
