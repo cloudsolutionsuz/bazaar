@@ -2,18 +2,24 @@ import type { ReactNode } from "react";
 
 export function Table({ children }: { children: ReactNode }) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200">
-      <table className="min-w-full divide-y divide-gray-200 text-sm">{children}</table>
+    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+      <table className="min-w-full divide-y divide-gray-200 text-sm dark:divide-gray-700">{children}</table>
     </div>
   );
 }
 
 export function Thead({ children }: { children: ReactNode }) {
-  return <thead className="bg-gray-50 text-left text-xs font-medium uppercase text-gray-500">{children}</thead>;
+  return (
+    <thead className="bg-gray-50 text-left text-xs font-medium uppercase text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+      {children}
+    </thead>
+  );
 }
 
 export function Tbody({ children }: { children: ReactNode }) {
-  return <tbody className="divide-y divide-gray-100 bg-white">{children}</tbody>;
+  return (
+    <tbody className="divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:bg-gray-900">{children}</tbody>
+  );
 }
 
 export function Th({ children }: { children: ReactNode }) {

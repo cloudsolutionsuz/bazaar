@@ -13,9 +13,7 @@ export function NumberInput({
 
   const raw = String(value ?? "");
   const displayValue =
-    !focused && raw !== "" && /^\d+$/.test(raw)
-      ? parseInt(raw, 10).toLocaleString("ru-RU")
-      : raw;
+    !focused && raw !== "" && /^\d+$/.test(raw) ? parseInt(raw, 10).toLocaleString("ru-RU") : raw;
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     if (!onChange) return;
@@ -28,7 +26,7 @@ export function NumberInput({
     <input
       type="text"
       inputMode="numeric"
-      className={`rounded-md border border-gray-300 bg-gray-50 px-3 py-2.5 text-right font-mono text-base focus:border-brand-500 focus:bg-white focus:outline-none ${className}`}
+      className={`rounded-md border border-gray-300 bg-gray-50 px-3 py-2.5 text-right font-mono text-base text-gray-900 focus:border-brand-500 focus:bg-white focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:bg-gray-600 ${className}`}
       value={displayValue}
       onChange={handleChange}
       onFocus={(e) => {

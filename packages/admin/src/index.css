@@ -5,3 +5,58 @@
 body {
   font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
+
+/* ============================================================
+   Global dark mode overrides — handle page-level Tailwind
+   classes without touching every individual page file.
+   Specificity: html(0,0,1) + .dark(0,1,0) + .class(0,1,0) = (0,2,1)
+   which beats plain Tailwind utilities at (0,1,0).
+   Explicit dark: classes on components (0,2,0) still override
+   these when needed.
+   ============================================================ */
+
+html.dark {
+  color-scheme: dark;
+}
+
+/* Text */
+html.dark .text-gray-900 { color: #f9fafb; }
+html.dark .text-gray-800 { color: #f3f4f6; }
+html.dark .text-gray-700 { color: #d1d5db; }
+html.dark .text-gray-600 { color: #9ca3af; }
+html.dark .text-gray-500 { color: #9ca3af; }
+html.dark .text-gray-400 { color: #6b7280; }
+
+/* Backgrounds */
+html.dark .bg-white    { background-color: #1f2937; }
+html.dark .bg-gray-50  { background-color: #111827; }
+html.dark .bg-gray-100 { background-color: #374151; }
+
+/* Borders */
+html.dark .border-gray-100 { border-color: #374151; }
+html.dark .border-gray-200 { border-color: #374151; }
+html.dark .border-gray-300 { border-color: #4b5563; }
+
+/* Divide utilities */
+html.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+html.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]) { border-color: #374151; }
+
+/* Form elements */
+html.dark input,
+html.dark select,
+html.dark textarea {
+  color-scheme: dark;
+}
+
+/* Hover overrides for interactive elements */
+html.dark .hover\:bg-gray-50:hover  { background-color: #1f2937; }
+html.dark .hover\:bg-gray-100:hover { background-color: #374151; }
+
+/* Recharts axis/grid text in dark mode */
+html.dark .recharts-cartesian-axis-tick text { fill: #9ca3af; }
+html.dark .recharts-cartesian-grid line { stroke: #374151; }
+html.dark .recharts-tooltip-wrapper .recharts-default-tooltip {
+  background-color: #1f2937!important;
+  border-color: #374151!important;
+  color: #f9fafb!important;
+}
