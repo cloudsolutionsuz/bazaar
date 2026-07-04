@@ -48,7 +48,7 @@ export function ArrangePage() {
   const hasChanges = localOrder !== null;
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <div className="mb-6 flex items-center justify-between">
         <div>
           <Link to="/products" className="mb-1 block text-sm text-brand-600 hover:underline">

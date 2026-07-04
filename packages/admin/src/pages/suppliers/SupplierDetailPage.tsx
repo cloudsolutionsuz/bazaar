@@ -68,98 +68,94 @@ export function SupplierDetailPage() {
   if (!statement) return null;
 
   return (
-    <div className="max-w-4xl">
+    <div>
       <Link to="/suppliers" className="mb-4 inline-block text-sm text-brand-600 hover:underline">
         ← {t("common.back")}
       </Link>
 
-      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-6">
-        <h1 className="text-xl font-semibold text-gray-900">{statement.supplier.name}</h1>
-        <p className="text-sm text-gray-500">{statement.supplier.phone ?? "—"}</p>
+      <h1 className="mb-1 text-xl font-semibold text-gray-900">{statement.supplier.name}</h1>
+      <p className="mb-6 text-sm text-gray-500">{statement.supplier.phone ?? "—"}</p>
 
-        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
-          <StatCard label={t("suppliers.openingBalance")} value={statement.openingBalance} />
-          <StatCard label={t("suppliers.closingBalance")} value={statement.closingBalance} highlight />
-        </div>
-      </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* Sidebar */}
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-1">
+            <StatCard label={t("suppliers.openingBalance")} value={statement.openingBalance} />
+            <StatCard label={t("suppliers.closingBalance")} value={statement.closingBalance} highlight />
+          </div>
 
-      <div className="mb-6 max-w-md rounded-xl border border-gray-200 bg-white p-6">
-        <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("suppliers.payment")}</h2>
-        <form onSubmit={handlePay} className="space-y-4">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t("suppliers.payAmount")}</label>
-            <NumberInput required min={1} value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full text-left" />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t("kassa.register")}</label>
-            <Select value={cashRegisterId || defaultRegisterId} onChange={(e) => setCashRegisterId(e.target.value)} className="w-full">
-              {activeRegisters.map((register) => (
-                <option key={register.id} value={register.id}>
-                  {register.name}
-                </option>
-              ))}
-            </Select>
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t("kassa.description")}</label>
-            <Input value={description} onChange={(e) => setDescription(e.target.value)} className="w-full" />
-          </div>
-          <Button type="submit" disabled={payMutation.isPending || !amount}>
-            {t("suppliers.pay")}
-          </Button>
-        </form>
-      </div>
-
-      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-        <div className="flex flex-wrap items-end gap-3">
-          <div>
-            <label className="mb-1 block text-xs text-gray-500">{t("reports.from")}</label>
-            <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs text-gray-500">{t("reports.to")}</label>
-            <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+          <div className="rounded-xl border border-gray-200 bg-white p-6">
+            <h2 className="mb-4 font-semibold text-gray-900">{t("suppliers.payment")}</h2>
+            <form onSubmit={handlePay} className="space-y-4">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">{t("suppliers.payAmount")}</label>
+                <NumberInput required min={1} value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full text-left" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">{t("kassa.register")}</label>
+                <Select value={cashRegisterId || defaultRegisterId} onChange={(e) => setCashRegisterId(e.target.value)} className="w-full">
+                  {activeRegisters.map((register) => (
+                    <option key={register.id} value={register.id}>{register.name}</option>
+                  ))}
+                </Select>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">{t("kassa.description")}</label>
+                <Input value={description} onChange={(e) => setDescription(e.target.value)} className="w-full" />
+              </div>
+              <Button type="submit" disabled={payMutation.isPending || !amount}>{t("suppliers.pay")}</Button>
+            </form>
           </div>
         </div>
-        <Button variant="secondary" onClick={handleExport}>
-          {t("common.export")}
-        </Button>
-      </div>
 
-      <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("suppliers.statement")}</h2>
-      <Table>
-        <Thead>
-          <tr>
-            <Th>{t("orders.date")}</Th>
-            <Th>{t("kassa.type")}</Th>
-            <Th>{t("suppliers.description")}</Th>
-            <Th>{t("suppliers.debit")}</Th>
-            <Th>{t("suppliers.credit")}</Th>
-            <Th>{t("suppliers.balance")}</Th>
-          </tr>
-        </Thead>
-        <Tbody>
-          {statement.entries.map((entry, index) => (
-            <tr key={index}>
-              <Td>{new Date(entry.date).toLocaleString()}</Td>
-              <Td>
-                <Badge color={ENTRY_COLORS[entry.type]}>{t(ENTRY_LABEL_KEYS[entry.type])}</Badge>
-              </Td>
-              <Td>{entry.description}</Td>
-              <Td className="text-red-600">{entry.debit ? entry.debit.toLocaleString() : "—"}</Td>
-              <Td className="text-green-600">{entry.credit ? entry.credit.toLocaleString() : "—"}</Td>
-              <Td className="font-medium">{entry.balanceAfter.toLocaleString()}</Td>
-            </tr>
-          ))}
-          {statement.entries.length === 0 && (
-            <tr>
-              <Td colSpan={6} className="text-center text-gray-400">
-                {t("common.noData")}
-              </Td>
-            </tr>
-          )}
-        </Tbody>
-      </Table>
+        {/* Main: statement */}
+        <div className="lg:col-span-2">
+          <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+            <div className="flex flex-wrap items-end gap-3">
+              <div>
+                <label className="mb-1 block text-xs text-gray-500">{t("reports.from")}</label>
+                <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-gray-500">{t("reports.to")}</label>
+                <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+              </div>
+            </div>
+            <Button variant="secondary" onClick={handleExport}>{t("common.export")}</Button>
+          </div>
+
+          <h2 className="mb-3 font-semibold text-gray-900">{t("suppliers.statement")}</h2>
+          <div className="overflow-x-auto">
+            <Table>
+              <Thead>
+                <tr>
+                  <Th>{t("orders.date")}</Th>
+                  <Th>{t("kassa.type")}</Th>
+                  <Th>{t("suppliers.description")}</Th>
+                  <Th>{t("suppliers.debit")}</Th>
+                  <Th>{t("suppliers.credit")}</Th>
+                  <Th>{t("suppliers.balance")}</Th>
+                </tr>
+              </Thead>
+              <Tbody>
+                {statement.entries.map((entry, index) => (
+                  <tr key={index}>
+                    <Td>{new Date(entry.date).toLocaleString()}</Td>
+                    <Td><Badge color={ENTRY_COLORS[entry.type]}>{t(ENTRY_LABEL_KEYS[entry.type])}</Badge></Td>
+                    <Td>{entry.description}</Td>
+                    <Td className="text-red-600">{entry.debit ? entry.debit.toLocaleString() : "—"}</Td>
+                    <Td className="text-green-600">{entry.credit ? entry.credit.toLocaleString() : "—"}</Td>
+                    <Td className="font-medium">{entry.balanceAfter.toLocaleString()}</Td>
+                  </tr>
+                ))}
+                {statement.entries.length === 0 && (
+                  <tr><Td colSpan={6} className="text-center text-gray-400">{t("common.noData")}</Td></tr>
+                )}
+              </Tbody>
+            </Table>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -70,42 +70,43 @@ export function EmployeesPage() {
   const employees = employeesQuery.data?.employees ?? [];
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-xl font-semibold text-gray-900">{t("employees.title")}</h1>
         {!inviting && <Button onClick={() => setInviting(true)}>{t("employees.invite")}</Button>}
       </div>
 
-      {inviting && (
-        <form onSubmit={handleInviteSubmit} className="mb-6 space-y-4 rounded-xl border border-gray-200 bg-white p-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {inviting && (
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t("employees.name")}</label>
-            <Input required value={name} onChange={(e) => setName(e.target.value)} className="w-full" />
+            <form onSubmit={handleInviteSubmit} className="space-y-4 rounded-xl border border-gray-200 bg-white p-6">
+              <h2 className="font-semibold text-gray-900">{t("employees.invite")}</h2>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">{t("employees.name")}</label>
+                <Input required value={name} onChange={(e) => setName(e.target.value)} className="w-full" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">{t("employees.email")}</label>
+                <Input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">{t("employees.role")}</label>
+                <Select value={role} onChange={(e) => setRole(e.target.value as EmployeeRole)} className="w-full">
+                  <option value="CASHIER">{t("employees.roleCashier")}</option>
+                  <option value="MANAGER">{t("employees.roleManager")}</option>
+                </Select>
+              </div>
+              {inviteError && <p className="text-sm text-red-600">{inviteError}</p>}
+              <div className="flex gap-2">
+                <Button type="submit" disabled={inviteMutation.isPending}>{t("employees.sendInvite")}</Button>
+                <Button type="button" variant="secondary" onClick={() => setInviting(false)}>{t("common.cancel")}</Button>
+              </div>
+            </form>
           </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t("employees.email")}</label>
-            <Input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full" />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t("employees.role")}</label>
-            <Select value={role} onChange={(e) => setRole(e.target.value as EmployeeRole)} className="w-full">
-              <option value="CASHIER">{t("employees.roleCashier")}</option>
-              <option value="MANAGER">{t("employees.roleManager")}</option>
-            </Select>
-          </div>
-          {inviteError && <p className="text-sm text-red-600">{inviteError}</p>}
-          <div className="flex gap-2">
-            <Button type="submit" disabled={inviteMutation.isPending}>
-              {t("employees.sendInvite")}
-            </Button>
-            <Button type="button" variant="secondary" onClick={() => setInviting(false)}>
-              {t("common.cancel")}
-            </Button>
-          </div>
-        </form>
-      )}
+        )}
 
-      <Table>
+        <div className={inviting ? "lg:col-span-2" : "lg:col-span-3"}>
+        <Table>
         <Thead>
           <tr>
             <Th>{t("employees.name")}</Th>
@@ -156,6 +157,8 @@ export function EmployeesPage() {
           ))}
         </Tbody>
       </Table>
+        </div>
+      </div>
     </div>
   );
 }

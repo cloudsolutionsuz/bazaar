@@ -74,86 +74,84 @@ export function PromotionFormPage() {
   const promotion = promotionQuery.data?.promotion;
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <Link to="/promotions" className="mb-4 inline-block text-sm text-brand-600 hover:underline">
         ← {t("common.back")}
       </Link>
       <h1 className="mb-6 text-xl font-semibold text-gray-900">{t("promotions.editPromotion")}</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-gray-200 bg-white p-6">
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">{t("promotions.name")}</label>
-          <Input required value={name} onChange={(e) => setName(e.target.value)} className="w-full" />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* Left: edit form */}
+        <div className="lg:col-span-1">
+          <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-gray-200 bg-white p-6">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t("promotions.name")}</label>
+              <Input required value={name} onChange={(e) => setName(e.target.value)} className="w-full" />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.discount")}, %</label>
+              <Input type="number" min={0} max={99} value={discountPercent} onChange={(e) => setDiscountPercent(e.target.value)} className="w-full" />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t("promotions.startsAt")}</label>
+              <Input type="date" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className="w-full" />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t("promotions.endsAt")}</label>
+              <Input type="date" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} className="w-full" />
+            </div>
+            <label className="flex items-center gap-2 text-sm text-gray-700">
+              <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
+              {t("promotions.isActive")}
+            </label>
+            <Button type="submit" disabled={updateMutation.isPending}>{t("common.save")}</Button>
+          </form>
         </div>
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.discount")}, %</label>
-            <Input type="number" min={0} max={99} value={discountPercent} onChange={(e) => setDiscountPercent(e.target.value)} className="w-full" />
-          </div>
-          <div className="flex-1">
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t("promotions.startsAt")}</label>
-            <Input type="date" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className="w-full" />
-          </div>
-          <div className="flex-1">
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t("promotions.endsAt")}</label>
-            <Input type="date" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} className="w-full" />
-          </div>
-        </div>
-        <label className="flex items-center gap-2 text-sm text-gray-700">
-          <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
-          {t("promotions.isActive")}
-        </label>
-        <Button type="submit" disabled={updateMutation.isPending}>
-          {t("common.save")}
-        </Button>
-      </form>
 
-      {promotion && (
-        <section className="mt-8">
-          <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("promotions.attachProducts")}</h2>
-          <div className="rounded-xl border border-gray-200 bg-white p-6">
-            <ProductSelectorFields value={selector} onChange={setSelector} />
-            <Button
-              type="button"
-              className="mt-3"
-              disabled={!isSelectorValid(selector) || attachMutation.isPending}
-              onClick={() => attachMutation.mutate()}
-            >
-              {t("promotions.attach")}
-            </Button>
-          </div>
+        {/* Right: attach products */}
+        {promotion && (
+          <div className="lg:col-span-2">
+            <div className="rounded-xl border border-gray-200 bg-white p-6">
+              <h2 className="mb-3 font-semibold text-gray-900">{t("promotions.attachProducts")}</h2>
+              <ProductSelectorFields value={selector} onChange={setSelector} />
+              <Button
+                type="button"
+                className="mt-3"
+                disabled={!isSelectorValid(selector) || attachMutation.isPending}
+                onClick={() => attachMutation.mutate()}
+              >
+                {t("promotions.attach")}
+              </Button>
+            </div>
 
-          <div className="mt-4">
-            <Table>
-              <Thead>
-                <tr>
-                  <Th>{t("products.name")}</Th>
-                  <Th>{t("common.actions")}</Th>
-                </tr>
-              </Thead>
-              <Tbody>
-                {promotion.products.map((pp) => (
-                  <tr key={pp.productId}>
-                    <Td>{pp.product.name}</Td>
-                    <Td>
-                      <button onClick={() => detachMutation.mutate(pp.productId)} className="text-red-600 hover:underline">
-                        {t("promotions.detach")}
-                      </button>
-                    </Td>
-                  </tr>
-                ))}
-                {promotion.products.length === 0 && (
+            <div className="mt-4">
+              <Table>
+                <Thead>
                   <tr>
-                    <Td colSpan={2} className="text-center text-gray-400">
-                      {t("common.noData")}
-                    </Td>
+                    <Th>{t("products.name")}</Th>
+                    <Th>{t("common.actions")}</Th>
                   </tr>
-                )}
-              </Tbody>
-            </Table>
+                </Thead>
+                <Tbody>
+                  {promotion.products.map((pp) => (
+                    <tr key={pp.productId}>
+                      <Td>{pp.product.name}</Td>
+                      <Td>
+                        <button onClick={() => detachMutation.mutate(pp.productId)} className="text-red-600 hover:underline">
+                          {t("promotions.detach")}
+                        </button>
+                      </Td>
+                    </tr>
+                  ))}
+                  {promotion.products.length === 0 && (
+                    <tr><Td colSpan={2} className="text-center text-gray-400">{t("common.noData")}</Td></tr>
+                  )}
+                </Tbody>
+              </Table>
+            </div>
           </div>
-        </section>
-      )}
+        )}
+      </div>
     </div>
   );
 }

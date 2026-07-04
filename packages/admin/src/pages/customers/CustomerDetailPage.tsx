@@ -73,160 +73,140 @@ export function CustomerDetailPage() {
   if (!customer) return null;
 
   return (
-    <div className="max-w-4xl">
+    <div>
       <Link to="/customers" className="mb-4 inline-block text-sm text-brand-600 hover:underline">
         ← {t("common.back")}
       </Link>
 
-      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-6">
-        <h1 className="text-xl font-semibold text-gray-900">{customer.name}</h1>
-        <p className="text-sm text-gray-500">{customer.phone}</p>
-        <p className="text-sm text-gray-500">
-          {regionName(customer.addressRegion)}, {districtName(customer.addressRegion, customer.addressDistrict)}
-          {customer.addressMahalla ? `, ${customer.addressMahalla}` : ""}
-        </p>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Customer info */}
+          <div className="rounded-xl border border-gray-200 bg-white p-6">
+            <h1 className="text-lg font-semibold text-gray-900">{customer.name}</h1>
+            <p className="mb-4 text-sm text-gray-500">{customer.phone}</p>
+            <p className="mb-4 text-xs text-gray-400">
+              {regionName(customer.addressRegion)}, {districtName(customer.addressRegion, customer.addressDistrict)}
+              {customer.addressMahalla ? `, ${customer.addressMahalla}` : ""}
+            </p>
+            <dl className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <dt className="text-xs text-gray-500">{t("customers.purchaseAmount")}</dt>
+                <dd className="font-semibold">{customer.purchaseAmount.toLocaleString()}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-gray-500">{t("customers.paidAmount")}</dt>
+                <dd className="font-semibold">{customer.paidAmount.toLocaleString()}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-gray-500">{t("customers.balance")}</dt>
+                <dd className={`font-semibold ${customer.balance > 0 ? "text-red-600" : ""}`}>{customer.balance.toLocaleString()}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-gray-500">{t("customers.orderCount")}</dt>
+                <dd className="font-semibold">{customer.orderCount}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-gray-500">{t("customers.loyaltyPoints")}</dt>
+                <dd className="font-semibold text-yellow-700">{customer.loyaltyPoints.toLocaleString()}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-gray-500">{t("customers.customerSince")}</dt>
+                <dd className="font-semibold">{new Date(customer.createdAt).toLocaleDateString()}</dd>
+              </div>
+            </dl>
+          </div>
 
-        <div className="mt-4 grid grid-cols-3 gap-4">
-          <div>
-            <div className="text-sm text-gray-500">{t("customers.purchaseAmount")}</div>
-            <div className="text-xl font-semibold text-gray-900">{customer.purchaseAmount.toLocaleString()}</div>
+          {/* Record payment */}
+          <div className="rounded-xl border border-gray-200 bg-white p-6">
+            <h2 className="mb-4 font-semibold text-gray-900">{t("customers.recordPayment")}</h2>
+            <form onSubmit={handlePay} className="space-y-3">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">{t("customers.payAmount")}</label>
+                <NumberInput min={1} required value={payAmount} onChange={(e) => setPayAmount(e.target.value)} className="w-full text-left" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">{t("kassa.description")}</label>
+                <Input value={payDescription} onChange={(e) => setPayDescription(e.target.value)} className="w-full" />
+              </div>
+              {activeRegisters.length > 1 && (
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">{t("kassa.register")}</label>
+                  <Select value={payCashRegisterId || defaultRegisterId} onChange={(e) => setPayCashRegisterId(e.target.value)} className="w-full">
+                    {activeRegisters.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+                  </Select>
+                </div>
+              )}
+              <Button type="submit" disabled={!payAmount || payMutation.isPending}>{t("customers.pay")}</Button>
+              {paySuccess && <span className="text-sm text-green-600">{t("customers.paySuccess")}</span>}
+            </form>
           </div>
-          <div>
-            <div className="text-sm text-gray-500">{t("customers.paidAmount")}</div>
-            <div className="text-xl font-semibold text-gray-900">{customer.paidAmount.toLocaleString()}</div>
+
+          {/* Loyalty */}
+          <div className="rounded-xl border border-gray-200 bg-white p-6">
+            <h2 className="mb-4 font-semibold text-gray-900">{t("customers.adjustLoyalty")}</h2>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const delta = Number(loyaltyDelta);
+                if (delta === 0) return;
+                loyaltyMutation.mutate({ delta, reason: loyaltyReason });
+              }}
+              className="space-y-3"
+            >
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">{t("customers.loyaltyDelta")}</label>
+                <Input type="number" value={loyaltyDelta} onChange={(e) => setLoyaltyDelta(e.target.value)} placeholder="+100 / -50" className="w-full" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">{t("customers.loyaltyReason")}</label>
+                <Input value={loyaltyReason} onChange={(e) => setLoyaltyReason(e.target.value)} className="w-full" />
+              </div>
+              <Button type="submit" disabled={!loyaltyDelta || loyaltyMutation.isPending}>{t("customers.loyaltyAdjust")}</Button>
+              {loyaltySuccess && <span className="text-sm text-green-600">{t("customers.loyaltySuccess")}</span>}
+              {loyaltyMutation.isError && <span className="text-sm text-red-600">{t("customers.loyaltyError")}</span>}
+            </form>
           </div>
-          <div>
-            <div className="text-sm text-gray-500">{t("customers.balance")}</div>
-            <div className={`text-xl font-semibold ${customer.balance > 0 ? "text-red-600" : "text-gray-900"}`}>
-              {customer.balance.toLocaleString()}
+        </div>
+
+        {/* Orders table */}
+        <div className="lg:col-span-2">
+          <div className="rounded-xl border border-gray-200 bg-white">
+            <div className="border-b border-gray-100 px-6 py-4">
+              <h2 className="font-semibold text-gray-900">{t("customers.purchases")}</h2>
             </div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">{t("customers.orderCount")}</div>
-            <div className="text-xl font-semibold text-gray-900">{customer.orderCount}</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">{t("customers.loyaltyPoints")}</div>
-            <div className="text-xl font-semibold text-yellow-700">{customer.loyaltyPoints.toLocaleString()}</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">{t("customers.customerSince")}</div>
-            <div className="text-xl font-semibold text-gray-900">{new Date(customer.createdAt).toLocaleDateString()}</div>
+            <div className="overflow-x-auto">
+              <Table>
+                <Thead>
+                  <tr>
+                    <Th>{t("orders.date")}</Th>
+                    <Th>{t("common.status")}</Th>
+                    <Th>{t("orders.region")}</Th>
+                    <Th>{t("orders.district")}</Th>
+                    <Th>{t("orders.total")}</Th>
+                    <Th>{t("common.actions")}</Th>
+                  </tr>
+                </Thead>
+                <Tbody>
+                  {customer.orders.map((o) => (
+                    <tr key={o.id}>
+                      <Td>{new Date(o.createdAt).toLocaleString()}</Td>
+                      <Td><Badge color={STATUS_COLORS[o.status]}>{t(STATUS_LABEL_KEYS[o.status])}</Badge></Td>
+                      <Td>{regionName(o.addressRegion)}</Td>
+                      <Td>{districtName(o.addressRegion, o.addressDistrict)}</Td>
+                      <Td>{o.totalAmount.toLocaleString()}</Td>
+                      <Td><Link to={`/orders/${o.id}`} className="text-brand-600 hover:underline">{t("common.edit")}</Link></Td>
+                    </tr>
+                  ))}
+                  {customer.orders.length === 0 && (
+                    <tr><Td colSpan={6} className="text-center text-gray-400">{t("common.noData")}</Td></tr>
+                  )}
+                </Tbody>
+              </Table>
+            </div>
           </div>
         </div>
       </div>
-
-      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-6">
-        <h2 className="mb-4 text-base font-semibold text-gray-900">{t("customers.recordPayment")}</h2>
-        <form onSubmit={handlePay} className="flex flex-wrap items-end gap-3">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t("customers.payAmount")}</label>
-            <NumberInput
-              min={1}
-              required
-              value={payAmount}
-              onChange={(e) => setPayAmount(e.target.value)}
-              className="w-40 text-left"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t("kassa.description")}</label>
-            <Input value={payDescription} onChange={(e) => setPayDescription(e.target.value)} className="w-52" />
-          </div>
-          {activeRegisters.length > 1 && (
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">{t("kassa.register")}</label>
-              <Select
-                value={payCashRegisterId || defaultRegisterId}
-                onChange={(e) => setPayCashRegisterId(e.target.value)}
-                className="w-40"
-              >
-                {activeRegisters.map((r) => (
-                  <option key={r.id} value={r.id}>{r.name}</option>
-                ))}
-              </Select>
-            </div>
-          )}
-          <Button type="submit" disabled={!payAmount || payMutation.isPending}>
-            {t("customers.pay")}
-          </Button>
-          {paySuccess && <span className="text-sm text-green-600">{t("customers.paySuccess")}</span>}
-        </form>
-      </div>
-
-      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-6">
-        <h2 className="mb-4 text-base font-semibold text-gray-900">{t("customers.adjustLoyalty")}</h2>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            const delta = Number(loyaltyDelta);
-            if (delta === 0) return;
-            loyaltyMutation.mutate({ delta, reason: loyaltyReason });
-          }}
-          className="flex flex-wrap items-end gap-3"
-        >
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t("customers.loyaltyDelta")}</label>
-            <Input
-              type="number"
-              value={loyaltyDelta}
-              onChange={(e) => setLoyaltyDelta(e.target.value)}
-              placeholder="+100 / -50"
-              className="w-32"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t("customers.loyaltyReason")}</label>
-            <Input value={loyaltyReason} onChange={(e) => setLoyaltyReason(e.target.value)} className="w-52" />
-          </div>
-          <Button type="submit" disabled={!loyaltyDelta || loyaltyMutation.isPending}>
-            {t("customers.loyaltyAdjust")}
-          </Button>
-          {loyaltySuccess && <span className="text-sm text-green-600">{t("customers.loyaltySuccess")}</span>}
-          {loyaltyMutation.isError && <span className="text-sm text-red-600">{t("customers.loyaltyError")}</span>}
-        </form>
-      </div>
-
-      <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("customers.purchases")}</h2>
-      <Table>
-        <Thead>
-          <tr>
-            <Th>{t("orders.date")}</Th>
-            <Th>{t("common.status")}</Th>
-            <Th>{t("orders.region")}</Th>
-            <Th>{t("orders.district")}</Th>
-            <Th>{t("orders.mahalla")}</Th>
-            <Th>{t("orders.total")}</Th>
-            <Th>{t("common.actions")}</Th>
-          </tr>
-        </Thead>
-        <Tbody>
-          {customer.orders.map((o) => (
-            <tr key={o.id}>
-              <Td>{new Date(o.createdAt).toLocaleString()}</Td>
-              <Td>
-                <Badge color={STATUS_COLORS[o.status]}>{t(STATUS_LABEL_KEYS[o.status])}</Badge>
-              </Td>
-              <Td>{regionName(o.addressRegion)}</Td>
-              <Td>{districtName(o.addressRegion, o.addressDistrict)}</Td>
-              <Td>{o.addressMahalla ?? "—"}</Td>
-              <Td>{o.totalAmount.toLocaleString()}</Td>
-              <Td>
-                <Link to={`/orders/${o.id}`} className="text-brand-600 hover:underline">
-                  {t("common.edit")}
-                </Link>
-              </Td>
-            </tr>
-          ))}
-          {customer.orders.length === 0 && (
-            <tr>
-              <Td colSpan={7} className="text-center text-gray-400">
-                {t("common.noData")}
-              </Td>
-            </tr>
-          )}
-        </Tbody>
-      </Table>
     </div>
   );
 }

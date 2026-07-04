@@ -101,125 +101,120 @@ export function BillingPage() {
   const { tenant, invoices, nextInvoice, clickConfigured } = summary;
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <h1 className="mb-6 text-xl font-semibold text-gray-900">{t("billing.title")}</h1>
 
-      <div className="mb-6 grid grid-cols-2 gap-4 rounded-xl border border-gray-200 bg-white p-6">
-        <div>
-          <div className="text-sm text-gray-500">{t("billing.currentPlan")}</div>
-          <div className="text-lg font-semibold text-gray-900">{tenant.plan.name}</div>
-        </div>
-        <div>
-          <div className="text-sm text-gray-500">{t("billing.shopStatus")}</div>
-          <Badge color={TENANT_STATUS_COLORS[tenant.status]}>{t(TENANT_STATUS_KEYS[tenant.status])}</Badge>
-        </div>
-      </div>
-
-      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-6">
-        <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("billing.changePlan")}</h2>
-        {planChanged && <p className="mb-3 text-sm text-green-600">{t("billing.changePlanSuccess")}</p>}
-        <div className="flex items-end gap-2">
-          <Select value={selectedPlanId ?? tenant.planId} onChange={(e) => setSelectedPlanId(e.target.value)}>
-            {plans.map((plan) => (
-              <option key={plan.id} value={plan.id}>
-                {plan.name} — {plan.priceSum.toLocaleString()} сум/мес
-              </option>
-            ))}
-          </Select>
-          <Button
-            disabled={!selectedPlanId || selectedPlanId === tenant.planId || changePlanMutation.isPending}
-            onClick={() => selectedPlanId && changePlanMutation.mutate(selectedPlanId)}
-          >
-            {t("billing.changePlanConfirm")}
-          </Button>
-        </div>
-      </div>
-
-      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-6">
-        <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("billing.prepay")}</h2>
-        <p className="mb-4 text-sm text-gray-500">{t("billing.prepayHint")}</p>
-        {prepayCreated && <p className="mb-3 text-sm text-green-600">{t("billing.prepayInvoiceCreated")}</p>}
-        <div className="grid grid-cols-3 gap-3">
-          {([3, 6, 12] as const).map((months) => {
-            const discounts: Record<number, number> = { 3: 0.05, 6: 0.10, 12: 0.15 };
-            const discount = discounts[months];
-            const amount = Math.round(tenant.plan.priceSum * months * (1 - discount));
-            const labelKey = `billing.prepay${months}months` as const;
-            return (
-              <button
-                key={months}
-                disabled={prepayMutation.isPending}
-                onClick={() => prepayMutation.mutate(months)}
-                className="rounded-xl border border-gray-200 p-4 text-left hover:border-brand-400 hover:bg-brand-50 disabled:opacity-50"
-              >
-                <div className="mb-1 text-sm font-medium text-gray-900">{t(labelKey)}</div>
-                <div className="text-sm text-brand-700">{t("billing.prepayAmount", { amount: amount.toLocaleString() })}</div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-6">
-        <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("billing.nextCharge")}</h2>
-        {justPaid && <p className="mb-3 text-sm text-green-600">{t("billing.paySuccess")}</p>}
-        {nextInvoice ? (
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-2xl font-semibold text-gray-900">{nextInvoice.amount.toLocaleString()}</div>
-              <div className="mb-1 text-sm text-gray-500">
-                {t("billing.dueDate")}: {new Date(nextInvoice.dueDate).toLocaleDateString()}
-              </div>
-              <Badge color={INVOICE_STATUS_COLORS[nextInvoice.status]}>{t(INVOICE_STATUS_KEYS[nextInvoice.status])}</Badge>
-            </div>
-            <Button
-              disabled={checkoutMutation.isPending}
-              onClick={() => checkoutMutation.mutate(nextInvoice.id)}
-            >
-              {clickConfigured ? t("billing.payViaClick") : t("billing.pay")}
-            </Button>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Plan + status */}
+          <div className="rounded-xl border border-gray-200 bg-white p-6">
+            <h2 className="mb-4 font-semibold text-gray-900">{t("billing.currentPlan")}</h2>
+            <div className="mb-3 text-lg font-semibold text-gray-900">{tenant.plan.name}</div>
+            <Badge color={TENANT_STATUS_COLORS[tenant.status]}>{t(TENANT_STATUS_KEYS[tenant.status])}</Badge>
           </div>
-        ) : (
-          <p className="text-sm text-gray-500">{t("billing.noNextCharge")}</p>
-        )}
-      </div>
 
-      <section>
-        <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("billing.history")}</h2>
-        <Table>
-          <Thead>
-            <tr>
-              <Th>{t("billing.period")}</Th>
-              <Th>{t("billing.amount")}</Th>
-              <Th>{t("billing.status")}</Th>
-              <Th>{t("billing.dueDate")}</Th>
-              <Th>{t("billing.paidAt")}</Th>
-            </tr>
-          </Thead>
-          <Tbody>
-            {invoices.map((invoice) => (
-              <tr key={invoice.id}>
-                <Td>
-                  {new Date(invoice.periodStart).toLocaleDateString()} — {new Date(invoice.periodEnd).toLocaleDateString()}
-                </Td>
-                <Td>{invoice.amount.toLocaleString()}</Td>
-                <Td>
-                  <Badge color={INVOICE_STATUS_COLORS[invoice.status]}>{t(INVOICE_STATUS_KEYS[invoice.status])}</Badge>
-                </Td>
-                <Td>{new Date(invoice.dueDate).toLocaleDateString()}</Td>
-                <Td>{invoice.paidAt ? new Date(invoice.paidAt).toLocaleDateString() : "—"}</Td>
-              </tr>
-            ))}
-            {invoices.length === 0 && (
-              <tr>
-                <Td colSpan={5} className="text-center text-gray-400">
-                  {t("common.noData")}
-                </Td>
-              </tr>
+          {/* Change plan */}
+          <div className="rounded-xl border border-gray-200 bg-white p-6">
+            <h2 className="mb-3 font-semibold text-gray-900">{t("billing.changePlan")}</h2>
+            {planChanged && <p className="mb-3 text-sm text-green-600">{t("billing.changePlanSuccess")}</p>}
+            <div className="flex flex-col gap-2">
+              <Select value={selectedPlanId ?? tenant.planId} onChange={(e) => setSelectedPlanId(e.target.value)} className="w-full">
+                {plans.map((plan) => (
+                  <option key={plan.id} value={plan.id}>{plan.name} — {plan.priceSum.toLocaleString()} сум/мес</option>
+                ))}
+              </Select>
+              <Button
+                disabled={!selectedPlanId || selectedPlanId === tenant.planId || changePlanMutation.isPending}
+                onClick={() => selectedPlanId && changePlanMutation.mutate(selectedPlanId)}
+              >
+                {t("billing.changePlanConfirm")}
+              </Button>
+            </div>
+          </div>
+
+          {/* Next charge */}
+          <div className="rounded-xl border border-gray-200 bg-white p-6">
+            <h2 className="mb-3 font-semibold text-gray-900">{t("billing.nextCharge")}</h2>
+            {justPaid && <p className="mb-3 text-sm text-green-600">{t("billing.paySuccess")}</p>}
+            {nextInvoice ? (
+              <div className="space-y-3">
+                <div className="text-2xl font-semibold text-gray-900">{nextInvoice.amount.toLocaleString()}</div>
+                <div className="text-sm text-gray-500">{t("billing.dueDate")}: {new Date(nextInvoice.dueDate).toLocaleDateString()}</div>
+                <Badge color={INVOICE_STATUS_COLORS[nextInvoice.status]}>{t(INVOICE_STATUS_KEYS[nextInvoice.status])}</Badge>
+                <Button disabled={checkoutMutation.isPending} onClick={() => checkoutMutation.mutate(nextInvoice.id)} className="w-full justify-center">
+                  {clickConfigured ? t("billing.payViaClick") : t("billing.pay")}
+                </Button>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">{t("billing.noNextCharge")}</p>
             )}
-          </Tbody>
-        </Table>
-      </section>
+          </div>
+        </div>
+
+        {/* Main content */}
+        <div className="space-y-6 lg:col-span-2">
+          {/* Prepay */}
+          <div className="rounded-xl border border-gray-200 bg-white p-6">
+            <h2 className="mb-2 font-semibold text-gray-900">{t("billing.prepay")}</h2>
+            <p className="mb-4 text-sm text-gray-500">{t("billing.prepayHint")}</p>
+            {prepayCreated && <p className="mb-3 text-sm text-green-600">{t("billing.prepayInvoiceCreated")}</p>}
+            <div className="grid grid-cols-3 gap-3">
+              {([3, 6, 12] as const).map((months) => {
+                const discounts: Record<number, number> = { 3: 0.05, 6: 0.10, 12: 0.15 };
+                const discount = discounts[months];
+                const amount = Math.round(tenant.plan.priceSum * months * (1 - discount));
+                const labelKey = `billing.prepay${months}months` as const;
+                return (
+                  <button
+                    key={months}
+                    disabled={prepayMutation.isPending}
+                    onClick={() => prepayMutation.mutate(months)}
+                    className="rounded-xl border border-gray-200 p-4 text-left hover:border-brand-400 hover:bg-brand-50 disabled:opacity-50"
+                  >
+                    <div className="mb-1 text-sm font-medium text-gray-900">{t(labelKey)}</div>
+                    <div className="text-sm text-brand-700">{t("billing.prepayAmount", { amount: amount.toLocaleString() })}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Invoice history */}
+          <div className="rounded-xl border border-gray-200 bg-white">
+            <div className="border-b border-gray-100 px-6 py-4">
+              <h2 className="font-semibold text-gray-900">{t("billing.history")}</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <Table>
+                <Thead>
+                  <tr>
+                    <Th>{t("billing.period")}</Th>
+                    <Th>{t("billing.amount")}</Th>
+                    <Th>{t("billing.status")}</Th>
+                    <Th>{t("billing.dueDate")}</Th>
+                    <Th>{t("billing.paidAt")}</Th>
+                  </tr>
+                </Thead>
+                <Tbody>
+                  {invoices.map((invoice) => (
+                    <tr key={invoice.id}>
+                      <Td>{new Date(invoice.periodStart).toLocaleDateString()} — {new Date(invoice.periodEnd).toLocaleDateString()}</Td>
+                      <Td>{invoice.amount.toLocaleString()}</Td>
+                      <Td><Badge color={INVOICE_STATUS_COLORS[invoice.status]}>{t(INVOICE_STATUS_KEYS[invoice.status])}</Badge></Td>
+                      <Td>{new Date(invoice.dueDate).toLocaleDateString()}</Td>
+                      <Td>{invoice.paidAt ? new Date(invoice.paidAt).toLocaleDateString() : "—"}</Td>
+                    </tr>
+                  ))}
+                  {invoices.length === 0 && (
+                    <tr><Td colSpan={5} className="text-center text-gray-400">{t("common.noData")}</Td></tr>
+                  )}
+                </Tbody>
+              </Table>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <Modal open={payingInvoiceId !== null} onClose={() => setPayingInvoiceId(null)} title={t("billing.pay")}>
         <p className="mb-4 text-sm text-amber-700">{t("billing.sandboxNotice")}</p>

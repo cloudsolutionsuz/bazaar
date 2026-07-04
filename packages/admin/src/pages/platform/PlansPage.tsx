@@ -89,7 +89,7 @@ export function PlansPage() {
   const isSaving = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-semibold text-gray-900">{t("platform.plansTitle")}</h1>
         {editingId === null && <Button onClick={startCreate}>{t("platform.addPlan")}</Button>}

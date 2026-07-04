@@ -124,121 +124,139 @@ export function ProductFormPage() {
   const saving = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <Link to="/products" className="mb-4 inline-block text-sm text-brand-600 hover:underline">
         ← {t("common.back")}
       </Link>
       <h1 className="mb-6 text-xl font-semibold text-gray-900">{isNew ? t("products.addProduct") : t("products.editProduct")}</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-gray-200 bg-white p-6">
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.name")}</label>
-          <Input required value={name} onChange={(e) => setName(e.target.value)} className="w-full" />
-        </div>
+      <form onSubmit={handleSubmit}>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {/* Left column — main content */}
+          <div className="space-y-6 lg:col-span-2">
+            <div className="rounded-xl border border-gray-200 bg-white p-6">
+              <h2 className="mb-4 text-sm font-semibold text-gray-700">{t("products.name")}</h2>
+              <Input required value={name} onChange={(e) => setName(e.target.value)} className="w-full" />
+            </div>
 
-        <div>
-          <div className="mb-1 flex items-center gap-1">
-            <label className="block text-sm font-medium text-gray-700">{t("products.description")}</label>
-            <div className="ml-2 flex gap-1">
-              {(["default", "ru", "uz"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => setDescriptionTab(tab)}
-                  className={`rounded px-2 py-0.5 text-xs font-medium ${
-                    descriptionTab === tab ? "bg-brand-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  }`}
-                >
-                  {tab === "default" ? t("products.descriptionDefault") : tab.toUpperCase()}
-                </button>
-              ))}
+            <div className="rounded-xl border border-gray-200 bg-white p-6">
+              <div className="mb-3 flex items-center gap-2">
+                <h2 className="text-sm font-semibold text-gray-700">{t("products.description")}</h2>
+                <div className="flex gap-1">
+                  {(["default", "ru", "uz"] as const).map((tab) => (
+                    <button
+                      key={tab}
+                      type="button"
+                      onClick={() => setDescriptionTab(tab)}
+                      className={`rounded px-2 py-0.5 text-xs font-medium ${
+                        descriptionTab === tab ? "bg-brand-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      }`}
+                    >
+                      {tab === "default" ? t("products.descriptionDefault") : tab.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {descriptionTab === "default" && (
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
+                  rows={5}
+                />
+              )}
+              {descriptionTab === "ru" && (
+                <textarea
+                  value={descriptionRu}
+                  onChange={(e) => setDescriptionRu(e.target.value)}
+                  placeholder={t("products.descriptionRuPlaceholder")}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
+                  rows={5}
+                />
+              )}
+              {descriptionTab === "uz" && (
+                <textarea
+                  value={descriptionUz}
+                  onChange={(e) => setDescriptionUz(e.target.value)}
+                  placeholder={t("products.descriptionUzPlaceholder")}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
+                  rows={5}
+                />
+              )}
             </div>
           </div>
-          {descriptionTab === "default" && (
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
-              rows={3}
-            />
-          )}
-          {descriptionTab === "ru" && (
-            <textarea
-              value={descriptionRu}
-              onChange={(e) => setDescriptionRu(e.target.value)}
-              placeholder={t("products.descriptionRuPlaceholder")}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
-              rows={3}
-            />
-          )}
-          {descriptionTab === "uz" && (
-            <textarea
-              value={descriptionUz}
-              onChange={(e) => setDescriptionUz(e.target.value)}
-              placeholder={t("products.descriptionUzPlaceholder")}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
-              rows={3}
-            />
-          )}
-        </div>
 
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.price")}</label>
-            <NumberInput required min={1} value={price} onChange={(e) => setPrice(e.target.value)} className="w-full" />
-          </div>
-          <div className="w-28">
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.currency")}</label>
-            <Input value={currency} onChange={(e) => setCurrency(e.target.value)} className="w-full" />
-          </div>
-          <div className="w-32">
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.discount")}, %</label>
-            <NumberInput min={0} max={99} value={discountPercent} onChange={(e) => setDiscountPercent(e.target.value)} className="w-full" />
-          </div>
-        </div>
+          {/* Right column — metadata */}
+          <div className="space-y-6">
+            {/* Publish */}
+            <div className="rounded-xl border border-gray-200 bg-white p-6">
+              <h2 className="mb-4 text-sm font-semibold text-gray-700">{t("common.status")}</h2>
+              <Select value={status} onChange={(e) => setStatus(e.target.value as ProductStatus)} className="mb-4 w-full">
+                <option value="ACTIVE">{t("products.statusActive")}</option>
+                <option value="HIDDEN">{t("products.statusHidden")}</option>
+                <option value="OUT_OF_STOCK">{t("products.statusOutOfStock")}</option>
+              </Select>
+              <div className="flex items-center gap-3">
+                <Button type="submit" disabled={saving} className="w-full justify-center">
+                  {saving ? t("common.saving") : t("common.save")}
+                </Button>
+              </div>
+              {justSaved && !saving && (
+                <p className="mt-2 text-center text-sm font-medium text-green-600">✓ {t("common.saved")}</p>
+              )}
+            </div>
 
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.category")}</label>
-            <Select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="w-full">
-              <option value="">{t("products.noCategory")}</option>
-              {categoriesQuery.data?.categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </Select>
-          </div>
-          <div className="flex-1">
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t("common.status")}</label>
-            <Select value={status} onChange={(e) => setStatus(e.target.value as ProductStatus)} className="w-full">
-              <option value="ACTIVE">{t("products.statusActive")}</option>
-              <option value="HIDDEN">{t("products.statusHidden")}</option>
-              <option value="OUT_OF_STOCK">{t("products.statusOutOfStock")}</option>
-            </Select>
-          </div>
-        </div>
+            {/* Pricing */}
+            <div className="rounded-xl border border-gray-200 bg-white p-6">
+              <h2 className="mb-4 text-sm font-semibold text-gray-700">{t("products.price")}</h2>
+              <div className="space-y-3">
+                <div>
+                  <label className="mb-1 block text-xs text-gray-500">{t("products.price")}</label>
+                  <NumberInput required min={1} value={price} onChange={(e) => setPrice(e.target.value)} className="w-full text-left" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1 block text-xs text-gray-500">{t("products.currency")}</label>
+                    <Input value={currency} onChange={(e) => setCurrency(e.target.value)} className="w-full" />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-gray-500">{t("products.discount")}, %</label>
+                    <Input type="number" min={0} max={99} value={discountPercent} onChange={(e) => setDiscountPercent(e.target.value)} className="w-full" />
+                  </div>
+                </div>
+              </div>
+            </div>
 
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.brand")}</label>
-            <Input value={brand} onChange={(e) => setBrand(e.target.value)} className="w-full" />
+            {/* Organization */}
+            <div className="rounded-xl border border-gray-200 bg-white p-6">
+              <h2 className="mb-4 text-sm font-semibold text-gray-700">{t("products.category")}</h2>
+              <div className="space-y-3">
+                <div>
+                  <label className="mb-1 block text-xs text-gray-500">{t("products.category")}</label>
+                  <Select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="w-full">
+                    <option value="">{t("products.noCategory")}</option>
+                    {categoriesQuery.data?.categories.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </Select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-gray-500">{t("products.brand")}</label>
+                  <Input value={brand} onChange={(e) => setBrand(e.target.value)} className="w-full" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1 block text-xs text-gray-500">{t("products.color")}</label>
+                    <Input value={color} onChange={(e) => setColor(e.target.value)} className="w-full" />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-gray-500">{t("products.code")}</label>
+                    <Input value={code} onChange={(e) => setCode(e.target.value)} className="w-full" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="flex-1">
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.color")}</label>
-            <Input value={color} onChange={(e) => setColor(e.target.value)} className="w-full" />
-          </div>
-          <div className="flex-1">
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t("products.code")}</label>
-            <Input value={code} onChange={(e) => setCode(e.target.value)} className="w-full" />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Button type="submit" disabled={saving}>
-            {saving ? t("common.saving") : t("common.save")}
-          </Button>
-          {justSaved && !saving && <span className="text-sm font-medium text-green-600">✓ {t("common.saved")}</span>}
         </div>
       </form>
 

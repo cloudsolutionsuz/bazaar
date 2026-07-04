@@ -104,7 +104,7 @@ export function TenantDetailPage() {
   const owner = tenant.users.find((u) => u.role === "OWNER");
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <Link to="/platform/tenants" className="mb-4 inline-block text-sm text-brand-600 hover:underline">
         ← {t("common.back")}
       </Link>
@@ -129,200 +129,210 @@ export function TenantDetailPage() {
         </div>
       </div>
 
-      <div className="mb-6 grid grid-cols-2 gap-4 rounded-xl border border-gray-200 bg-white p-6 text-sm">
-        <div>
-          <div className="text-gray-500">{t("platform.subdomain")}</div>
-          <div>{tenant.subdomain}</div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* Sidebar */}
+        <div className="space-y-6">
+          <div className="rounded-xl border border-gray-200 bg-white p-6 text-sm">
+            <h2 className="mb-4 font-semibold text-gray-900">{t("platform.owner")}</h2>
+            <dl className="space-y-3">
+              <div>
+                <dt className="text-xs text-gray-500">{t("platform.subdomain")}</dt>
+                <dd className="font-medium">{tenant.subdomain}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-gray-500">{t("platform.registeredAt")}</dt>
+                <dd>{new Date(tenant.createdAt).toLocaleDateString()}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-gray-500">{t("platform.owner")}</dt>
+                <dd>{owner ? `${owner.name}` : "—"}</dd>
+                {owner && <dd className="text-xs text-gray-500">{owner.email}</dd>}
+              </div>
+              <div>
+                <dt className="text-xs text-gray-500">{t("billing.currentPlan")}</dt>
+                <dd>{tenant.plan.name}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-gray-500">{t("platform.ltv")}</dt>
+                <dd className="font-semibold text-green-700">{tenant.ltv.toLocaleString()}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div className="rounded-xl border border-gray-200 bg-white p-6">
+            <h2 className="mb-3 font-semibold text-gray-900">{t("platform.changePlan")}</h2>
+            <div className="flex flex-col gap-2">
+              <Select value={selectedPlanId ?? tenant.planId} onChange={(e) => setSelectedPlanId(e.target.value)} className="w-full">
+                {plans.map((plan) => (
+                  <option key={plan.id} value={plan.id}>
+                    {plan.name} — {plan.priceSum.toLocaleString()}
+                  </option>
+                ))}
+              </Select>
+              <Button
+                disabled={!selectedPlanId || selectedPlanId === tenant.planId || changePlanMutation.isPending}
+                onClick={() => selectedPlanId && changePlanMutation.mutate(selectedPlanId)}
+              >
+                {t("common.save")}
+              </Button>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-gray-200 bg-white">
+            <div className="border-b border-gray-100 px-6 py-4">
+              <h2 className="font-semibold text-gray-900">{t("employees.title")}</h2>
+            </div>
+            <Table>
+              <Thead>
+                <tr>
+                  <Th>{t("employees.name")}</Th>
+                  <Th>{t("employees.role")}</Th>
+                </tr>
+              </Thead>
+              <Tbody>
+                {tenant.users.map((user) => (
+                  <tr key={user.id}>
+                    <Td>
+                      <div>{user.name}</div>
+                      <div className="text-xs text-gray-400">{user.email}</div>
+                    </Td>
+                    <Td>{ROLE_KEYS[user.role] ? t(ROLE_KEYS[user.role]) : user.role}</Td>
+                  </tr>
+                ))}
+              </Tbody>
+            </Table>
+          </div>
         </div>
-        <div>
-          <div className="text-gray-500">{t("platform.registeredAt")}</div>
-          <div>{new Date(tenant.createdAt).toLocaleDateString()}</div>
-        </div>
-        <div>
-          <div className="text-gray-500">{t("platform.owner")}</div>
-          <div>{owner ? `${owner.name} (${owner.email})` : "—"}</div>
-        </div>
-        <div>
-          <div className="text-gray-500">{t("billing.currentPlan")}</div>
-          <div>{tenant.plan.name}</div>
-        </div>
-        <div>
-          <div className="text-gray-500">{t("platform.ltv")}</div>
-          <div>{tenant.ltv.toLocaleString()}</div>
+
+        {/* Main content */}
+        <div className="space-y-6 lg:col-span-2">
+          <div className="rounded-xl border border-gray-200 bg-white">
+            <div className="border-b border-gray-100 px-6 py-4">
+              <h2 className="font-semibold text-gray-900">{t("billing.history")}</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <Table>
+                <Thead>
+                  <tr>
+                    <Th>{t("billing.period")}</Th>
+                    <Th>{t("billing.amount")}</Th>
+                    <Th>{t("billing.status")}</Th>
+                    <Th>{t("billing.dueDate")}</Th>
+                    <Th>{t("billing.paidAt")}</Th>
+                  </tr>
+                </Thead>
+                <Tbody>
+                  {tenant.invoices.map((invoice) => (
+                    <tr key={invoice.id}>
+                      <Td>{new Date(invoice.periodStart).toLocaleDateString()} — {new Date(invoice.periodEnd).toLocaleDateString()}</Td>
+                      <Td>{invoice.amount.toLocaleString()}</Td>
+                      <Td><Badge color={INVOICE_STATUS_COLORS[invoice.status]}>{t(INVOICE_STATUS_KEYS[invoice.status])}</Badge></Td>
+                      <Td>{new Date(invoice.dueDate).toLocaleDateString()}</Td>
+                      <Td>{invoice.paidAt ? new Date(invoice.paidAt).toLocaleDateString() : "—"}</Td>
+                    </tr>
+                  ))}
+                  {tenant.invoices.length === 0 && (
+                    <tr><Td colSpan={5} className="text-center text-gray-400">{t("common.noData")}</Td></tr>
+                  )}
+                </Tbody>
+              </Table>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-gray-200 bg-white p-6">
+            <h2 className="mb-4 font-semibold text-gray-900">{t("platform.shopReports")}</h2>
+            <div className="mb-4 flex flex-wrap items-end gap-3">
+              <div>
+                <label className="mb-1 block text-xs text-gray-500">{t("reports.from")}</label>
+                <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-gray-500">{t("reports.to")}</label>
+                <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+              </div>
+              <div className="flex gap-2">
+                <Button variant="secondary" onClick={() => applyPreset(0)}>{t("reports.presetToday")}</Button>
+                <Button variant="secondary" onClick={() => applyPreset(1)}>{t("reports.presetYesterday")}</Button>
+                <Button variant="secondary" onClick={() => applyPreset(7)}>{t("reports.presetWeek")}</Button>
+              </div>
+            </div>
+
+            <h3 className="mb-2 text-sm font-semibold text-gray-700">{t("platform.reportProducts")}</h3>
+            <div className="mb-6 overflow-x-auto">
+              <Table>
+                <Thead>
+                  <tr>
+                    <Th>{t("products.name")}</Th>
+                    <Th>{t("products.category")}</Th>
+                    <Th>{t("products.brand")}</Th>
+                    <Th>{t("products.price")}</Th>
+                    <Th>{t("products.discount")}</Th>
+                    <Th>{t("reports.productQtySold")}</Th>
+                    <Th>{t("reports.productRevenuePerUnit")}</Th>
+                    <Th>{t("reports.margin")}</Th>
+                    <Th>{t("reports.revenue")}</Th>
+                  </tr>
+                </Thead>
+                <Tbody>
+                  {(productsQuery.data?.products ?? []).map((row) => (
+                    <tr key={row.productId}>
+                      <Td>{row.name}</Td>
+                      <Td>{row.categoryName ?? "—"}</Td>
+                      <Td>{row.brand ?? "—"}</Td>
+                      <Td>{row.price.toLocaleString()}</Td>
+                      <Td>{row.avgDiscountPercent}%</Td>
+                      <Td>{row.quantity}</Td>
+                      <Td>{row.revenuePerUnit.toLocaleString()}</Td>
+                      <Td>{row.marginPercent}%</Td>
+                      <Td>{row.totalRevenue.toLocaleString()}</Td>
+                    </tr>
+                  ))}
+                  {(productsQuery.data?.products ?? []).length === 0 && (
+                    <tr><Td colSpan={9} className="text-center text-gray-400">{t("common.noData")}</Td></tr>
+                  )}
+                </Tbody>
+              </Table>
+            </div>
+
+            <h3 className="mb-2 text-sm font-semibold text-gray-700">{t("platform.reportPayments")}</h3>
+            <div className="overflow-x-auto">
+              <Table>
+                <Thead>
+                  <tr>
+                    <Th>{t("customers.name")}</Th>
+                    <Th>{t("customers.phone")}</Th>
+                    <Th>{t("reports.paymentStatus")}</Th>
+                    <Th>{t("reports.orderCount")}</Th>
+                    <Th>{t("reports.paymentDebt")}</Th>
+                    <Th>{t("reports.paymentPaid")}</Th>
+                    <Th>{t("reports.paymentBalance")}</Th>
+                  </tr>
+                </Thead>
+                <Tbody>
+                  {(paymentsQuery.data?.items ?? []).map((row) => (
+                    <tr key={row.id}>
+                      <Td>{row.name}</Td>
+                      <Td>{row.phone}</Td>
+                      <Td>
+                        <Badge color={row.status === "paid" ? "green" : row.status === "partial" ? "yellow" : "red"}>
+                          {t(`reports.paymentStatus${row.status.charAt(0).toUpperCase() + row.status.slice(1)}`)}
+                        </Badge>
+                      </Td>
+                      <Td>{row.orderCount}</Td>
+                      <Td>{row.purchaseAmount.toLocaleString()}</Td>
+                      <Td>{row.paidAmount.toLocaleString()}</Td>
+                      <Td>{row.balance.toLocaleString()}</Td>
+                    </tr>
+                  ))}
+                  {(paymentsQuery.data?.items ?? []).length === 0 && (
+                    <tr><Td colSpan={7} className="text-center text-gray-400">{t("common.noData")}</Td></tr>
+                  )}
+                </Tbody>
+              </Table>
+            </div>
+          </div>
         </div>
       </div>
-
-      <section className="mb-6 rounded-xl border border-gray-200 bg-white p-6">
-        <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("platform.changePlan")}</h2>
-        <div className="flex items-end gap-2">
-          <Select value={selectedPlanId ?? tenant.planId} onChange={(e) => setSelectedPlanId(e.target.value)}>
-            {plans.map((plan) => (
-              <option key={plan.id} value={plan.id}>
-                {plan.name} — {plan.priceSum.toLocaleString()}
-              </option>
-            ))}
-          </Select>
-          <Button
-            disabled={!selectedPlanId || selectedPlanId === tenant.planId || changePlanMutation.isPending}
-            onClick={() => selectedPlanId && changePlanMutation.mutate(selectedPlanId)}
-          >
-            {t("common.save")}
-          </Button>
-        </div>
-      </section>
-
-      <section className="mb-6">
-        <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("employees.title")}</h2>
-        <Table>
-          <Thead>
-            <tr>
-              <Th>{t("employees.name")}</Th>
-              <Th>{t("employees.email")}</Th>
-              <Th>{t("employees.role")}</Th>
-            </tr>
-          </Thead>
-          <Tbody>
-            {tenant.users.map((user) => (
-              <tr key={user.id}>
-                <Td>{user.name}</Td>
-                <Td>{user.email}</Td>
-                <Td>{ROLE_KEYS[user.role] ? t(ROLE_KEYS[user.role]) : user.role}</Td>
-              </tr>
-            ))}
-          </Tbody>
-        </Table>
-      </section>
-
-      <section className="mb-6">
-        <h2 className="mb-3 text-lg font-semibold text-gray-900">{t("billing.history")}</h2>
-        <Table>
-          <Thead>
-            <tr>
-              <Th>{t("billing.period")}</Th>
-              <Th>{t("billing.amount")}</Th>
-              <Th>{t("billing.status")}</Th>
-              <Th>{t("billing.dueDate")}</Th>
-              <Th>{t("billing.paidAt")}</Th>
-            </tr>
-          </Thead>
-          <Tbody>
-            {tenant.invoices.map((invoice) => (
-              <tr key={invoice.id}>
-                <Td>
-                  {new Date(invoice.periodStart).toLocaleDateString()} — {new Date(invoice.periodEnd).toLocaleDateString()}
-                </Td>
-                <Td>{invoice.amount.toLocaleString()}</Td>
-                <Td>
-                  <Badge color={INVOICE_STATUS_COLORS[invoice.status]}>{t(INVOICE_STATUS_KEYS[invoice.status])}</Badge>
-                </Td>
-                <Td>{new Date(invoice.dueDate).toLocaleDateString()}</Td>
-                <Td>{invoice.paidAt ? new Date(invoice.paidAt).toLocaleDateString() : "—"}</Td>
-              </tr>
-            ))}
-            {tenant.invoices.length === 0 && (
-              <tr>
-                <Td colSpan={5} className="text-center text-gray-400">
-                  {t("common.noData")}
-                </Td>
-              </tr>
-            )}
-          </Tbody>
-        </Table>
-      </section>
-
-      <section className="mb-6">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">{t("platform.shopReports")}</h2>
-
-        <div className="mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-gray-200 bg-white p-4">
-          <div>
-            <label className="mb-1 block text-xs text-gray-500">{t("reports.from")}</label>
-            <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs text-gray-500">{t("reports.to")}</label>
-            <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
-          </div>
-          <div className="flex gap-2">
-            <Button variant="secondary" onClick={() => applyPreset(0)}>{t("reports.presetToday")}</Button>
-            <Button variant="secondary" onClick={() => applyPreset(1)}>{t("reports.presetYesterday")}</Button>
-            <Button variant="secondary" onClick={() => applyPreset(7)}>{t("reports.presetWeek")}</Button>
-          </div>
-        </div>
-
-        <h3 className="mb-2 text-sm font-semibold text-gray-700">{t("platform.reportProducts")}</h3>
-        <div className="mb-6 overflow-x-auto">
-          <Table>
-            <Thead>
-              <tr>
-                <Th>{t("products.name")}</Th>
-                <Th>{t("products.category")}</Th>
-                <Th>{t("products.brand")}</Th>
-                <Th>{t("products.price")}</Th>
-                <Th>{t("products.discount")}</Th>
-                <Th>{t("reports.productQtySold")}</Th>
-                <Th>{t("reports.productRevenuePerUnit")}</Th>
-                <Th>{t("reports.margin")}</Th>
-                <Th>{t("reports.revenue")}</Th>
-              </tr>
-            </Thead>
-            <Tbody>
-              {(productsQuery.data?.products ?? []).map((row) => (
-                <tr key={row.productId}>
-                  <Td>{row.name}</Td>
-                  <Td>{row.categoryName ?? "—"}</Td>
-                  <Td>{row.brand ?? "—"}</Td>
-                  <Td>{row.price.toLocaleString()}</Td>
-                  <Td>{row.avgDiscountPercent}%</Td>
-                  <Td>{row.quantity}</Td>
-                  <Td>{row.revenuePerUnit.toLocaleString()}</Td>
-                  <Td>{row.marginPercent}%</Td>
-                  <Td>{row.totalRevenue.toLocaleString()}</Td>
-                </tr>
-              ))}
-              {(productsQuery.data?.products ?? []).length === 0 && (
-                <tr><Td colSpan={9} className="text-center text-gray-400">{t("common.noData")}</Td></tr>
-              )}
-            </Tbody>
-          </Table>
-        </div>
-
-        <h3 className="mb-2 text-sm font-semibold text-gray-700">{t("platform.reportPayments")}</h3>
-        <div className="overflow-x-auto">
-          <Table>
-            <Thead>
-              <tr>
-                <Th>{t("customers.name")}</Th>
-                <Th>{t("customers.phone")}</Th>
-                <Th>{t("reports.paymentStatus")}</Th>
-                <Th>{t("reports.orderCount")}</Th>
-                <Th>{t("reports.paymentDebt")}</Th>
-                <Th>{t("reports.paymentPaid")}</Th>
-                <Th>{t("reports.paymentBalance")}</Th>
-              </tr>
-            </Thead>
-            <Tbody>
-              {(paymentsQuery.data?.items ?? []).map((row) => (
-                <tr key={row.id}>
-                  <Td>{row.name}</Td>
-                  <Td>{row.phone}</Td>
-                  <Td>
-                    <Badge color={row.status === "paid" ? "green" : row.status === "partial" ? "yellow" : "red"}>
-                      {t(`reports.paymentStatus${row.status.charAt(0).toUpperCase() + row.status.slice(1)}`)}
-                    </Badge>
-                  </Td>
-                  <Td>{row.orderCount}</Td>
-                  <Td>{row.purchaseAmount.toLocaleString()}</Td>
-                  <Td>{row.paidAmount.toLocaleString()}</Td>
-                  <Td>{row.balance.toLocaleString()}</Td>
-                </tr>
-              ))}
-              {(paymentsQuery.data?.items ?? []).length === 0 && (
-                <tr><Td colSpan={7} className="text-center text-gray-400">{t("common.noData")}</Td></tr>
-              )}
-            </Tbody>
-          </Table>
-        </div>
-      </section>
     </div>
   );
 }

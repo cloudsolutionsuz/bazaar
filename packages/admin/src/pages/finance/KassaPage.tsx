@@ -77,7 +77,7 @@ export function KassaPage() {
   const transactions = transactionsQuery.data?.items ?? [];
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-semibold text-gray-900">{t("kassa.title")}</h1>
         {!adding && <Button onClick={openAddForm}>{t("kassa.addTransaction")}</Button>}

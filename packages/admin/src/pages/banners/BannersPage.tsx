@@ -64,7 +64,7 @@ export function BannersPage() {
   const banners = bannersQuery.data?.banners ?? [];
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-semibold text-gray-900">{t("banners.title")}</h1>
         {!adding && <Button onClick={() => setAdding(true)}>{t("banners.add")}</Button>}
