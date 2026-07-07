@@ -55,7 +55,7 @@
     "logout": "Выйти"
   },
   "login": {
-    "title": "Вход в Bazaar",
+    "title": "Вход в UBazaar",
     "email": "Email",
     "password": "Пароль",
     "submit": "Войти",
