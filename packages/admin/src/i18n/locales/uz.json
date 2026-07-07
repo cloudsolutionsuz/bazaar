@@ -59,7 +59,24 @@
     "email": "Email",
     "password": "Parol",
     "submit": "Kirish",
-    "error": "Email yoki parol noto'g'ri"
+    "error": "Email yoki parol noto'g'ri",
+    "forgotPassword": "Parolni unutdingizmi?"
+  },
+  "forgotPassword": {
+    "title": "Parolni tiklash",
+    "hint": "Emailingizni kiriting — parolni tiklash havolasini yuboramiz",
+    "submit": "Havola yuborish",
+    "sent": "Xat yuborildi. Pochtangizni tekshiring va havolaga o'ting.",
+    "backToLogin": "Kirishga qaytish"
+  },
+  "resetPassword": {
+    "title": "Yangi parol",
+    "newPassword": "Yangi parol",
+    "confirmPassword": "Parolni takrorlang",
+    "submit": "Parolni saqlash",
+    "mismatch": "Parollar mos kelmaydi",
+    "error": "Havola yaroqsiz yoki eskirgan",
+    "invalidLink": "Parolni tiklash havolasi yaroqsiz"
   },
   "acceptInvite": {
     "title": "Taklifni qabul qiling",

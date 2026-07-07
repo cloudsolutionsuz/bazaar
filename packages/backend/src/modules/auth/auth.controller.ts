@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
-import type { AcceptInviteInput, LoginInput, RefreshInput, RegisterInput } from "./auth.schema";
+import type { AcceptInviteInput, ForgotPasswordInput, LoginInput, RefreshInput, RegisterInput, ResetPasswordInput } from "./auth.schema";
 import * as authService from "./auth.service";
 
 export async function register(req: Request, res: Response): Promise<void> {
@@ -30,6 +30,19 @@ export async function logout(req: Request, res: Response): Promise<void> {
   const { refreshToken } = req.body as RefreshInput;
   await authService.logout(refreshToken);
   res.status(204).send();
+}
+
+export async function forgotPassword(req: Request, res: Response): Promise<void> {
+  const { email } = req.body as ForgotPasswordInput;
+  await authService.requestPasswordReset(email);
+  // Always 200 to avoid user enumeration
+  res.json({ ok: true });
+}
+
+export async function resetPassword(req: Request, res: Response): Promise<void> {
+  const { token, password } = req.body as ResetPasswordInput;
+  await authService.resetPassword(token, password);
+  res.json({ ok: true });
 }
 
 export async function me(req: Request, res: Response): Promise<void> {

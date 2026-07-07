@@ -22,6 +22,14 @@ export function acceptInvite(token: string, password: string): Promise<{ accepte
   return apiRequest("/api/auth/accept-invite", { method: "POST", body: { token, password } });
 }
 
+export function forgotPassword(email: string): Promise<{ ok: boolean }> {
+  return apiRequest("/api/auth/forgot-password", { method: "POST", body: { email } });
+}
+
+export function resetPassword(token: string, password: string): Promise<{ ok: boolean }> {
+  return apiRequest("/api/auth/reset-password", { method: "POST", body: { token, password } });
+}
+
 export async function logout(): Promise<void> {
   const refreshToken = getRefreshToken();
   if (refreshToken) {

@@ -42,4 +42,12 @@ export const env = {
   clickServiceId: process.env.CLICK_SERVICE_ID ?? null,
   clickMerchantId: process.env.CLICK_MERCHANT_ID ?? null,
   clickSecretKey: process.env.CLICK_SECRET_KEY ?? null,
+
+  // Optional: SMTP for transactional emails (password reset etc.).
+  // Degrades gracefully — links are logged to console when not configured.
+  smtpHost: process.env.SMTP_HOST ?? null,
+  smtpPort: Number(process.env.SMTP_PORT ?? 587),
+  smtpUser: process.env.SMTP_USER ?? null,
+  smtpPass: process.env.SMTP_PASS ?? null,
+  smtpFrom: process.env.SMTP_FROM ?? "noreply@ubazaar.uz",
 };

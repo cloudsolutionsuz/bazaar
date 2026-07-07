@@ -1,8 +1,10 @@
+import crypto from "crypto";
 import type { Tenant, User } from "@prisma/client";
 import { prisma } from "../../db/prisma";
 import { env } from "../../config/env";
 import { AppError } from "../../middleware/errorHandler";
 import { hashPassword, verifyPassword } from "../../utils/password";
+import { sendPasswordResetEmail } from "../../utils/email";
 import {
   generateRefreshTokenValue,
   hashToken,
@@ -153,4 +155,44 @@ export async function logout(refreshTokenValue: string): Promise<void> {
     where: { tokenHash, revokedAt: null },
     data: { revokedAt: new Date() },
   });
+}
+
+export async function requestPasswordReset(email: string): Promise<void> {
+  const user = await prisma.user.findUnique({ where: { email } });
+  // Silently succeed if user not found to avoid enumeration
+  if (!user) return;
+
+  // Invalidate any existing reset tokens
+  await prisma.verificationToken.deleteMany({
+    where: { userId: user.id, type: "PASSWORD_RESET" },
+  });
+
+  const token = crypto.randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+  await prisma.verificationToken.create({
+    data: { userId: user.id, token, type: "PASSWORD_RESET", expiresAt },
+  });
+
+  await sendPasswordResetEmail(email, token);
+}
+
+export async function resetPassword(token: string, newPassword: string): Promise<void> {
+  const record = await prisma.verificationToken.findUnique({ where: { token } });
+
+  if (!record || record.type !== "PASSWORD_RESET" || record.expiresAt < new Date()) {
+    throw new AppError(400, "INVALID_RESET_TOKEN", "Reset link is invalid or has expired");
+  }
+
+  const passwordHash = await hashPassword(newPassword);
+
+  await prisma.$transaction([
+    prisma.user.update({ where: { id: record.userId }, data: { passwordHash } }),
+    prisma.verificationToken.delete({ where: { id: record.id } }),
+    // Revoke all existing sessions so old password sessions stop working
+    prisma.refreshToken.updateMany({
+      where: { userId: record.userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    }),
+  ]);
 }
