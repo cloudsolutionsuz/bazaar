@@ -9,8 +9,9 @@ export function Header() {
   return (
     <header className="border-b border-brand-100 bg-white">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-        <Link to="/" className="text-2xl font-bold text-brand-700">
-          Bazaar
+        <Link to="/" className="flex flex-col leading-tight">
+          <span className="text-2xl font-bold text-brand-700">Ubazaar</span>
+          <span className="text-xs font-medium text-brand-500 tracking-wide">{t("nav.slogan")}</span>
         </Link>
         <div className="flex items-center gap-4">
           <select

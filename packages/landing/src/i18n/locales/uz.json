@@ -1,7 +1,8 @@
 {
   "nav": {
     "login": "Kirish",
-    "getStarted": "Bepul boshlash"
+    "getStarted": "Bepul boshlash",
+    "slogan": "Biz bilan — Tezroq / Qulay / Foydali"
   },
   "hero": {
     "title": "Biznesingiz uchun shaxsiy onlayn-do'kon 5 daqiqada",
