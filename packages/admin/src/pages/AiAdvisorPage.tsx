@@ -40,7 +40,7 @@ export function AiAdvisorPage() {
   }
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-8rem)] max-w-2xl flex-col">
+    <div className="mx-auto flex h-[calc(100svh-7rem)] max-w-2xl flex-col sm:h-[calc(100vh-8rem)]">
       <h1 className="mb-4 text-xl font-semibold text-gray-900">{t("aiAdvisor.title")}</h1>
 
       {notConfigured ? (

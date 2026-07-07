@@ -40,16 +40,16 @@ export function DashboardPage() {
 
   return (
     <div>
-      <div className="mb-4 flex flex-wrap items-end gap-3">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
         <h1 className="text-xl font-semibold text-gray-900">{t("dashboard.title")}</h1>
-        <div className="ml-auto flex flex-wrap items-end gap-2">
+        <div className="flex flex-wrap items-end gap-2 sm:ml-auto">
           <div>
             <label className="mb-1 block text-xs text-gray-500">{t("reports.from")}</label>
-            <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+            <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="w-full sm:w-auto" />
           </div>
           <div>
             <label className="mb-1 block text-xs text-gray-500">{t("reports.to")}</label>
-            <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+            <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="w-full sm:w-auto" />
           </div>
           <Button variant="secondary" onClick={() => applyPreset(0)}>{t("reports.presetToday")}</Button>
           <Button variant="secondary" onClick={() => applyPreset(7)}>{t("reports.preset7Days")}</Button>
