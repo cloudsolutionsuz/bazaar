@@ -22,3 +22,14 @@ export interface RegisterInput {
 export function register(input: RegisterInput): Promise<unknown> {
   return apiRequest("/api/auth/register", { method: "POST", body: input });
 }
+
+export interface VideoBannerItem {
+  id: string;
+  title: string;
+  videoUrl: string;
+  position: number;
+}
+
+export function listVideoBanners(): Promise<{ items: VideoBannerItem[] }> {
+  return apiRequest("/api/video-banners");
+}

@@ -6,14 +6,29 @@ import * as registrationApi from "../api/registration";
 
 const FEATURE_KEYS = ["products", "inventory", "orders", "storefront", "analytics", "finance", "aiAdvisor", "reports", "chat"] as const;
 
+function getEmbedUrl(url: string): string {
+  const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?\s]+)/);
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
+  const vimeo = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
+  return url;
+}
+
+function isDirectVideo(url: string): boolean {
+  return /\.(mp4|webm|ogg)(\?|$)/i.test(url);
+}
+
 export function LandingPage() {
   const { t } = useTranslation();
   const plansQuery = useQuery({ queryKey: ["plans"], queryFn: registrationApi.listPlans });
+  const videosQuery = useQuery({ queryKey: ["video-banners"], queryFn: registrationApi.listVideoBanners });
+  const videos = videosQuery.data?.items ?? [];
 
   return (
     <div>
       <Header />
 
+      {/* Hero */}
       <section className="bg-brand-50">
         <div className="mx-auto max-w-4xl px-4 py-20 text-center">
           <h1 className="text-4xl font-bold text-brand-900 sm:text-5xl">{t("hero.title")}</h1>
@@ -28,6 +43,7 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* Features */}
       <section className="mx-auto max-w-6xl px-4 py-16">
         <h2 className="mb-10 text-center text-3xl font-bold text-gray-900">{t("features.title")}</h2>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -40,6 +56,51 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* Video Banners — only shown if there are active videos */}
+      {videos.length > 0 && (
+        <section className="bg-gray-50 py-16">
+          <div className="mx-auto max-w-6xl px-4">
+            <h2 className="mb-3 text-center text-3xl font-bold text-gray-900">
+              Видео об платформе
+            </h2>
+            <p className="mb-10 text-center text-gray-500">
+              Обзоры и обучающие материалы по работе с Bazaar
+            </p>
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {videos.map((v) => {
+                const embed = getEmbedUrl(v.videoUrl);
+                const direct = isDirectVideo(embed);
+                return (
+                  <div key={v.id} className="overflow-hidden rounded-2xl bg-white shadow-md">
+                    <div className="aspect-video w-full bg-gray-900">
+                      {direct ? (
+                        <video
+                          src={embed}
+                          controls
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <iframe
+                          src={embed}
+                          className="h-full w-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          title={v.title}
+                        />
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-gray-900">{v.title}</h3>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Pricing */}
       <section className="bg-brand-900 py-16 text-white">
         <div className="mx-auto max-w-6xl px-4">
           <h2 className="mb-10 text-center text-3xl font-bold">{t("pricing.title")}</h2>

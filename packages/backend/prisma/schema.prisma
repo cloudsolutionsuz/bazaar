@@ -628,3 +628,15 @@ model DeliveryZone {
   @@index([tenantId])
   @@map("delivery_zones")
 }
+
+model VideoBanner {
+  id        String   @id @default(uuid())
+  title     String
+  videoUrl  String
+  position  Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("video_banners")
+}

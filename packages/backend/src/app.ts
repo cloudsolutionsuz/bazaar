@@ -26,6 +26,7 @@ import { promotionsRouter } from "./modules/promotions/promotions.routes";
 import { promoCodesRouter } from "./modules/promo-codes/promo-codes.routes";
 import { reviewsRouter } from "./modules/reviews/reviews.routes";
 import { deliveryRouter } from "./modules/delivery/delivery.routes";
+import { videoBannersRouter } from "./modules/videoBanners/videoBanners.routes";
 
 export function createApp(): Express {
   const app = express();
@@ -63,6 +64,7 @@ export function createApp(): Express {
   app.use("/api/promo-codes", promoCodesRouter);
   app.use("/api/reviews", reviewsRouter);
   app.use("/api/delivery", deliveryRouter);
+  app.use("/api/video-banners", videoBannersRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

@@ -29,6 +29,7 @@ import { TenantsListPage } from "./pages/platform/TenantsListPage";
 import { TenantDetailPage } from "./pages/platform/TenantDetailPage";
 import { PlansPage } from "./pages/platform/PlansPage";
 import { BillingTimelinePage } from "./pages/platform/BillingTimelinePage";
+import { VideoBannersPage } from "./pages/platform/VideoBannersPage";
 import { PromotionsListPage } from "./pages/promotions/PromotionsListPage";
 import { PromotionFormPage } from "./pages/promotions/PromotionFormPage";
 import { PromoCodesPage } from "./pages/promo-codes/PromoCodesPage";
@@ -91,6 +92,7 @@ export function App() {
                 <Route path="/platform/tenants/:id" element={<TenantDetailPage />} />
                 <Route path="/platform/plans" element={<PlansPage />} />
                 <Route path="/platform/billing-timeline" element={<BillingTimelinePage />} />
+                <Route path="/platform/video-banners" element={<VideoBannersPage />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
