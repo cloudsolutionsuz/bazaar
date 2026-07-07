@@ -146,7 +146,7 @@ export function Layout() {
                 <NavLink to="/platform/tenants" className={navItemClass}>{t("nav.tenants")}</NavLink>
                 <NavLink to="/platform/plans" className={navItemClass}>{t("nav.plans")}</NavLink>
                 <NavLink to="/platform/billing-timeline" className={navItemClass}>{t("nav.billingTimeline")}</NavLink>
-              <NavLink to="/platform/video-banners" className={navItemClass}>{t("nav.videoBanners")}</NavLink>
+                <NavLink to="/platform/video-banners" className={navItemClass}>{t("nav.videoBanners")}</NavLink>
               </>
             )}
           </nav>
