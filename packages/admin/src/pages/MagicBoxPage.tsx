@@ -29,11 +29,13 @@ function MagicBoxForm({
   products,
   onSave,
   onCancel,
+  saveError,
 }: {
   initial?: MagicBox;
   products: Product[];
   onSave: (data: { name: string; description: string; giftVariantId: string; items: { variantId: string; quantity: number }[] }) => void;
   onCancel: () => void;
+  saveError?: string | null;
 }) {
   const { t } = useTranslation();
   const [name, setName] = useState(initial?.name ?? "");
@@ -175,6 +177,9 @@ function MagicBoxForm({
         </button>
       </div>
 
+      {saveError && (
+        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">{saveError}</p>
+      )}
       <div className="flex justify-end gap-2">
         <button onClick={onCancel} className="rounded-md border border-gray-300 px-4 py-2 text-sm dark:border-gray-600 dark:text-gray-300">
           {t("common.cancel")}
@@ -196,6 +201,8 @@ export function MagicBoxPage() {
   const qc = useQueryClient();
   const [creating, setCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [updateError, setUpdateError] = useState<string | null>(null);
 
   const boxesQuery = useQuery({ queryKey: ["magic-boxes"], queryFn: magicBoxApi.listMagicBoxes });
   const productsQuery = useQuery({
@@ -207,13 +214,15 @@ export function MagicBoxPage() {
 
   const createMut = useMutation({
     mutationFn: magicBoxApi.createMagicBox,
-    onSuccess: () => { void qc.invalidateQueries({ queryKey: ["magic-boxes"] }); setCreating(false); },
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: ["magic-boxes"] }); setCreating(false); setCreateError(null); },
+    onError: (e: unknown) => setCreateError(e instanceof Error ? e.message : String(e)),
   });
 
   const updateMut = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Parameters<typeof magicBoxApi.updateMagicBox>[1] }) =>
       magicBoxApi.updateMagicBox(id, data),
-    onSuccess: () => { void qc.invalidateQueries({ queryKey: ["magic-boxes"] }); setEditingId(null); },
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: ["magic-boxes"] }); setEditingId(null); setUpdateError(null); },
+    onError: (e: unknown) => setUpdateError(e instanceof Error ? e.message : String(e)),
   });
 
   const deleteMut = useMutation({
@@ -237,8 +246,9 @@ export function MagicBoxPage() {
           <h2 className="mb-4 font-semibold text-gray-800 dark:text-gray-100">{t("magicBox.newBox")}</h2>
           <MagicBoxForm
             products={products}
-            onSave={(data) => createMut.mutate(data)}
-            onCancel={() => setCreating(false)}
+            onSave={(data) => { setCreateError(null); createMut.mutate(data); }}
+            onCancel={() => { setCreating(false); setCreateError(null); }}
+            saveError={createError}
           />
         </div>
       )}
@@ -255,8 +265,9 @@ export function MagicBoxPage() {
                   <MagicBoxForm
                     initial={box}
                     products={products}
-                    onSave={(data) => updateMut.mutate({ id: box.id, data })}
-                    onCancel={() => setEditingId(null)}
+                    onSave={(data) => { setUpdateError(null); updateMut.mutate({ id: box.id, data }); }}
+                    onCancel={() => { setEditingId(null); setUpdateError(null); }}
+                    saveError={updateError}
                   />
                 </>
               ) : (
