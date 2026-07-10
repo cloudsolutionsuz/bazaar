@@ -158,7 +158,7 @@ export function MagicBoxPage() {
   const boxesQuery = useQuery({ queryKey: ["magic-boxes"], queryFn: magicBoxApi.listMagicBoxes });
   const productsQuery = useQuery({
     queryKey: ["products-all"],
-    queryFn: () => productsApi.listProducts({ pageSize: 200 }),
+    queryFn: () => productsApi.listProducts({ pageSize: 100 }),
   });
   const boxes = boxesQuery.data?.items ?? [];
   const products = productsQuery.data?.items ?? [];
