@@ -42,8 +42,16 @@ export const bulkDiscountSchema = productSelectorSchema.and(
   z.object({ discountPercent: z.number().int().min(1).max(99).nullable() }),
 );
 
+export const createBxGyRuleSchema = z.object({
+  buyVariantId: z.string().uuid(),
+  buyQty: z.number().int().min(1).max(999),
+  getVariantId: z.string().uuid(),
+  getQty: z.number().int().min(1).max(999),
+});
+
 export type CreatePromotionInput = z.infer<typeof createPromotionSchema>;
 export type UpdatePromotionInput = z.infer<typeof updatePromotionSchema>;
 export type ListPromotionsQuery = z.infer<typeof listPromotionsQuerySchema>;
 export type ProductSelectorInput = z.infer<typeof productSelectorSchema>;
 export type BulkDiscountInput = z.infer<typeof bulkDiscountSchema>;
+export type CreateBxGyRuleInput = z.infer<typeof createBxGyRuleSchema>;

@@ -14,6 +14,29 @@ function formatDeliveryDate(days: number): string {
   return d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
 }
 
+function BxGyBadge({ deals, selectedVariantId }: { deals: import("../types/api").BxGyDeal[]; selectedVariantId: string }) {
+  const matching = deals.filter((d) => d.buyVariantId === selectedVariantId);
+  if (matching.length === 0) return null;
+  return (
+    <>
+      {matching.map((deal) => {
+        const getLabel = deal.getVariantName
+          ? `${deal.getProductName} (${deal.getVariantName})`
+          : deal.getProductName;
+        return (
+          <div key={deal.id} className="mt-3 flex items-center gap-2 rounded-lg border border-orange-100 bg-orange-50 px-3 py-2 text-sm text-orange-800">
+            <span className="text-base">🎁</span>
+            <span>
+              <span className="font-semibold">Купи {deal.buyQty} — получи {deal.getQty} {getLabel} в подарок!</span>
+              <span className="ml-1 text-orange-600 opacity-75">· {deal.promotionName}</span>
+            </span>
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
 function DeliveryBadge({ minDays, maxDays }: { minDays: number; maxDays: number | null }) {
   const label =
     maxDays && maxDays > minDays
@@ -246,6 +269,10 @@ export function ProductPage() {
           >
             {variant.stockQuantity === 0 ? t("catalog.outOfStock") : added ? t("product.added") : t("product.addToCart")}
           </button>
+
+          {product.bxgyDeals && product.bxgyDeals.length > 0 && (
+            <BxGyBadge deals={product.bxgyDeals} selectedVariantId={variant.id} />
+          )}
 
           {deliveryMinDays !== null && (
             <DeliveryBadge minDays={deliveryMinDays} maxDays={deliveryMaxDays} />

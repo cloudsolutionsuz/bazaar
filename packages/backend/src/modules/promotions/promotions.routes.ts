@@ -5,6 +5,7 @@ import { requireRole } from "../../middleware/requireRole";
 import { validateBody, validateQuery } from "../../middleware/validate";
 import {
   bulkDiscountSchema,
+  createBxGyRuleSchema,
   createPromotionSchema,
   listPromotionsQuerySchema,
   productSelectorSchema,
@@ -26,3 +27,6 @@ promotionsRouter.delete("/:id", asyncHandler(promotionsController.remove));
 
 promotionsRouter.post("/:id/products", validateBody(productSelectorSchema), asyncHandler(promotionsController.attachProducts));
 promotionsRouter.delete("/:id/products/:productId", asyncHandler(promotionsController.detachProduct));
+
+promotionsRouter.post("/:id/bxgy", validateBody(createBxGyRuleSchema), asyncHandler(promotionsController.addBxGyRule));
+promotionsRouter.delete("/:id/bxgy/:ruleId", asyncHandler(promotionsController.removeBxGyRule));

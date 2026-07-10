@@ -3,6 +3,7 @@ import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
 import type {
   BulkDiscountInput,
+  CreateBxGyRuleInput,
   CreatePromotionInput,
   ListPromotionsQuery,
   ProductSelectorInput,
@@ -40,10 +41,23 @@ export async function listPromotions(tenantId: string, query: ListPromotionsQuer
   return { items, total, page, pageSize };
 }
 
+const variantWithProduct = {
+  include: { product: { select: { id: true, name: true } } },
+} as const;
+
 export async function getPromotion(tenantId: string, promotionId: string) {
   const promotion = await prisma.promotion.findFirst({
     where: { id: promotionId, tenantId },
-    include: { products: { include: { product: true } } },
+    include: {
+      products: { include: { product: true } },
+      bxgyRules: {
+        include: {
+          buyVariant: variantWithProduct,
+          getVariant: variantWithProduct,
+        },
+        orderBy: { createdAt: "asc" },
+      },
+    },
   });
   if (!promotion) {
     throw new AppError(404, "NOT_FOUND", "Promotion not found");
@@ -105,6 +119,22 @@ export async function detachProduct(tenantId: string, promotionId: string, produ
 // promotion's attachProducts, since the ТЗ asks for the identical
 // name/selection/category/brand/supplier targeting for both discounts and
 // promotions.
+export async function addBxGyRule(tenantId: string, promotionId: string, input: CreateBxGyRuleInput) {
+  await getPromotion(tenantId, promotionId);
+  return prisma.promotionBxGy.create({
+    data: { promotionId, ...input },
+    include: {
+      buyVariant: variantWithProduct,
+      getVariant: variantWithProduct,
+    },
+  });
+}
+
+export async function removeBxGyRule(tenantId: string, promotionId: string, ruleId: string) {
+  await getPromotion(tenantId, promotionId);
+  await prisma.promotionBxGy.delete({ where: { id: ruleId } });
+}
+
 export async function applyBulkDiscount(tenantId: string, input: BulkDiscountInput): Promise<{ updated: number }> {
   const result = await prisma.product.updateMany({
     where: selectorWhere(tenantId, input),

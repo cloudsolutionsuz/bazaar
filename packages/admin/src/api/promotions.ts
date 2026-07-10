@@ -50,6 +50,21 @@ export function detachProduct(promotionId: string, productId: string): Promise<v
   return apiRequest(`/api/promotions/${promotionId}/products/${productId}`, { method: "DELETE", responseType: "none" });
 }
 
+export interface BxGyRuleInput {
+  buyVariantId: string;
+  buyQty: number;
+  getVariantId: string;
+  getQty: number;
+}
+
+export function addBxGyRule(promotionId: string, input: BxGyRuleInput) {
+  return apiRequest(`/api/promotions/${promotionId}/bxgy`, { method: "POST", body: input });
+}
+
+export function removeBxGyRule(promotionId: string, ruleId: string): Promise<void> {
+  return apiRequest(`/api/promotions/${promotionId}/bxgy/${ruleId}`, { method: "DELETE", responseType: "none" });
+}
+
 export function applyBulkDiscount(
   selector: ProductSelector & { discountPercent: number | null },
 ): Promise<{ updated: number }> {

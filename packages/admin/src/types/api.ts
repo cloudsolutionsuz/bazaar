@@ -241,8 +241,27 @@ export interface Promotion {
   _count?: { products: number };
 }
 
+export interface BxGyVariantRef {
+  id: string;
+  name: string | null;
+  sku: string;
+  product: { id: string; name: string };
+}
+
+export interface PromotionBxGyRule {
+  id: string;
+  promotionId: string;
+  buyVariantId: string;
+  buyVariant: BxGyVariantRef;
+  buyQty: number;
+  getVariantId: string;
+  getVariant: BxGyVariantRef;
+  getQty: number;
+}
+
 export interface PromotionDetail extends Promotion {
   products: { promotionId: string; productId: string; product: Product }[];
+  bxgyRules: PromotionBxGyRule[];
 }
 
 export interface DashboardSummary {

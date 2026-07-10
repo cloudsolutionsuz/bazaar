@@ -344,6 +344,8 @@ model ProductVariant {
   inventoryMovements InventoryMovement[]
   magicBoxItems      MagicBoxItem[]
   giftMagicBoxes     MagicBox[]         @relation("MagicBoxGift")
+  bxgyBuyRules       PromotionBxGy[]    @relation("BxGyBuy")
+  bxgyGetRules       PromotionBxGy[]    @relation("BxGyGet")
 
   @@unique([tenantId, sku])
   @@index([tenantId])
@@ -557,7 +559,8 @@ model Promotion {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  products PromotionProduct[]
+  products  PromotionProduct[]
+  bxgyRules PromotionBxGy[]
 
   @@index([tenantId])
   @@map("promotions")
@@ -572,6 +575,24 @@ model PromotionProduct {
   @@id([promotionId, productId])
   @@index([productId])
   @@map("promotion_products")
+}
+
+// "Купи X штук варианта A — получи Y штук варианта B бесплатно"
+model PromotionBxGy {
+  id           String         @id @default(uuid())
+  promotionId  String
+  promotion    Promotion      @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  buyVariantId String
+  buyVariant   ProductVariant @relation("BxGyBuy", fields: [buyVariantId], references: [id])
+  buyQty       Int            @default(1)
+  getVariantId String
+  getVariant   ProductVariant @relation("BxGyGet", fields: [getVariantId], references: [id])
+  getQty       Int            @default(1)
+  createdAt    DateTime       @default(now())
+
+  @@index([promotionId])
+  @@index([buyVariantId])
+  @@map("promotion_bxgy")
 }
 
 model PromoCode {

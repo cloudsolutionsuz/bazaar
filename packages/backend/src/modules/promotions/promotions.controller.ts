@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import * as promotionsService from "./promotions.service";
 import type {
   BulkDiscountInput,
+  CreateBxGyRuleInput,
   CreatePromotionInput,
   ListPromotionsQuery,
   ProductSelectorInput,
@@ -46,4 +47,14 @@ export async function detachProduct(req: Request, res: Response): Promise<void> 
 export async function bulkDiscount(req: Request, res: Response): Promise<void> {
   const result = await promotionsService.applyBulkDiscount(req.authUser!.tenantId!, req.body as BulkDiscountInput);
   res.json(result);
+}
+
+export async function addBxGyRule(req: Request, res: Response): Promise<void> {
+  const rule = await promotionsService.addBxGyRule(req.authUser!.tenantId!, req.params.id, req.body as CreateBxGyRuleInput);
+  res.status(201).json({ rule });
+}
+
+export async function removeBxGyRule(req: Request, res: Response): Promise<void> {
+  await promotionsService.removeBxGyRule(req.authUser!.tenantId!, req.params.id, req.params.ruleId);
+  res.status(204).send();
 }

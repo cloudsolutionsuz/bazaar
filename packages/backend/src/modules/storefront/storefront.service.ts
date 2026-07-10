@@ -112,6 +112,7 @@ export async function listProducts(tenantId: string, query: ListStorefrontProduc
 }
 
 export async function getProduct(tenantId: string, productId: string) {
+  const now = new Date();
   const product = await prisma.product.findFirst({
     where: { id: productId, tenantId, status: { not: "HIDDEN" } },
     include: productInclude,
@@ -119,7 +120,40 @@ export async function getProduct(tenantId: string, productId: string) {
   if (!product) {
     throw new AppError(404, "NOT_FOUND", "Product not found");
   }
-  return mapProduct(product as ProductWithIncludes, new Date());
+
+  const variantIds = product.variants.map((v) => v.id);
+  const bxgyDeals = variantIds.length
+    ? await prisma.promotionBxGy.findMany({
+        where: {
+          buyVariantId: { in: variantIds },
+          promotion: {
+            tenantId,
+            isActive: true,
+            AND: [
+              { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
+              { OR: [{ endsAt: null }, { endsAt: { gte: now } }] },
+            ],
+          },
+        },
+        include: {
+          getVariant: { include: { product: { select: { name: true } } } },
+          promotion: { select: { name: true } },
+        },
+      })
+    : [];
+
+  const deals = bxgyDeals.map((r) => ({
+    id: r.id,
+    buyVariantId: r.buyVariantId,
+    buyQty: r.buyQty,
+    getVariantId: r.getVariantId,
+    getVariantName: r.getVariant.name ?? null,
+    getProductName: r.getVariant.product.name,
+    getQty: r.getQty,
+    promotionName: r.promotion.name,
+  }));
+
+  return { ...mapProduct(product as ProductWithIncludes, now), bxgyDeals: deals };
 }
 
 export function trackPageView(tenantId: string, input: TrackPageViewInput) {

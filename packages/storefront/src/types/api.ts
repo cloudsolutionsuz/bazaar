@@ -21,6 +21,17 @@ export interface ProductImage {
   position: number;
 }
 
+export interface BxGyDeal {
+  id: string;
+  buyVariantId: string;
+  buyQty: number;
+  getVariantId: string;
+  getVariantName: string | null;
+  getProductName: string;
+  getQty: number;
+  promotionName: string;
+}
+
 export interface Product {
   id: string;
   categoryId: string | null;
@@ -39,6 +50,7 @@ export interface Product {
   variants: ProductVariant[];
   images: ProductImage[];
   promotionName: string | null;
+  bxgyDeals?: BxGyDeal[];
 }
 
 export interface Paginated<T> {
