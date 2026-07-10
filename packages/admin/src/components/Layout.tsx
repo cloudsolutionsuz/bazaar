@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { Link, NavLink, Navigate, Outlet, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../auth/AuthContext";
@@ -56,7 +56,8 @@ export function Layout() {
   const { user, tenant, logout } = useAuth();
   const { theme, toggle } = useTheme();
   const location = useLocation();
-  const needsBillingAttention = tenant?.status === "PAST_DUE" || tenant?.status === "BLOCKED";
+  const isBlocked = tenant?.status === "BLOCKED";
+  const needsBillingAttention = tenant?.status === "PAST_DUE" || isBlocked;
   const role = user?.role ?? "";
 
   const chatUnreadQuery = useQuery({
@@ -95,6 +96,11 @@ export function Layout() {
     }
   }, [location.pathname]);
 
+  // Redirect blocked tenants to billing for any page other than /billing
+  if (isBlocked && !location.pathname.startsWith("/billing")) {
+    return <Navigate to="/billing" replace />;
+  }
+
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Mobile backdrop — shown when sidebar is open on small screens */}
@@ -127,63 +133,72 @@ export function Layout() {
         <div className="flex h-full w-56 flex-col p-4">
           <div className="mb-6 px-2 text-lg font-semibold text-brand-700 dark:text-brand-400">Bazaar</div>
           <nav className="flex-1 space-y-1 overflow-y-auto">
-            {STAFF_AND_MANAGEMENT_ROLES.has(role) && (
+            {/* Blocked tenants: only billing + support chat */}
+            {isBlocked ? (
               <>
-                <NavLink to="/dashboard" className={navItemClass}>{t("nav.dashboard")}</NavLink>
-                <NavLink to="/products" className={navItemClass}>{t("nav.products")}</NavLink>
-                <NavLink to="/categories" className={navItemClass}>{t("nav.categories")}</NavLink>
-                <NavLink to="/inventory" className={navItemClass}>{t("nav.inventory")}</NavLink>
-                <NavLink to="/suppliers" className={navItemClass}>{t("nav.suppliers")}</NavLink>
-                <NavLink to="/banners" className={navItemClass}>{t("nav.banners")}</NavLink>
-                <NavLink to="/promotions" className={navItemClass}>{t("nav.promotions")}</NavLink>
-                <NavLink to="/promo-codes" className={navItemClass}>{t("nav.promoCodes")}</NavLink>
-                <NavLink to="/reviews" className={navItemClass}>{t("nav.reviews")}</NavLink>
-                <NavLink to="/delivery-zones" className={navItemClass}>{t("nav.deliveryZones")}</NavLink>
-                <NavLink to="/customers" className={navItemClass}>{t("nav.customers")}</NavLink>
-              </>
-            )}
-            {ALL_STAFF_ROLES.has(role) && (
-              <>
-                <NavLink to="/orders" className={navItemClass}>{t("nav.orders")}</NavLink>
-                <NavLink to="/chat" className={({ isActive }) => `${navItemClass({ isActive })} flex items-center justify-between`}>
-                  <span>{t("nav.chat")}</span>
-                  {chatUnread > 0 && (
-                    <span className="ml-2 rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
-                      {chatUnread > 99 ? "99+" : chatUnread}
-                    </span>
-                  )}
-                </NavLink>
-              </>
-            )}
-            {STAFF_AND_MANAGEMENT_ROLES.has(role) && (
-              <>
-                <NavLink to="/magic-boxes" className={navItemClass}>{t("nav.magicBox")}</NavLink>
-                <NavLink to="/kassa" className={navItemClass}>{t("nav.kassa")}</NavLink>
-                <NavLink to="/reports" className={navItemClass}>{t("nav.reports")}</NavLink>
-                <NavLink to="/ai-advisor" className={navItemClass}>{t("nav.aiAdvisor")}</NavLink>
                 <NavLink to="/billing" className={navItemClass}>{t("nav.billing")}</NavLink>
               </>
-            )}
-            {role === "OWNER" && (
+            ) : (
               <>
-                <NavLink to="/employees" className={navItemClass}>{t("nav.employees")}</NavLink>
-                <NavLink to="/settings" className={navItemClass}>{t("nav.settings")}</NavLink>
-              </>
-            )}
-            {role === "SUPER_ADMIN" && (
-              <>
-                <NavLink to="/platform/tenants" className={navItemClass}>{t("nav.tenants")}</NavLink>
-                <NavLink to="/platform/plans" className={navItemClass}>{t("nav.plans")}</NavLink>
-                <NavLink to="/platform/billing-timeline" className={navItemClass}>{t("nav.billingTimeline")}</NavLink>
-                <NavLink to="/platform/video-banners" className={navItemClass}>{t("nav.videoBanners")}</NavLink>
-                <NavLink to="/platform/support" className={({ isActive }) => `${navItemClass({ isActive })} flex items-center justify-between`}>
-                  <span>{t("nav.support")}</span>
-                  {supportUnread > 0 && (
-                    <span className="ml-2 rounded-full bg-indigo-500 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
-                      {supportUnread > 99 ? "99+" : supportUnread}
-                    </span>
-                  )}
-                </NavLink>
+                {STAFF_AND_MANAGEMENT_ROLES.has(role) && (
+                  <>
+                    <NavLink to="/dashboard" className={navItemClass}>{t("nav.dashboard")}</NavLink>
+                    <NavLink to="/products" className={navItemClass}>{t("nav.products")}</NavLink>
+                    <NavLink to="/categories" className={navItemClass}>{t("nav.categories")}</NavLink>
+                    <NavLink to="/inventory" className={navItemClass}>{t("nav.inventory")}</NavLink>
+                    <NavLink to="/suppliers" className={navItemClass}>{t("nav.suppliers")}</NavLink>
+                    <NavLink to="/banners" className={navItemClass}>{t("nav.banners")}</NavLink>
+                    <NavLink to="/promotions" className={navItemClass}>{t("nav.promotions")}</NavLink>
+                    <NavLink to="/promo-codes" className={navItemClass}>{t("nav.promoCodes")}</NavLink>
+                    <NavLink to="/reviews" className={navItemClass}>{t("nav.reviews")}</NavLink>
+                    <NavLink to="/delivery-zones" className={navItemClass}>{t("nav.deliveryZones")}</NavLink>
+                    <NavLink to="/customers" className={navItemClass}>{t("nav.customers")}</NavLink>
+                  </>
+                )}
+                {ALL_STAFF_ROLES.has(role) && (
+                  <>
+                    <NavLink to="/orders" className={navItemClass}>{t("nav.orders")}</NavLink>
+                    <NavLink to="/chat" className={({ isActive }) => `${navItemClass({ isActive })} flex items-center justify-between`}>
+                      <span>{t("nav.chat")}</span>
+                      {chatUnread > 0 && (
+                        <span className="ml-2 rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+                          {chatUnread > 99 ? "99+" : chatUnread}
+                        </span>
+                      )}
+                    </NavLink>
+                  </>
+                )}
+                {STAFF_AND_MANAGEMENT_ROLES.has(role) && (
+                  <>
+                    <NavLink to="/magic-boxes" className={navItemClass}>{t("nav.magicBox")}</NavLink>
+                    <NavLink to="/kassa" className={navItemClass}>{t("nav.kassa")}</NavLink>
+                    <NavLink to="/reports" className={navItemClass}>{t("nav.reports")}</NavLink>
+                    <NavLink to="/ai-advisor" className={navItemClass}>{t("nav.aiAdvisor")}</NavLink>
+                    <NavLink to="/billing" className={navItemClass}>{t("nav.billing")}</NavLink>
+                  </>
+                )}
+                {role === "OWNER" && (
+                  <>
+                    <NavLink to="/employees" className={navItemClass}>{t("nav.employees")}</NavLink>
+                    <NavLink to="/settings" className={navItemClass}>{t("nav.settings")}</NavLink>
+                  </>
+                )}
+                {role === "SUPER_ADMIN" && (
+                  <>
+                    <NavLink to="/platform/tenants" className={navItemClass}>{t("nav.tenants")}</NavLink>
+                    <NavLink to="/platform/plans" className={navItemClass}>{t("nav.plans")}</NavLink>
+                    <NavLink to="/platform/billing-timeline" className={navItemClass}>{t("nav.billingTimeline")}</NavLink>
+                    <NavLink to="/platform/video-banners" className={navItemClass}>{t("nav.videoBanners")}</NavLink>
+                    <NavLink to="/platform/support" className={({ isActive }) => `${navItemClass({ isActive })} flex items-center justify-between`}>
+                      <span>{t("nav.support")}</span>
+                      {supportUnread > 0 && (
+                        <span className="ml-2 rounded-full bg-indigo-500 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+                          {supportUnread > 99 ? "99+" : supportUnread}
+                        </span>
+                      )}
+                    </NavLink>
+                  </>
+                )}
               </>
             )}
           </nav>
@@ -207,7 +222,7 @@ export function Layout() {
           </div>
 
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-            {ALL_STAFF_ROLES.has(role) && <ChatNotificationBell unread={chatUnread} />}
+            {ALL_STAFF_ROLES.has(role) && !isBlocked && <ChatNotificationBell unread={chatUnread} />}
             {(role === "OWNER" || role === "MANAGER") && <SupportChatWidget unread={supportUnread} />}
             <button
               onClick={toggle}

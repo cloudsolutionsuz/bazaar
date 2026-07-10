@@ -11,7 +11,8 @@ export const supportRouter = Router();
 const sendMessageSchema = z.object({ text: z.string().min(1).max(5000) });
 
 // Tenant-facing endpoints (OWNER / MANAGER only)
-supportRouter.use(requireAuth(), requireRole("OWNER", "MANAGER"));
+// allowBlocked: blocked tenants still need to reach support to resolve their situation
+supportRouter.use(requireAuth({ allowBlocked: true }), requireRole("OWNER", "MANAGER"));
 
 supportRouter.get("/messages", asyncHandler(supportController.getMessages));
 supportRouter.post("/messages", validateBody(sendMessageSchema), asyncHandler(supportController.sendMessage));

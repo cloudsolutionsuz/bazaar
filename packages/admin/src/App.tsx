@@ -47,8 +47,9 @@ const queryClient = new QueryClient();
 // CASHIER has no access to /dashboard or /products (both OWNER/MANAGER-only
 // on the backend), so it gets its own landing page among the pages it can use.
 function RoleHome() {
-  const { user } = useAuth();
+  const { user, tenant } = useAuth();
   if (user?.role === "SUPER_ADMIN") return <Navigate to="/platform/tenants" replace />;
+  if (tenant?.status === "BLOCKED") return <Navigate to="/billing" replace />;
   if (user?.role === "CASHIER") return <Navigate to="/orders" replace />;
   return <Navigate to="/dashboard" replace />;
 }

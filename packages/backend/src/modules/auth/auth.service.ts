@@ -123,10 +123,6 @@ export async function login(input: LoginInput): Promise<AuthTokens & { user: Ret
     throw new AppError(401, "INVALID_CREDENTIALS", "Invalid email or password");
   }
 
-  if (user.tenant && user.tenant.status === "BLOCKED") {
-    throw new AppError(403, "TENANT_BLOCKED", "Shop is blocked, please contact support");
-  }
-
   if (user.role !== "SUPER_ADMIN" && !user.emailVerifiedAt) {
     throw new AppError(403, "EMAIL_NOT_VERIFIED", "Please verify your email before logging in");
   }
