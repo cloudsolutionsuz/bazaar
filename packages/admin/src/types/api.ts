@@ -27,6 +27,8 @@ export interface Tenant {
   loyaltyMinRedeem: number;
   minOrderAmount: number;
   paymentMethods: string[];
+  deliveryMinDays: number | null;
+  deliveryMaxDays: number | null;
   createdAt: string;
 }
 

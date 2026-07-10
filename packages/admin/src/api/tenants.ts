@@ -16,6 +16,8 @@ export interface UpdateMySettingsInput {
   loyaltyMinRedeem?: number;
   minOrderAmount?: number;
   paymentMethods?: string[];
+  deliveryMinDays?: number | null;
+  deliveryMaxDays?: number | null;
 }
 
 export function updateMySettings(input: UpdateMySettingsInput): Promise<{ tenant: Tenant }> {

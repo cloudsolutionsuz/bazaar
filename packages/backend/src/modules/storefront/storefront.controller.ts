@@ -59,8 +59,8 @@ export async function listBanners(req: Request, res: Response): Promise<void> {
 }
 
 export async function getMeta(req: Request, res: Response): Promise<void> {
-  const { name, logoUrl, themeColor, description, inn, companyName, contactPhone, instagram, facebook, youtube, minOrderAmount, paymentMethods } = req.tenant!;
-  res.json({ name, logoUrl, themeColor, description, inn, companyName, contactPhone, instagram, facebook, youtube, minOrderAmount, paymentMethods });
+  const { name, logoUrl, themeColor, description, inn, companyName, contactPhone, instagram, facebook, youtube, minOrderAmount, paymentMethods, deliveryMinDays, deliveryMaxDays } = req.tenant!;
+  res.json({ name, logoUrl, themeColor, description, inn, companyName, contactPhone, instagram, facebook, youtube, minOrderAmount, paymentMethods, deliveryMinDays, deliveryMaxDays });
 }
 
 export async function getPushVapidKey(req: Request, res: Response): Promise<void> {

@@ -23,6 +23,8 @@ export function SettingsPage() {
   const [loyaltyPointsRate, setLoyaltyPointsRate] = useState(String(tenant?.loyaltyPointsRate ?? 1));
   const [loyaltyMinRedeem, setLoyaltyMinRedeem] = useState(String(tenant?.loyaltyMinRedeem ?? 0));
   const [minOrderAmount, setMinOrderAmount] = useState(String(tenant?.minOrderAmount ?? 0));
+  const [deliveryMinDays, setDeliveryMinDays] = useState(String(tenant?.deliveryMinDays ?? ""));
+  const [deliveryMaxDays, setDeliveryMaxDays] = useState(String(tenant?.deliveryMaxDays ?? ""));
   const [paymentMethods, setPaymentMethods] = useState<string[]>(
     tenant?.paymentMethods?.length ? tenant.paymentMethods : []
   );
@@ -46,6 +48,8 @@ export function SettingsPage() {
         loyaltyPointsRate: Number(loyaltyPointsRate) || 1,
         loyaltyMinRedeem: Number(loyaltyMinRedeem) || 0,
         minOrderAmount: Number(minOrderAmount) || 0,
+        deliveryMinDays: deliveryMinDays !== "" ? Number(deliveryMinDays) : null,
+        deliveryMaxDays: deliveryMaxDays !== "" ? Number(deliveryMaxDays) : null,
         paymentMethods,
       }),
     onSuccess: async () => {
@@ -212,6 +216,41 @@ export function SettingsPage() {
                 <NumberInput min={0} value={minOrderAmount} onChange={(e) => setMinOrderAmount(e.target.value)} className="w-40 text-left" />
                 <span className="text-sm text-gray-500">{t("settings.minOrderAmountHint")}</span>
               </div>
+            </div>
+
+            {/* Delivery days */}
+            <div className="rounded-xl border border-gray-200 bg-white p-6">
+              <h2 className="mb-1 text-sm font-semibold text-gray-700">Дата доставки</h2>
+              <p className="mb-4 text-xs text-gray-500">Отображается покупателю на странице товара. Считается от даты оформления заказа.</p>
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-gray-600 whitespace-nowrap">От</label>
+                  <NumberInput
+                    min={0}
+                    value={deliveryMinDays}
+                    onChange={(e) => setDeliveryMinDays(e.target.value)}
+                    placeholder="—"
+                    className="w-24 text-left"
+                  />
+                  <label className="text-sm text-gray-600">дней</label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-gray-600 whitespace-nowrap">До</label>
+                  <NumberInput
+                    min={0}
+                    value={deliveryMaxDays}
+                    onChange={(e) => setDeliveryMaxDays(e.target.value)}
+                    placeholder="—"
+                    className="w-24 text-left"
+                  />
+                  <label className="text-sm text-gray-600">дней</label>
+                </div>
+              </div>
+              {deliveryMinDays !== "" && (
+                <p className="mt-3 text-xs text-green-600">
+                  🚚 Покупатель увидит: «Доставим за {deliveryMinDays}{deliveryMaxDays && Number(deliveryMaxDays) > Number(deliveryMinDays) ? `–${deliveryMaxDays}` : ""} {Number(deliveryMinDays) === 1 ? "день" : Number(deliveryMinDays) < 5 ? "дня" : "дней"}»
+                </p>
+              )}
             </div>
 
             {/* Payment methods */}

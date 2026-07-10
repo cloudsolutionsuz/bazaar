@@ -8,6 +8,39 @@ import { ApiError } from "../api/client";
 
 const PHONE_PREFIXES = ["+998", "+992", "+996", "+7"];
 
+function formatDeliveryDate(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
+}
+
+function DeliveryBadge({ minDays, maxDays }: { minDays: number; maxDays: number | null }) {
+  const label =
+    maxDays && maxDays > minDays
+      ? `${minDays}–${maxDays} дней`
+      : `${minDays} ${minDays === 1 ? "день" : minDays < 5 ? "дня" : "дней"}`;
+
+  const dateLabel =
+    maxDays && maxDays > minDays
+      ? `до ${formatDeliveryDate(maxDays)}`
+      : formatDeliveryDate(minDays);
+
+  return (
+    <div className="mt-3 flex items-center gap-2 rounded-lg border border-green-100 bg-green-50 px-3 py-2 text-sm text-green-700">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+        <rect x="1" y="3" width="15" height="13" rx="2" />
+        <path d="M16 8h4l3 5v3h-7V8z" />
+        <circle cx="5.5" cy="18.5" r="2.5" />
+        <circle cx="18.5" cy="18.5" r="2.5" />
+      </svg>
+      <span>
+        <span className="font-semibold">Доставим за {label}</span>
+        <span className="ml-1 text-green-600 opacity-80">· {dateLabel}</span>
+      </span>
+    </div>
+  );
+}
+
 function StarRating({ value, onChange }: { value: number; onChange?: (v: number) => void }) {
   return (
     <div className="flex gap-1">
@@ -34,6 +67,9 @@ export function ProductPage() {
 
   const query = useQuery({ queryKey: ["product", id], queryFn: () => storefrontApi.getProduct(id as string) });
   const product = query.data?.product;
+  const metaQuery = useQuery({ queryKey: ["tenant-meta"], queryFn: storefrontApi.getMeta });
+  const deliveryMinDays = metaQuery.data?.deliveryMinDays ?? null;
+  const deliveryMaxDays = metaQuery.data?.deliveryMaxDays ?? null;
 
   const reviewsQuery = useQuery({
     queryKey: ["product-reviews", id],
@@ -210,6 +246,10 @@ export function ProductPage() {
           >
             {variant.stockQuantity === 0 ? t("catalog.outOfStock") : added ? t("product.added") : t("product.addToCart")}
           </button>
+
+          {deliveryMinDays !== null && (
+            <DeliveryBadge minDays={deliveryMinDays} maxDays={deliveryMaxDays} />
+          )}
 
           {localizedDescription && (
             <div className="mt-6">

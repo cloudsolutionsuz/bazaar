@@ -92,6 +92,8 @@ export interface TenantMeta {
   youtube: string | null;
   minOrderAmount: number;
   paymentMethods: string[];
+  deliveryMinDays: number | null;
+  deliveryMaxDays: number | null;
 }
 
 export interface ApiErrorBody {
