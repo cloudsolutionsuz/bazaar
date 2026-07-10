@@ -16,17 +16,19 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = event.notification.data?.url || "/chat";
+  const path = event.notification.data?.url || "/chat";
+  const target = self.location.origin + path;
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
+      // Focus existing admin tab if open
       for (const client of windowClients) {
-        if (client.url.includes(self.location.origin) && "focus" in client) {
-          client.focus();
-          client.navigate(url);
-          return;
+        if (client.url.startsWith(self.location.origin)) {
+          return client.focus().then(() =>
+            "navigate" in client ? client.navigate(target) : clients.openWindow(target)
+          );
         }
       }
-      return clients.openWindow(url);
+      return clients.openWindow(target);
     })
   );
 });

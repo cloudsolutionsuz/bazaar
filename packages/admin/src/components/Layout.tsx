@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../auth/AuthContext";
 import { changeLanguage } from "../i18n/i18n";
 import { useTheme } from "../context/ThemeContext";
 import { ChatNotificationBell } from "./ChatNotificationBell";
+import { getUnreadCount } from "../api/chat";
 
 function navItemClass({ isActive }: { isActive: boolean }): string {
   return `block rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap ${
@@ -54,6 +56,14 @@ export function Layout() {
   const location = useLocation();
   const needsBillingAttention = tenant?.status === "PAST_DUE" || tenant?.status === "BLOCKED";
   const role = user?.role ?? "";
+
+  const chatUnreadQuery = useQuery({
+    queryKey: ["chat-unread-count"],
+    queryFn: getUnreadCount,
+    refetchInterval: 30_000,
+    enabled: ALL_STAFF_ROLES.has(role),
+  });
+  const chatUnread = chatUnreadQuery.data?.count ?? 0;
 
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     // On small screens, default to closed so content isn't overlaid on first load
@@ -125,7 +135,14 @@ export function Layout() {
             {ALL_STAFF_ROLES.has(role) && (
               <>
                 <NavLink to="/orders" className={navItemClass}>{t("nav.orders")}</NavLink>
-                <NavLink to="/chat" className={navItemClass}>{t("nav.chat")}</NavLink>
+                <NavLink to="/chat" className={({ isActive }) => `${navItemClass({ isActive })} flex items-center justify-between`}>
+                  <span>{t("nav.chat")}</span>
+                  {chatUnread > 0 && (
+                    <span className="ml-2 rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+                      {chatUnread > 99 ? "99+" : chatUnread}
+                    </span>
+                  )}
+                </NavLink>
               </>
             )}
             {STAFF_AND_MANAGEMENT_ROLES.has(role) && (
@@ -172,7 +189,7 @@ export function Layout() {
           </div>
 
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-            {ALL_STAFF_ROLES.has(role) && <ChatNotificationBell />}
+            {ALL_STAFF_ROLES.has(role) && <ChatNotificationBell unread={chatUnread} />}
             <button
               onClick={toggle}
               title={theme === "dark" ? "Светлый режим" : "Тёмный режим"}
