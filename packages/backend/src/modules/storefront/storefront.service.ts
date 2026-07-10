@@ -4,6 +4,7 @@ import { AppError } from "../../middleware/errorHandler";
 import { notifyNewChatMessage } from "../../utils/notifications";
 import { normalizePhone } from "../../utils/phone";
 import { getVapidPublicKey, sendWebPush } from "../../utils/webpush";
+import { getSearchTerms } from "../../utils/transliterate";
 import type { ListStorefrontProductsQuery, PushSubscribeInput, SendChatMessageInput, TrackPageViewInput } from "./storefront.schema";
 
 const productInclude = {
@@ -61,10 +62,10 @@ export async function listProducts(tenantId: string, query: ListStorefrontProduc
     ...(query.brand ? { brand: query.brand } : {}),
     ...(query.search
       ? {
-          OR: [
-            { name: { contains: query.search, mode: "insensitive" } },
-            { variants: { some: { sku: { contains: query.search, mode: "insensitive" } } } },
-          ],
+          OR: getSearchTerms(query.search).flatMap((term) => [
+            { name: { contains: term, mode: "insensitive" as const } },
+            { variants: { some: { sku: { contains: term, mode: "insensitive" as const } } } },
+          ]),
         }
       : {}),
     ...(query.minPrice !== undefined || query.maxPrice !== undefined
