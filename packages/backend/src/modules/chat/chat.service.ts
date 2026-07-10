@@ -1,6 +1,7 @@
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
 import { pushToCustomer } from "../storefront/storefront.service";
+import { getVapidPublicKey, sendWebPush } from "../../utils/webpush";
 
 // "Last message per customer" via Prisma's distinct+orderBy combo: ordering
 // by createdAt desc means distinct keeps the first (= newest) row it sees
@@ -64,6 +65,27 @@ export async function getThreadMessages(tenantId: string, customerId: string) {
   });
 
   return { customer, messages };
+}
+
+export function getAdminPushVapidKey() {
+  return { publicKey: getVapidPublicKey() };
+}
+
+export async function subscribeAdminPush(
+  tenantId: string,
+  userId: string,
+  sub: { endpoint: string; p256dh: string; auth: string },
+) {
+  // Remove any stale subscription from another device for this user
+  await prisma.adminPushSubscription.deleteMany({ where: { tenantId, userId } });
+  await prisma.adminPushSubscription.create({
+    data: { tenantId, userId, ...sub },
+  });
+}
+
+async function pushToAdmins(tenantId: string, title: string, body: string, url: string) {
+  const subs = await prisma.adminPushSubscription.findMany({ where: { tenantId } });
+  await Promise.all(subs.map((s) => sendWebPush(s, { title, body, url }).catch(() => {})));
 }
 
 export async function sendStaffMessage(tenantId: string, userId: string, customerId: string, text: string) {

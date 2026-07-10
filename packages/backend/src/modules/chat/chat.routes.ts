@@ -17,3 +17,6 @@ chatRouter.post(
   validateBody(sendStaffMessageSchema),
   asyncHandler(chatController.sendStaffMessage),
 );
+chatRouter.get("/unread-count", asyncHandler(chatController.getUnreadCount));
+chatRouter.get("/push/vapid-key", asyncHandler(chatController.getPushVapidKey));
+chatRouter.post("/push/subscribe", asyncHandler(chatController.subscribePush));

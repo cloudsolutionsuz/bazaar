@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
 import { changeLanguage } from "../i18n/i18n";
 import { useTheme } from "../context/ThemeContext";
+import { ChatNotificationBell } from "./ChatNotificationBell";
 
 function navItemClass({ isActive }: { isActive: boolean }): string {
   return `block rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap ${
@@ -171,6 +172,7 @@ export function Layout() {
           </div>
 
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            {ALL_STAFF_ROLES.has(role) && <ChatNotificationBell />}
             <button
               onClick={toggle}
               title={theme === "dark" ? "Светлый режим" : "Тёмный режим"}

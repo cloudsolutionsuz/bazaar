@@ -17,3 +17,18 @@ export async function sendStaffMessage(req: Request, res: Response): Promise<voi
   const message = await chatService.sendStaffMessage(req.authUser!.tenantId!, req.authUser!.id, req.params.customerId, text);
   res.status(201).json({ message });
 }
+
+export async function getPushVapidKey(_req: Request, res: Response): Promise<void> {
+  res.json(chatService.getAdminPushVapidKey());
+}
+
+export async function subscribePush(req: Request, res: Response): Promise<void> {
+  const { endpoint, p256dh, auth } = req.body as { endpoint: string; p256dh: string; auth: string };
+  await chatService.subscribeAdminPush(req.authUser!.tenantId!, req.authUser!.id, { endpoint, p256dh, auth });
+  res.json({ ok: true });
+}
+
+export async function getUnreadCount(req: Request, res: Response): Promise<void> {
+  const count = await chatService.getUnreadCount(req.authUser!.tenantId!);
+  res.json({ count });
+}

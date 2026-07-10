@@ -173,8 +173,20 @@ export async function sendChatMessage(tenantId: string, input: SendChatMessageIn
     });
   });
 
-  const tenant = await prisma.tenant.findUnique({ where: { id: tenantId }, select: { telegramChatId: true } });
+  const [tenant, adminSubs] = await Promise.all([
+    prisma.tenant.findUnique({ where: { id: tenantId }, select: { telegramChatId: true } }),
+    prisma.adminPushSubscription.findMany({ where: { tenantId } }),
+  ]);
   await notifyNewChatMessage(tenant?.telegramChatId ?? null, input.name, input.text);
+  await Promise.all(
+    adminSubs.map((s) =>
+      sendWebPush(s, {
+        title: `💬 ${input.name}`,
+        body: input.text,
+        url: "/chat",
+      }).catch(() => {}),
+    ),
+  );
 
   return message;
 }
