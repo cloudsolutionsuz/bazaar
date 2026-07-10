@@ -427,6 +427,26 @@ export interface PlatformStats {
 
 export type ChatMessageSender = "CUSTOMER" | "STAFF";
 
+export type SupportMessageSender = "TENANT" | "SUPER_ADMIN";
+
+export interface SupportMessage {
+  id: string;
+  tenantId: string;
+  sender: SupportMessageSender;
+  text: string;
+  readAt: string | null;
+  createdAt: string;
+}
+
+export interface SupportChatThread {
+  tenantId: string;
+  tenantName: string;
+  lastText: string;
+  lastSender: SupportMessageSender;
+  lastAt: string;
+  unreadCount: number;
+}
+
 // Just the identity fields a thread header needs - not the full Customer
 // type, which carries computed fields (orderCount/purchaseAmount) this endpoint
 // doesn't return.

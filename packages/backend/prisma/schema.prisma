@@ -143,6 +143,7 @@ model Tenant {
   deliveryZones      DeliveryZone[]
   magicBoxes              MagicBox[]
   adminPushSubscriptions  AdminPushSubscription[]
+  supportMessages         SupportMessage[]
 
   @@map("tenants")
 }
@@ -471,6 +472,11 @@ enum ChatMessageSender {
   STAFF
 }
 
+enum SupportMessageSender {
+  TENANT
+  SUPER_ADMIN
+}
+
 // readAt only ever gets set on CUSTOMER-sent messages - the customer has no
 // persistent UI to mark anything read, they just see the thread when they
 // reopen it, so there's nothing meaningful to track in the other direction.
@@ -679,6 +685,20 @@ model MagicBox {
 
   @@index([tenantId])
   @@map("magic_boxes")
+}
+
+model SupportMessage {
+  id        String               @id @default(uuid())
+  tenantId  String
+  tenant    Tenant               @relation(fields: [tenantId], references: [id])
+  sender    SupportMessageSender
+  text      String
+  readAt    DateTime?
+  createdAt DateTime             @default(now())
+
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+  @@map("support_messages")
 }
 
 model MagicBoxItem {

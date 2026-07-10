@@ -6,7 +6,9 @@ import { useAuth } from "../auth/AuthContext";
 import { changeLanguage } from "../i18n/i18n";
 import { useTheme } from "../context/ThemeContext";
 import { ChatNotificationBell } from "./ChatNotificationBell";
+import { SupportChatWidget } from "./SupportChatWidget";
 import { getUnreadCount } from "../api/chat";
+import { getUnreadCount as getSupportUnread, getSuperAdminUnreadCount } from "../api/support";
 
 function navItemClass({ isActive }: { isActive: boolean }): string {
   return `block rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap ${
@@ -64,6 +66,14 @@ export function Layout() {
     enabled: ALL_STAFF_ROLES.has(role),
   });
   const chatUnread = chatUnreadQuery.data?.count ?? 0;
+
+  const supportUnreadQuery = useQuery({
+    queryKey: ["support-unread"],
+    queryFn: role === "SUPER_ADMIN" ? getSuperAdminUnreadCount : getSupportUnread,
+    refetchInterval: 30_000,
+    enabled: role === "OWNER" || role === "MANAGER" || role === "SUPER_ADMIN",
+  });
+  const supportUnread = supportUnreadQuery.data?.count ?? 0;
 
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     // On small screens, default to closed so content isn't overlaid on first load
@@ -166,6 +176,14 @@ export function Layout() {
                 <NavLink to="/platform/plans" className={navItemClass}>{t("nav.plans")}</NavLink>
                 <NavLink to="/platform/billing-timeline" className={navItemClass}>{t("nav.billingTimeline")}</NavLink>
                 <NavLink to="/platform/video-banners" className={navItemClass}>{t("nav.videoBanners")}</NavLink>
+                <NavLink to="/platform/support" className={({ isActive }) => `${navItemClass({ isActive })} flex items-center justify-between`}>
+                  <span>{t("nav.support")}</span>
+                  {supportUnread > 0 && (
+                    <span className="ml-2 rounded-full bg-indigo-500 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+                      {supportUnread > 99 ? "99+" : supportUnread}
+                    </span>
+                  )}
+                </NavLink>
               </>
             )}
           </nav>
@@ -190,6 +208,7 @@ export function Layout() {
 
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             {ALL_STAFF_ROLES.has(role) && <ChatNotificationBell unread={chatUnread} />}
+            {(role === "OWNER" || role === "MANAGER") && <SupportChatWidget unread={supportUnread} />}
             <button
               onClick={toggle}
               title={theme === "dark" ? "Светлый режим" : "Тёмный режим"}
