@@ -99,10 +99,6 @@
     "needed": "kerak",
     "free": "Bepul"
   },
-  "common": {
-    "activate": "Faollashtirish",
-    "deactivate": "O'chirish"
-  },
   "acceptInvite": {
     "title": "Taklifni qabul qiling",
     "submit": "Parolni o'rnatish",
