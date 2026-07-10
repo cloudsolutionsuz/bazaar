@@ -50,6 +50,16 @@ function applyMap(input: string, map: [string, string][]): string {
   return result;
 }
 
+// Restore common Russian soft signs lost during transliteration.
+// e.g. "холодилник" → "холодильник", "болница" → "больница"
+function restoreSoftSigns(s: string): string {
+  return s
+    .replace(/лн/g, "льн")
+    .replace(/лс/g, "льс")
+    .replace(/нк/g, "ньк")
+    .replace(/сн/g, "сьн");
+}
+
 function hasCyrillic(s: string): boolean {
   return /[а-яёА-ЯЁ]/.test(s);
 }
@@ -69,7 +79,11 @@ export function getSearchTerms(query: string): string[] {
   const terms = new Set<string>([query.toLowerCase()]);
   if (hasLatin(query)) {
     const cyr = applyMap(query, LAT_TO_CYR);
-    if (cyr !== query.toLowerCase()) terms.add(cyr);
+    if (cyr !== query.toLowerCase()) {
+      terms.add(cyr);
+      const cyrRestored = restoreSoftSigns(cyr);
+      if (cyrRestored !== cyr) terms.add(cyrRestored);
+    }
   }
   if (hasCyrillic(query)) {
     const lat = applyMap(query, CYR_TO_LAT);
