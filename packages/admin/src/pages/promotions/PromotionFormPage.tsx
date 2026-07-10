@@ -166,9 +166,18 @@ export function PromotionFormPage() {
     queryClient.invalidateQueries({ queryKey: ["promotions"] });
   }
 
+  const [saved, setSaved] = useState(false);
+
   const updateMutation = useMutation({
     mutationFn: (input: promotionsApi.PromotionInput) => promotionsApi.updatePromotion(id as string, input),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    },
+    onError: (err: unknown) => {
+      window.alert(err instanceof Error ? err.message : t("common.error"));
+    },
   });
 
   const attachMutation = useMutation({
@@ -198,11 +207,17 @@ export function PromotionFormPage() {
       setGetVariant(null);
       setGetQty("1");
     },
+    onError: (err: unknown) => {
+      window.alert(err instanceof Error ? err.message : t("common.error"));
+    },
   });
 
   const removeBxGyMutation = useMutation({
     mutationFn: (ruleId: string) => promotionsApi.removeBxGyRule(id as string, ruleId),
     onSuccess: invalidate,
+    onError: (err: unknown) => {
+      window.alert(err instanceof Error ? err.message : t("common.error"));
+    },
   });
 
   function handleSubmit(e: FormEvent) {
@@ -250,7 +265,9 @@ export function PromotionFormPage() {
               <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
               {t("promotions.isActive")}
             </label>
-            <Button type="submit" disabled={updateMutation.isPending}>{t("common.save")}</Button>
+            <Button type="submit" disabled={updateMutation.isPending}>
+              {saved ? "✓ Сохранено" : updateMutation.isPending ? t("common.saving") : t("common.save")}
+            </Button>
           </form>
         </div>
 
