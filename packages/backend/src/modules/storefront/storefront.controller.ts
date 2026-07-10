@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import * as storefrontService from "./storefront.service";
 import * as ordersService from "../orders/orders.service";
 import * as bannersService from "../banners/banners.service";
+import * as magicBoxesService from "../magicBoxes/magicBoxes.service";
 import type { ListStorefrontProductsQuery, MyOrdersQuery, PushSubscribeInput, SendChatMessageInput, TrackPageViewInput } from "./storefront.schema";
 import type { CreateOrderInput } from "../orders/orders.schema";
 
@@ -85,4 +86,8 @@ export async function getLoyaltyBalance(req: Request, res: Response): Promise<vo
     loyaltyMinRedeem: tenant.loyaltyMinRedeem,
     loyaltyPointsRate: tenant.loyaltyPointsRate,
   });
+}
+
+export async function listMagicBoxes(req: Request, res: Response): Promise<void> {
+  res.json(await magicBoxesService.listActiveMagicBoxes(req.tenant!.id));
 }

@@ -129,6 +129,7 @@ export function Layout() {
             )}
             {STAFF_AND_MANAGEMENT_ROLES.has(role) && (
               <>
+                <NavLink to="/magic-boxes" className={navItemClass}>{t("nav.magicBox")}</NavLink>
                 <NavLink to="/kassa" className={navItemClass}>{t("nav.kassa")}</NavLink>
                 <NavLink to="/reports" className={navItemClass}>{t("nav.reports")}</NavLink>
                 <NavLink to="/ai-advisor" className={navItemClass}>{t("nav.aiAdvisor")}</NavLink>

@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import * as storefrontApi from "../api/storefront";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import { BannerCarousel } from "../components/BannerCarousel";
+import { useMagicBoxes } from "../cart/MagicBoxContext";
 
 const PAGE_SIZE = 24;
 
@@ -25,6 +26,8 @@ export function CatalogPage() {
 
   const metaQuery = useQuery({ queryKey: ["tenant-meta"], queryFn: storefrontApi.getMeta });
   const accentStyle = metaQuery.data?.themeColor ? { backgroundColor: metaQuery.data.themeColor } : undefined;
+  const [showMagicBox, setShowMagicBox] = useState(false);
+  const { boxes: magicBoxes, progress: magicBoxProgress } = useMagicBoxes();
 
   const categoriesQuery = useQuery({ queryKey: ["categories"], queryFn: storefrontApi.listCategories });
   const brandsQuery = useQuery({ queryKey: ["brands"], queryFn: storefrontApi.listBrands });
@@ -119,7 +122,54 @@ export function CatalogPage() {
         >
           {t("catalog.filterPromoted")}
         </button>
+        {magicBoxes.length > 0 && (
+          <button
+            onClick={() => setShowMagicBox((v) => !v)}
+            className={`rounded-full px-3 py-1 text-sm font-bold shadow-sm transition-all ${showMagicBox ? "bg-red-500 text-white" : "bg-gradient-to-r from-yellow-400 to-red-500 text-white"}`}
+          >
+            🎁 Magic Box
+          </button>
+        )}
       </div>
+
+      {showMagicBox && magicBoxes.length > 0 && (
+        <div className="mb-6 rounded-2xl border-2 border-yellow-400 bg-gradient-to-br from-yellow-50 to-red-50 p-4">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="text-2xl">🎁</span>
+            <span className="text-lg font-bold text-red-600">Magic Box</span>
+          </div>
+          <div className="space-y-4">
+            {magicBoxProgress.map(({ box, unlocked, itemProgress }) => (
+              <div key={box.id} className={`rounded-xl border-2 p-4 ${unlocked ? "border-green-400 bg-green-50" : "border-yellow-300 bg-white"}`}>
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="font-semibold text-gray-900">{box.name}</span>
+                  {unlocked ? (
+                    <span className="rounded-full bg-green-500 px-3 py-1 text-xs font-bold text-white">✓ Получен!</span>
+                  ) : (
+                    <span className="rounded-full bg-yellow-400 px-3 py-1 text-xs font-bold text-gray-900">Собери набор</span>
+                  )}
+                </div>
+                {box.description && <p className="mb-2 text-sm text-gray-500">{box.description}</p>}
+                <div className="space-y-1">
+                  {itemProgress.map(({ item, have, need }) => (
+                    <div key={item.id} className="flex items-center gap-2 text-sm">
+                      <div className={`h-2 flex-1 rounded-full bg-gray-200`}>
+                        <div
+                          className={`h-2 rounded-full transition-all ${have >= need ? "bg-green-500" : "bg-yellow-400"}`}
+                          style={{ width: `${Math.min(100, (have / need) * 100)}%` }}
+                        />
+                      </div>
+                      <span className={`shrink-0 text-xs font-medium ${have >= need ? "text-green-600" : "text-gray-600"}`}>
+                        {item.variant.product.name}{item.variant.name ? ` (${item.variant.name})` : ""}: {have}/{need}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <select

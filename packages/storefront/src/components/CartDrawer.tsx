@@ -1,10 +1,12 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useCart } from "../cart/CartContext";
+import { useMagicBoxes } from "../cart/MagicBoxContext";
 
 export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { t } = useTranslation();
   const { items, updateQuantity, removeItem, total } = useCart();
+  const { unlockedBoxes } = useMagicBoxes();
 
   const originalTotal = items.reduce((sum, i) => sum + i.originalPrice * i.quantity, 0);
   const discountTotal = originalTotal - total;
@@ -53,6 +55,23 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                 </button>
               </div>
             ))}
+
+            {unlockedBoxes.length > 0 && (
+              <div className="rounded-xl border-2 border-yellow-400 bg-gradient-to-br from-yellow-50 to-red-50 p-3">
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="text-lg">🎁</span>
+                  <span className="text-sm font-bold text-red-600">Magic Box — бесплатно!</span>
+                </div>
+                <div className="space-y-2">
+                  {unlockedBoxes.map((box) => (
+                    <div key={box.id} className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-800">{box.name}</span>
+                      <span className="rounded-full bg-green-500 px-2 py-0.5 text-xs font-bold text-white">0 сум</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

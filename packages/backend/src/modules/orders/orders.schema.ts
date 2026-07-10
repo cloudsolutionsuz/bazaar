@@ -26,6 +26,7 @@ export const createOrderSchema = z
     loyaltyPointsToRedeem: z.number().int().min(0).optional(),
     shippingCost: z.number().int().min(0).optional(),
     items: z.array(orderItemInputSchema).min(1),
+    magicBoxIds: z.array(z.string()).optional(),
   })
   .refine((data) => DISTRICTS_BY_REGION.get(data.addressRegion)?.has(data.addressDistrict) ?? false, {
     message: "addressDistrict does not belong to addressRegion",

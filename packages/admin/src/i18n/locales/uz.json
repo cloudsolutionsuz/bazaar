@@ -50,6 +50,7 @@
     "plans": "Tariflar",
     "billingTimeline": "Vaqt jadvali",
     "videoBanners": "Video bannerlar",
+    "magicBox": "Magic Box",
     "categories": "Kategoriyalar",
     "settings": "Sozlamalar",
     "logout": "Chiqish"
@@ -77,6 +78,30 @@
     "mismatch": "Parollar mos kelmaydi",
     "error": "Havola yaroqsiz yoki eskirgan",
     "invalidLink": "Parolni tiklash havolasi yaroqsiz"
+  },
+  "magicBox": {
+    "title": "Magic Box",
+    "create": "Magic Box yaratish",
+    "newBox": "Yangi Magic Box",
+    "editing": "Magic Box tahrirlash",
+    "name": "Nomi",
+    "description": "Tavsif",
+    "requiredItems": "Olish uchun kerakli tovarlar",
+    "selectProduct": "Tovar tanlang",
+    "selectVariant": "Variant tanlang",
+    "addItem": "Tovar qo'shish",
+    "pcs": "dona",
+    "confirmDelete": "Magic Box'ni o'chirishni tasdiqlaysizmi?",
+    "unlocked": "🎁 Sizda Magic Box bor!",
+    "unlockedDesc": "Barcha shartlar bajarildi. Magic Box buyurtmaga bepul qo'shildi.",
+    "progress": "Jarayon",
+    "inCart": "savatda",
+    "needed": "kerak",
+    "free": "Bepul"
+  },
+  "common": {
+    "activate": "Faollashtirish",
+    "deactivate": "O'chirish"
   },
   "acceptInvite": {
     "title": "Taklifni qabul qiling",

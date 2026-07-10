@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { useCart } from "../cart/CartContext";
+import { useMagicBoxes } from "../cart/MagicBoxContext";
 import * as storefrontApi from "../api/storefront";
 import { ApiError } from "../api/client";
 import { UZBEKISTAN_REGIONS } from "../data/uzbekistanRegions";
@@ -27,6 +28,7 @@ export function CheckoutPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { items, total, clear } = useCart();
+  const { unlockedIds: magicBoxIds } = useMagicBoxes();
   const metaQuery = useQuery({ queryKey: ["tenant-meta"], queryFn: storefrontApi.getMeta });
   const meta = metaQuery.data;
   const accentStyle = meta?.themeColor ? { backgroundColor: meta.themeColor } : undefined;
@@ -134,6 +136,7 @@ export function CheckoutPage() {
         promoCode: appliedPromo?.code,
         loyaltyPointsToRedeem: loyaltyToRedeem > 0 ? loyaltyToRedeem : undefined,
         items: items.map((i) => ({ variantId: i.variantId, quantity: i.quantity })),
+        magicBoxIds: magicBoxIds.length > 0 ? magicBoxIds : undefined,
       });
       clear();
       navigate("/order-confirmation", { state: { order: result.order } });
@@ -376,6 +379,19 @@ export function CheckoutPage() {
         </div>
 
         {error && <p className="text-sm text-red-600">{error}</p>}
+
+        {magicBoxIds.length > 0 && (
+          <div className="rounded-xl border-2 border-yellow-400 bg-gradient-to-br from-yellow-50 to-red-50 p-3">
+            <div className="mb-1 flex items-center gap-2">
+              <span className="text-base">🎁</span>
+              <span className="text-sm font-bold text-red-600">Magic Box</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-700">{magicBoxIds.length} Magic Box будет добавлен бесплатно</span>
+              <span className="font-bold text-green-600">0 сум</span>
+            </div>
+          </div>
+        )}
 
         <div className="flex items-center justify-between border-t border-clay-100 pt-4 text-base text-gray-900">
           <span className="text-sm text-gray-500">{t("cart.total")}</span>

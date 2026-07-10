@@ -43,6 +43,7 @@ export interface CheckoutInput {
   promoCode?: string;
   loyaltyPointsToRedeem?: number;
   items: { variantId: string; quantity: number }[];
+  magicBoxIds?: string[];
 }
 
 export interface LoyaltyBalance {
@@ -130,4 +131,23 @@ export function subscribeToPush(phone: string, name: string, sub: PushSubscripti
       auth: sub.keys?.auth,
     },
   });
+}
+
+export interface MagicBoxItem {
+  id: string;
+  variantId: string;
+  quantity: number;
+  variant: { id: string; name: string | null; sku: string; product: { id: string; name: string; images: { url: string }[] } };
+}
+
+export interface MagicBox {
+  id: string;
+  name: string;
+  description: string | null;
+  isActive: boolean;
+  items: MagicBoxItem[];
+}
+
+export function listMagicBoxes(): Promise<{ items: MagicBox[] }> {
+  return apiRequest("/api/storefront/magic-boxes");
 }

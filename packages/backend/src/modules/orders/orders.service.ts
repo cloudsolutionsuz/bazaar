@@ -1,6 +1,7 @@
 import ExcelJS from "exceljs";
 import { Prisma, type OrderStatus } from "@prisma/client";
 import { prisma } from "../../db/prisma";
+import { validateMagicBoxes } from "../magicBoxes/magicBoxes.service";
 import { AppError } from "../../middleware/errorHandler";
 import { assertWithinPlanLimit } from "../plans/limits";
 import { notifyLowStock, notifyNewOrder } from "../../utils/notifications";
@@ -108,6 +109,12 @@ export async function createOrder(tenantId: string, userId: string | null, input
     throw new AppError(400, "MIN_ORDER_AMOUNT", `Minimum order amount is ${minOrderAmount}`);
   }
 
+  const validatedMagicBoxIds = await validateMagicBoxes(
+    tenantId,
+    input.magicBoxIds ?? [],
+    input.items,
+  );
+
   let promoCodeId: string | undefined;
   let discountAmount = 0;
   if (input.promoCode) {
@@ -204,6 +211,9 @@ export async function createOrder(tenantId: string, userId: string | null, input
         loyaltyPointsRedeemed,
         totalAmount,
         items: { create: orderItemsData },
+        magicBoxes: validatedMagicBoxIds.length > 0
+          ? { create: validatedMagicBoxIds.map((magicBoxId) => ({ magicBoxId })) }
+          : undefined,
       },
     });
 

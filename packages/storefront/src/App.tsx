@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { CartProvider } from "./cart/CartContext";
+import { MagicBoxProvider } from "./cart/MagicBoxContext";
 import { Layout } from "./components/Layout";
 import { CatalogPage } from "./pages/CatalogPage";
 import { ProductPage } from "./pages/ProductPage";
@@ -15,6 +16,7 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <CartProvider>
+        <MagicBoxProvider>
         <BrowserRouter>
           <Routes>
             <Route element={<Layout />}>
@@ -27,6 +29,7 @@ export function App() {
             </Route>
           </Routes>
         </BrowserRouter>
+        </MagicBoxProvider>
       </CartProvider>
     </QueryClientProvider>
   );

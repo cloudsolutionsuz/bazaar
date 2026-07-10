@@ -32,3 +32,4 @@ storefrontRouter.post("/push/subscribe", validateBody(pushSubscribeSchema), asyn
 storefrontRouter.get("/products/:productId/reviews", asyncHandler(reviewsController.listStorefrontReviews));
 storefrontRouter.post("/products/:productId/reviews", validateBody(submitReviewSchema), asyncHandler(reviewsController.submitReview));
 storefrontRouter.get("/loyalty", asyncHandler(storefrontController.getLoyaltyBalance));
+storefrontRouter.get("/magic-boxes", asyncHandler(storefrontController.listMagicBoxes));

@@ -50,6 +50,7 @@
     "plans": "Тарифы",
     "billingTimeline": "Таймлайн",
     "videoBanners": "Видео баннеры",
+    "magicBox": "Magic Box",
     "categories": "Категории",
     "settings": "Настройки",
     "logout": "Выйти"
@@ -77,6 +78,30 @@
     "mismatch": "Пароли не совпадают",
     "error": "Ссылка недействительна или устарела",
     "invalidLink": "Ссылка для сброса пароля недействительна"
+  },
+  "magicBox": {
+    "title": "Magic Box",
+    "create": "Создать Magic Box",
+    "newBox": "Новый Magic Box",
+    "editing": "Редактировать Magic Box",
+    "name": "Название",
+    "description": "Описание",
+    "requiredItems": "Необходимые товары для получения",
+    "selectProduct": "Выберите товар",
+    "selectVariant": "Выберите вариант",
+    "addItem": "Добавить товар",
+    "pcs": "шт",
+    "confirmDelete": "Удалить Magic Box?",
+    "unlocked": "🎁 У вас есть Magic Box!",
+    "unlockedDesc": "Вы выполнили все условия. Magic Box добавлен в заказ бесплатно.",
+    "progress": "Прогресс",
+    "inCart": "в корзине",
+    "needed": "нужно",
+    "free": "Бесплатно"
+  },
+  "common": {
+    "activate": "Активировать",
+    "deactivate": "Деактивировать"
   },
   "acceptInvite": {
     "title": "Примите приглашение",
