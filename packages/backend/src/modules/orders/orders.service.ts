@@ -109,11 +109,25 @@ export async function createOrder(tenantId: string, userId: string | null, input
     throw new AppError(400, "MIN_ORDER_AMOUNT", `Minimum order amount is ${minOrderAmount}`);
   }
 
-  const validatedMagicBoxIds = await validateMagicBoxes(
+  const validatedBoxes = await validateMagicBoxes(
     tenantId,
     input.magicBoxIds ?? [],
     input.items,
   );
+
+  // Load gift variants to check stock and build order items
+  const giftVariantIds = validatedBoxes.map((b) => b.giftVariantId).filter(Boolean) as string[];
+  const giftVariants = giftVariantIds.length > 0
+    ? await prisma.productVariant.findMany({ where: { id: { in: giftVariantIds }, tenantId }, include: { product: true } })
+    : [];
+  const giftVariantById = new Map(giftVariants.map((v) => [v.id, v]));
+
+  const giftItemsData = giftVariants.map((v) => ({
+    variantId: v.id,
+    quantity: 1,
+    unitPrice: 0,
+    totalPrice: 0,
+  }));
 
   let promoCodeId: string | undefined;
   let discountAmount = 0;
@@ -159,13 +173,13 @@ export async function createOrder(tenantId: string, userId: string | null, input
     // Atomic, race-safe stock guard: only decrements if enough stock is
     // still available at the moment of the update, so concurrent orders
     // can't oversell the same variant.
-    for (const item of orderItemsData) {
+    for (const item of [...orderItemsData, ...giftItemsData]) {
       const updated = await tx.productVariant.updateMany({
         where: { id: item.variantId, tenantId, stockQuantity: { gte: item.quantity } },
         data: { stockQuantity: { decrement: item.quantity } },
       });
       if (updated.count === 0) {
-        const variant = variantById.get(item.variantId)!;
+        const variant = variantById.get(item.variantId) ?? giftVariantById.get(item.variantId)!;
         throw new AppError(409, "INSUFFICIENT_STOCK", `Not enough stock for SKU "${variant.sku}"`);
       }
     }
@@ -210,10 +224,7 @@ export async function createOrder(tenantId: string, userId: string | null, input
         loyaltyPointsEarned,
         loyaltyPointsRedeemed,
         totalAmount,
-        items: { create: orderItemsData },
-        magicBoxes: validatedMagicBoxIds.length > 0
-          ? { create: validatedMagicBoxIds.map((magicBoxId) => ({ magicBoxId })) }
-          : undefined,
+        items: { create: [...orderItemsData, ...giftItemsData] },
       },
     });
 
@@ -243,7 +254,7 @@ export async function createOrder(tenantId: string, userId: string | null, input
 
     await tx.orderStatusHistory.create({ data: { orderId: order.id, toStatus: "NEW", changedByUserId: userId } });
 
-    for (const item of orderItemsData) {
+    for (const item of [...orderItemsData, ...giftItemsData]) {
       await tx.inventoryMovement.create({
         data: {
           tenantId,

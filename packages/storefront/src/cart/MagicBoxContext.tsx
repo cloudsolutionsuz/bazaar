@@ -15,11 +15,21 @@ export interface MagicBoxRequiredItem {
   };
 }
 
+export interface MagicBoxGiftVariant {
+  id: string;
+  name: string | null;
+  sku: string;
+  priceOverride: number | null;
+  product: { id: string; name: string; price: number; images: { url: string }[] };
+}
+
 export interface MagicBox {
   id: string;
   name: string;
   description: string | null;
   isActive: boolean;
+  giftVariantId: string | null;
+  giftVariant: MagicBoxGiftVariant | null;
   items: MagicBoxRequiredItem[];
 }
 

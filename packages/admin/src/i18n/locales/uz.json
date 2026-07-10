@@ -86,6 +86,7 @@
     "editing": "Magic Box tahrirlash",
     "name": "Nomi",
     "description": "Tavsif",
+    "giftProduct": "Sovg'a-tovar",
     "requiredItems": "Olish uchun kerakli tovarlar",
     "selectProduct": "Tovar tanlang",
     "selectVariant": "Variant tanlang",

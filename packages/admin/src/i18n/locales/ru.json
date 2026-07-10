@@ -86,6 +86,7 @@
     "editing": "Редактировать Magic Box",
     "name": "Название",
     "description": "Описание",
+    "giftProduct": "Товар-подарок",
     "requiredItems": "Необходимые товары для получения",
     "selectProduct": "Выберите товар",
     "selectVariant": "Выберите вариант",

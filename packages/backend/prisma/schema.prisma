@@ -338,6 +338,7 @@ model ProductVariant {
   orderItems         OrderItem[]
   inventoryMovements InventoryMovement[]
   magicBoxItems      MagicBoxItem[]
+  giftMagicBoxes     MagicBox[]         @relation("MagicBoxGift")
 
   @@unique([tenantId, sku])
   @@index([tenantId])
@@ -433,7 +434,6 @@ model Order {
   statusHistory     OrderStatusHistory[]
   inventoryMovements InventoryMovement[]
   transactions      Transaction[]
-  magicBoxes        OrderMagicBox[]
 
   @@index([tenantId])
   @@index([tenantId, status])
@@ -646,16 +646,17 @@ model VideoBanner {
 }
 
 model MagicBox {
-  id          String         @id @default(uuid())
-  tenantId    String
-  tenant      Tenant         @relation(fields: [tenantId], references: [id])
-  name        String
-  description String?
-  isActive    Boolean        @default(true)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  items       MagicBoxItem[]
-  orders      OrderMagicBox[]
+  id            String          @id @default(uuid())
+  tenantId      String
+  tenant        Tenant          @relation(fields: [tenantId], references: [id])
+  name          String
+  description   String?
+  isActive      Boolean         @default(true)
+  giftVariantId String?
+  giftVariant   ProductVariant? @relation("MagicBoxGift", fields: [giftVariantId], references: [id])
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  items         MagicBoxItem[]
 
   @@index([tenantId])
   @@map("magic_boxes")
@@ -671,15 +672,4 @@ model MagicBoxItem {
 
   @@index([magicBoxId])
   @@map("magic_box_items")
-}
-
-model OrderMagicBox {
-  id         String   @id @default(uuid())
-  orderId    String
-  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  magicBoxId String
-  magicBox   MagicBox @relation(fields: [magicBoxId], references: [id])
-
-  @@index([orderId])
-  @@map("order_magic_boxes")
 }

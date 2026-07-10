@@ -14,8 +14,13 @@ magicBoxesRouter.get("/", asyncHandler(async (req, res) => {
 }));
 
 magicBoxesRouter.post("/", asyncHandler(async (req, res) => {
-  const { name, description, items } = req.body as { name: string; description?: string; items: { variantId: string; quantity: number }[] };
-  res.status(201).json(await svc.createMagicBox(req.authUser!.tenantId!, { name, description, items }));
+  const { name, description, giftVariantId, items } = req.body as {
+    name: string;
+    description?: string;
+    giftVariantId?: string;
+    items: { variantId: string; quantity: number }[];
+  };
+  res.status(201).json(await svc.createMagicBox(req.authUser!.tenantId!, { name, description, giftVariantId, items }));
 }));
 
 magicBoxesRouter.patch("/:id", asyncHandler(async (req, res) => {

@@ -32,12 +32,20 @@ function MagicBoxForm({
 }: {
   initial?: MagicBox;
   products: Product[];
-  onSave: (data: { name: string; description: string; items: { variantId: string; quantity: number }[] }) => void;
+  onSave: (data: { name: string; description: string; giftVariantId: string; items: { variantId: string; quantity: number }[] }) => void;
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
   const [name, setName] = useState(initial?.name ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
+
+  // Gift product state
+  const initialGiftProduct = initial?.giftVariant
+    ? products.find((p) => p.variants.some((v) => v.id === initial.giftVariantId))
+    : null;
+  const [giftProductId, setGiftProductId] = useState(initialGiftProduct?.id ?? "");
+  const [giftVariantId, setGiftVariantId] = useState(initial?.giftVariantId ?? "");
+
   const [rows, setRows] = useState<RequiredItemRow[]>(
     initial?.items.map((i) => ({
       id: i.id,
@@ -46,6 +54,8 @@ function MagicBoxForm({
       quantity: i.quantity,
     })) ?? [{ id: crypto.randomUUID(), productId: "", variantId: "", quantity: 1 }],
   );
+
+  const giftProduct = products.find((p) => p.id === giftProductId);
 
   function addRow() {
     setRows((r) => [...r, { id: crypto.randomUUID(), productId: "", variantId: "", quantity: 1 }]);
@@ -61,8 +71,8 @@ function MagicBoxForm({
 
   function handleSubmit() {
     const items = rows.filter((r) => r.variantId && r.quantity > 0).map((r) => ({ variantId: r.variantId, quantity: r.quantity }));
-    if (!name.trim() || items.length === 0) return;
-    onSave({ name: name.trim(), description: description.trim(), items });
+    if (!name.trim() || !giftVariantId || items.length === 0) return;
+    onSave({ name: name.trim(), description: description.trim(), giftVariantId, items });
   }
 
   return (
@@ -85,8 +95,40 @@ function MagicBoxForm({
         />
       </div>
 
+      {/* Gift product */}
+      <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
+        <label className="mb-2 block text-sm font-semibold text-green-800 dark:text-green-300">
+          🎁 {t("magicBox.giftProduct")}
+          <span className="ml-1 text-xs font-normal text-green-600">— добавляется в заказ бесплатно (0 сум)</span>
+        </label>
+        <div className="flex gap-2">
+          <select
+            value={giftProductId}
+            onChange={(e) => { setGiftProductId(e.target.value); setGiftVariantId(""); }}
+            className="flex-1 rounded-md border border-green-300 px-2 py-1.5 text-sm dark:border-green-700 dark:bg-gray-800 dark:text-gray-100"
+          >
+            <option value="">{t("magicBox.selectProduct")}</option>
+            {products.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+          <select
+            value={giftVariantId}
+            onChange={(e) => setGiftVariantId(e.target.value)}
+            disabled={!giftProduct}
+            className="flex-1 rounded-md border border-green-300 px-2 py-1.5 text-sm dark:border-green-700 dark:bg-gray-800 dark:text-gray-100 disabled:opacity-50"
+          >
+            <option value="">{t("magicBox.selectVariant")}</option>
+            {giftProduct?.variants.map((v) => (
+              <option key={v.id} value={v.id}>{v.name ?? v.sku}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Required items */}
       <div>
-        <div className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">{t("magicBox.requiredItems")}</div>
+        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">{t("magicBox.requiredItems")}</label>
         <div className="space-y-2">
           {rows.map((row) => {
             const product = products.find((p) => p.id === row.productId);
@@ -139,7 +181,7 @@ function MagicBoxForm({
         </button>
         <button
           onClick={handleSubmit}
-          disabled={!name.trim() || rows.every((r) => !r.variantId)}
+          disabled={!name.trim() || !giftVariantId || rows.every((r) => !r.variantId)}
           className="rounded-md bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
         >
           {t("common.save")}
@@ -228,6 +270,16 @@ export function MagicBoxPage() {
                       </span>
                     </div>
                     {box.description && <p className="mb-2 text-sm text-gray-500">{box.description}</p>}
+                    {/* Gift product */}
+                    {box.giftVariant && (
+                      <div className="mb-2 flex items-center gap-1 text-sm text-green-700 dark:text-green-400">
+                        <span>🎁</span>
+                        <span className="font-medium">{t("magicBox.giftProduct")}:</span>
+                        <span>{box.giftVariant.product.name}{box.giftVariant.name ? ` (${box.giftVariant.name})` : ""}</span>
+                        <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700 dark:bg-green-900/40">0 сум</span>
+                      </div>
+                    )}
+                    {/* Required items */}
                     <div className="flex flex-wrap gap-2">
                       {box.items.map((item) => (
                         <span key={item.id} className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">

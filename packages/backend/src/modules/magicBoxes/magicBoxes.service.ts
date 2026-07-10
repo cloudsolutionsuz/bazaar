@@ -12,10 +12,27 @@ const ITEM_INCLUDE = {
   },
 };
 
+const GIFT_INCLUDE = {
+  select: {
+    id: true,
+    name: true,
+    sku: true,
+    priceOverride: true,
+    product: {
+      select: { id: true, name: true, price: true, images: { take: 1, select: { url: true } } },
+    },
+  },
+};
+
+const BOX_INCLUDE = {
+  items: { include: ITEM_INCLUDE },
+  giftVariant: GIFT_INCLUDE,
+};
+
 export async function listMagicBoxes(tenantId: string) {
   const items = await prisma.magicBox.findMany({
     where: { tenantId },
-    include: { items: { include: ITEM_INCLUDE } },
+    include: BOX_INCLUDE,
     orderBy: { createdAt: "desc" },
   });
   return { items };
@@ -24,7 +41,7 @@ export async function listMagicBoxes(tenantId: string) {
 export async function listActiveMagicBoxes(tenantId: string) {
   const items = await prisma.magicBox.findMany({
     where: { tenantId, isActive: true },
-    include: { items: { include: ITEM_INCLUDE } },
+    include: BOX_INCLUDE,
     orderBy: { createdAt: "desc" },
   });
   return { items };
@@ -32,7 +49,12 @@ export async function listActiveMagicBoxes(tenantId: string) {
 
 export async function createMagicBox(
   tenantId: string,
-  data: { name: string; description?: string; items: { variantId: string; quantity: number }[] },
+  data: {
+    name: string;
+    description?: string;
+    giftVariantId?: string;
+    items: { variantId: string; quantity: number }[];
+  },
 ) {
   if (data.items.length === 0) throw new AppError(400, "INVALID_INPUT", "Magic Box must have at least one required item");
 
@@ -41,9 +63,10 @@ export async function createMagicBox(
       tenantId,
       name: data.name,
       description: data.description,
+      giftVariantId: data.giftVariantId,
       items: { create: data.items.map((i) => ({ variantId: i.variantId, quantity: i.quantity })) },
     },
-    include: { items: { include: ITEM_INCLUDE } },
+    include: BOX_INCLUDE,
   });
   return { box };
 }
@@ -51,7 +74,13 @@ export async function createMagicBox(
 export async function updateMagicBox(
   tenantId: string,
   id: string,
-  data: { name?: string; description?: string; isActive?: boolean; items?: { variantId: string; quantity: number }[] },
+  data: {
+    name?: string;
+    description?: string;
+    isActive?: boolean;
+    giftVariantId?: string | null;
+    items?: { variantId: string; quantity: number }[];
+  },
 ) {
   const box = await prisma.magicBox.findUnique({ where: { id } });
   if (!box || box.tenantId !== tenantId) throw new AppError(404, "NOT_FOUND", "Magic Box not found");
@@ -65,8 +94,13 @@ export async function updateMagicBox(
     }
     return tx.magicBox.update({
       where: { id },
-      data: { name: data.name, description: data.description, isActive: data.isActive },
-      include: { items: { include: ITEM_INCLUDE } },
+      data: {
+        name: data.name,
+        description: data.description,
+        isActive: data.isActive,
+        giftVariantId: data.giftVariantId,
+      },
+      include: BOX_INCLUDE,
     });
   });
   return { box: updated };
@@ -104,5 +138,5 @@ export async function validateMagicBoxes(
     }
   }
 
-  return boxes.map((b) => b.id);
+  return boxes;
 }

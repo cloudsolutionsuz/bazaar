@@ -63,12 +63,21 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                   <span className="text-sm font-bold text-red-600">Magic Box — бесплатно!</span>
                 </div>
                 <div className="space-y-2">
-                  {unlockedBoxes.map((box) => (
-                    <div key={box.id} className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-800">{box.name}</span>
-                      <span className="rounded-full bg-green-500 px-2 py-0.5 text-xs font-bold text-white">0 сум</span>
-                    </div>
-                  ))}
+                  {unlockedBoxes.map((box) => {
+                    const gift = box.giftVariant;
+                    const giftImage = gift?.product.images[0]?.url;
+                    const giftName = gift ? `${gift.product.name}${gift.name ? ` (${gift.name})` : ""}` : box.name;
+                    return (
+                      <div key={box.id} className="flex items-center gap-2">
+                        {giftImage
+                          ? <img src={giftImage} alt="" className="h-10 w-10 rounded object-cover" />
+                          : <span className="flex h-10 w-10 items-center justify-center rounded bg-yellow-200 text-lg">🎁</span>
+                        }
+                        <span className="flex-1 text-sm font-medium text-gray-800">{giftName}</span>
+                        <span className="rounded-full bg-green-500 px-2 py-0.5 text-xs font-bold text-white">0 сум</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}

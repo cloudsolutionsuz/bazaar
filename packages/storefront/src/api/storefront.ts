@@ -140,11 +140,21 @@ export interface MagicBoxItem {
   variant: { id: string; name: string | null; sku: string; product: { id: string; name: string; images: { url: string }[] } };
 }
 
+export interface MagicBoxGiftVariant {
+  id: string;
+  name: string | null;
+  sku: string;
+  priceOverride: number | null;
+  product: { id: string; name: string; price: number; images: { url: string }[] };
+}
+
 export interface MagicBox {
   id: string;
   name: string;
   description: string | null;
   isActive: boolean;
+  giftVariantId: string | null;
+  giftVariant: MagicBoxGiftVariant | null;
   items: MagicBoxItem[];
 }
 
