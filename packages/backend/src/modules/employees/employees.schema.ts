@@ -4,6 +4,7 @@ export const inviteEmployeeSchema = z.object({
   name: z.string().min(2).max(120),
   email: z.string().email(),
   role: z.enum(["MANAGER", "CASHIER"]),
+  password: z.string().min(6).max(72),
 });
 
 export const updateEmployeeSchema = z.object({

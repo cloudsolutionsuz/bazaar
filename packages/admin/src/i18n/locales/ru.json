@@ -26,7 +26,9 @@
     "inactive": "Неактивен",
     "activate": "Включить",
     "deactivate": "Отключить",
-    "sum": "сум"
+    "sum": "сум",
+    "show": "Показать",
+    "hide": "Скрыть"
   },
   "nav": {
     "dashboard": "Дашборд",
@@ -121,7 +123,10 @@
     "statusInvited": "Приглашён",
     "confirmRemove": "Удалить этого сотрудника?",
     "errorLimitReached": "Достигнут лимит сотрудников по тарифу",
-    "errorEmailTaken": "Аккаунт с этим email уже существует"
+    "errorEmailTaken": "Аккаунт с этим email уже существует",
+    "password": "Пароль",
+    "passwordHint": "Минимум 6 символов",
+    "sendInviteLabel": "Добавить сотрудника"
   },
   "products": {
     "title": "Товары",

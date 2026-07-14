@@ -1,13 +1,9 @@
-import crypto from "node:crypto";
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
 import { hashPassword } from "../../utils/password";
-import { sendEmployeeInviteEmail } from "../../utils/email";
 import { assertWithinPlanLimit } from "../plans/limits";
 import { toPublicUser } from "../auth/auth.service";
 import type { InviteEmployeeInput, UpdateEmployeeInput } from "./employees.schema";
-
-const INVITE_TTL_HOURS = 72;
 
 export async function listEmployees(tenantId: string) {
   const users = await prisma.user.findMany({ where: { tenantId }, orderBy: { createdAt: "asc" } });
@@ -22,38 +18,20 @@ export async function inviteEmployee(tenantId: string, input: InviteEmployeeInpu
     throw new AppError(409, "EMAIL_TAKEN", "An account with this email already exists");
   }
 
-  // Unusable until accept-invite sets a real password - emailVerifiedAt
-  // stays null until then, which the existing login() check already
-  // treats as "please verify your email" (here: accept the invite first).
-  const unusablePasswordHash = await hashPassword(crypto.randomBytes(32).toString("hex"));
+  const passwordHash = await hashPassword(input.password);
 
-  const result = await prisma.$transaction(async (tx) => {
-    const user = await tx.user.create({
-      data: {
-        tenantId,
-        email: input.email,
-        name: input.name,
-        role: input.role,
-        passwordHash: unusablePasswordHash,
-      },
-    });
-
-    const token = crypto.randomBytes(32).toString("hex");
-    await tx.verificationToken.create({
-      data: {
-        userId: user.id,
-        token,
-        type: "EMPLOYEE_INVITE",
-        expiresAt: new Date(Date.now() + INVITE_TTL_HOURS * 60 * 60 * 1000),
-      },
-    });
-
-    return { user, token };
+  const user = await prisma.user.create({
+    data: {
+      tenantId,
+      email: input.email,
+      name: input.name,
+      role: input.role,
+      passwordHash,
+      emailVerifiedAt: new Date(),
+    },
   });
 
-  await sendEmployeeInviteEmail(result.user.email, result.token);
-
-  return toPublicUser(result.user);
+  return toPublicUser(user);
 }
 
 async function getModifiableEmployee(tenantId: string, employeeId: string) {

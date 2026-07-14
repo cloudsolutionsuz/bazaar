@@ -26,7 +26,9 @@
     "inactive": "Faol emas",
     "activate": "Yoqish",
     "deactivate": "O'chirish",
-    "sum": "so'm"
+    "sum": "so'm",
+    "show": "Ko'rsatish",
+    "hide": "Yashirish"
   },
   "nav": {
     "dashboard": "Boshqaruv paneli",
@@ -121,7 +123,10 @@
     "statusInvited": "Taklif qilingan",
     "confirmRemove": "Bu xodimni o'chirishni tasdiqlaysizmi?",
     "errorLimitReached": "Tarif bo'yicha xodimlar chegarasiga yetildi",
-    "errorEmailTaken": "Bu email bilan hisob allaqachon mavjud"
+    "errorEmailTaken": "Bu email bilan hisob allaqachon mavjud",
+    "password": "Parol",
+    "passwordHint": "Kamida 6 ta belgi",
+    "sendInviteLabel": "Xodim qo'shish"
   },
   "products": {
     "title": "Tovarlar",

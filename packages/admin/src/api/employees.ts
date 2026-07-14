@@ -9,6 +9,7 @@ export interface InviteEmployeeInput {
   name: string;
   email: string;
   role: "MANAGER" | "CASHIER";
+  password: string;
 }
 
 export function inviteEmployee(input: InviteEmployeeInput): Promise<{ employee: User }> {

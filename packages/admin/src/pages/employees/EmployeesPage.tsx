@@ -27,6 +27,8 @@ export function EmployeesPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<EmployeeRole>("CASHIER");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
 
   const employeesQuery = useQuery({ queryKey: ["employees"], queryFn: employeesApi.listEmployees });
@@ -43,6 +45,7 @@ export function EmployeesPage() {
       setName("");
       setEmail("");
       setRole("CASHIER");
+      setPassword("");
     },
     onError: (err) => {
       if (err instanceof ApiError && err.code === "PLAN_LIMIT_REACHED") setInviteError(t("employees.errorLimitReached"));
@@ -64,7 +67,7 @@ export function EmployeesPage() {
   function handleInviteSubmit(e: FormEvent) {
     e.preventDefault();
     setInviteError(null);
-    inviteMutation.mutate({ name, email, role });
+    inviteMutation.mutate({ name, email, role, password });
   }
 
   const employees = employeesQuery.data?.employees ?? [];
@@ -95,6 +98,27 @@ export function EmployeesPage() {
                   <option value="CASHIER">{t("employees.roleCashier")}</option>
                   <option value="MANAGER">{t("employees.roleManager")}</option>
                 </Select>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">{t("employees.password")}</label>
+                <div className="relative">
+                  <Input
+                    required
+                    type={showPassword ? "text" : "password"}
+                    minLength={6}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pr-10"
+                    placeholder={t("employees.passwordHint")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-500 hover:text-gray-800"
+                  >
+                    {showPassword ? t("common.hide") : t("common.show")}
+                  </button>
+                </div>
               </div>
               {inviteError && <p className="text-sm text-red-600">{inviteError}</p>}
               <div className="flex gap-2">
