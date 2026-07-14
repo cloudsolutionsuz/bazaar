@@ -7,7 +7,7 @@ export const registerSchema = z.object({
   password: z.string().min(8).max(72),
   shopName: z.string().min(2).max(120),
   subdomain: z.string().min(3).max(63),
-  planCode: z.enum(["start", "business", "pro"]),
+  planCode: z.string().min(1),
 });
 
 export const loginSchema = z.object({
