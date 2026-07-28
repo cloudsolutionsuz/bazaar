@@ -250,9 +250,9 @@ export function CatalogPage() {
                     {p.promotionName}
                   </span>
                 )}
-                <div className="flex aspect-square items-center justify-center bg-sand-100">
+                <div className="flex aspect-video items-center justify-center overflow-hidden bg-sand-100">
                   {cover ? (
-                    <img src={cover} alt={p.name} className="h-full w-full object-cover" />
+                    <img src={cover} alt={p.name} className="h-full w-full object-contain" />
                   ) : (
                     <span className="font-display text-clay-300">Bazaar</span>
                   )}

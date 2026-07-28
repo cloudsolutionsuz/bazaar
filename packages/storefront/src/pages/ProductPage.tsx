@@ -103,6 +103,7 @@ export function ProductPage() {
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const [added, setAdded] = useState(false);
 
   const [reviewPhone, setReviewPhone] = useState("");
@@ -185,9 +186,46 @@ export function ProductPage() {
 
       <div className="grid gap-6 md:grid-cols-2">
         <div>
-          <div className="flex aspect-square items-center justify-center overflow-hidden rounded-xl bg-sand-100">
+          {/* Lightbox overlay */}
+          {lightboxOpen && product.images[activeImage] && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+              onClick={() => setLightboxOpen(false)}
+            >
+              <button
+                className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+                onClick={() => setLightboxOpen(false)}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+              <img
+                src={product.images[activeImage].url}
+                alt={product.name}
+                className="max-h-[90vh] max-w-[95vw] object-contain"
+                onClick={(e) => e.stopPropagation()}
+              />
+              {product.images.length > 1 && (
+                <div className="absolute bottom-4 flex gap-2">
+                  {product.images.map((img, i) => (
+                    <button
+                      key={img.id}
+                      onClick={(e) => { e.stopPropagation(); setActiveImage(i); }}
+                      className={`h-12 w-12 overflow-hidden rounded border-2 ${i === activeImage ? "border-white" : "border-white/30"}`}
+                    >
+                      <img src={img.url} alt="" className="h-full w-full object-contain" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div
+            className="flex aspect-video cursor-zoom-in items-center justify-center overflow-hidden rounded-xl bg-sand-100"
+            onClick={() => product.images[activeImage] && setLightboxOpen(true)}
+          >
             {product.images[activeImage] ? (
-              <img src={product.images[activeImage].url} alt={product.name} className="h-full w-full object-cover" />
+              <img src={product.images[activeImage].url} alt={product.name} className="h-full w-full object-contain" />
             ) : (
               <span className="font-display text-clay-300">Bazaar</span>
             )}
@@ -198,9 +236,9 @@ export function ProductPage() {
                 <button
                   key={img.id}
                   onClick={() => setActiveImage(i)}
-                  className={`h-16 w-16 overflow-hidden rounded border-2 ${i === activeImage ? "border-clay-600" : "border-transparent"}`}
+                  className={`h-16 w-20 overflow-hidden rounded border-2 ${i === activeImage ? "border-clay-600" : "border-transparent"}`}
                 >
-                  <img src={img.url} alt="" className="h-full w-full object-cover" />
+                  <img src={img.url} alt="" className="h-full w-full object-contain" />
                 </button>
               ))}
             </div>
