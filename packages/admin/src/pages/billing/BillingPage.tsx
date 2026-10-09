@@ -121,7 +121,7 @@ export function BillingPage() {
             <div className="flex flex-col gap-2">
               <Select value={selectedPlanId ?? tenant.planId} onChange={(e) => setSelectedPlanId(e.target.value)} className="w-full">
                 {plans.map((plan) => (
-                  <option key={plan.id} value={plan.id}>{plan.name} — {plan.priceSum.toLocaleString()} сум/мес</option>
+                  <option key={plan.id} value={plan.id}>{plan.name} — {plan.priceSum.toLocaleString()} {t("billing.sumPerMonth")}</option>
                 ))}
               </Select>
               <Button

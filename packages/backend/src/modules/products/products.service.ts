@@ -118,6 +118,8 @@ export async function createProduct(tenantId: string, userId: string, input: Cre
         descriptionUz: input.descriptionUz,
         price: input.price,
         discountPercent: input.discountPercent,
+        piecesPerBlock: input.piecesPerBlock,
+        piecesPerBox: input.piecesPerBox,
         brand: input.brand,
         color: input.color,
         code: input.code,
@@ -198,6 +200,8 @@ export async function updateProduct(tenantId: string, productId: string, input: 
       ...(input.descriptionUz !== undefined ? { descriptionUz: input.descriptionUz } : {}),
       ...(input.price !== undefined ? { price: input.price } : {}),
       ...(input.discountPercent !== undefined ? { discountPercent: input.discountPercent } : {}),
+      ...(input.piecesPerBlock !== undefined ? { piecesPerBlock: input.piecesPerBlock } : {}),
+      ...(input.piecesPerBox !== undefined ? { piecesPerBox: input.piecesPerBox } : {}),
       ...(input.brand !== undefined ? { brand: input.brand } : {}),
       ...(input.color !== undefined ? { color: input.color } : {}),
       ...(input.code !== undefined ? { code: input.code } : {}),
@@ -390,6 +394,8 @@ const EXPORT_HEADERS = [
   "Stock",
   "LowStockThreshold",
   "Status",
+  "PiecesPerBlock",
+  "PiecesPerBox",
 ];
 
 export async function exportProductsToExcel(tenantId: string): Promise<Buffer> {
@@ -423,6 +429,8 @@ export async function exportProductsToExcel(tenantId: string): Promise<Buffer> {
         variant.stockQuantity,
         variant.lowStockThreshold ?? "",
         product.status,
+        product.piecesPerBlock ?? "",
+        product.piecesPerBox ?? "",
       ]);
     }
   }
@@ -458,6 +466,8 @@ export async function exportProductImportTemplate(): Promise<Buffer> {
     20,
     5,
     "ACTIVE",
+    10,
+    100,
   ]);
 
   const notes = workbook.addWorksheet("Notes");
@@ -479,6 +489,8 @@ export async function exportProductImportTemplate(): Promise<Buffer> {
   notes.addRow(["Stock", "no", "Opening stock quantity, defaults to 0"]);
   notes.addRow(["LowStockThreshold", "no", "Triggers a low-stock notification once stock falls at or below this"]);
   notes.addRow(["Status", "no", "ACTIVE, HIDDEN, or OUT_OF_STOCK - defaults to ACTIVE"]);
+  notes.addRow(["PiecesPerBlock", "no", "How many pieces are in one block (2 or more) - lets customers buy by the block"]);
+  notes.addRow(["PiecesPerBox", "no", "How many pieces are in one box (2 or more) - lets customers buy by the box"]);
 
   const arrayBuffer = await workbook.xlsx.writeBuffer();
   return Buffer.from(arrayBuffer);
@@ -519,6 +531,12 @@ export async function importProductsFromExcel(tenantId: string, userId: string, 
   const discountIdx = colIndex("discountpercent");
   const costPriceIdx = colIndex("costprice");
   const supplierIdx = colIndex("supplier");
+  const piecesPerBlockIdx = colIndex("piecesperblock");
+  const piecesPerBoxIdx = colIndex("piecesperbox");
+  const packSize = (idx: number, values: unknown[]) => {
+    const raw = idx >= 0 ? Number(values[idx]) : NaN;
+    return Number.isInteger(raw) && raw >= 2 ? raw : undefined;
+  };
 
   if (nameIdx === -1 || skuIdx === -1 || priceIdx === -1) {
     throw new AppError(400, "INVALID_FILE", "File must have Name, SKU and Price columns");
@@ -580,6 +598,8 @@ export async function importProductsFromExcel(tenantId: string, userId: string, 
       description,
       price,
       discountPercent,
+      piecesPerBlock: packSize(piecesPerBlockIdx, values),
+      piecesPerBox: packSize(piecesPerBoxIdx, values),
       brand,
       color,
       code,

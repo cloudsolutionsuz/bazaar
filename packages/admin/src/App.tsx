@@ -39,6 +39,8 @@ import { PromoCodesPage } from "./pages/promo-codes/PromoCodesPage";
 import { ReviewsPage } from "./pages/reviews/ReviewsPage";
 import { DeliveryZonesPage } from "./pages/delivery/DeliveryZonesPage";
 import { SupportPage } from "./pages/platform/SupportPage";
+import { AgentsPage } from "./pages/agents/AgentsPage";
+import { AgentSalesPage } from "./pages/agents/AgentSalesPage";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +51,7 @@ const queryClient = new QueryClient();
 function RoleHome() {
   const { user, tenant } = useAuth();
   if (user?.role === "SUPER_ADMIN") return <Navigate to="/platform/tenants" replace />;
+  if (user?.role === "AGENT") return <Navigate to="/agent-sales" replace />;
   if (tenant?.status === "BLOCKED") return <Navigate to="/billing" replace />;
   if (user?.role === "CASHIER") return <Navigate to="/orders" replace />;
   return <Navigate to="/dashboard" replace />;
@@ -102,6 +105,8 @@ export function App() {
                 <Route path="/platform/video-banners" element={<VideoBannersPage />} />
                 <Route path="/platform/support" element={<SupportPage />} />
                 <Route path="/magic-boxes" element={<MagicBoxPage />} />
+                <Route path="/agents" element={<AgentsPage />} />
+                <Route path="/agent-sales" element={<AgentSalesPage />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

@@ -211,7 +211,8 @@ export function SettingsPage() {
 
             {/* Orders */}
             <div className="rounded-xl border border-gray-200 bg-white p-6">
-              <h2 className="mb-4 text-sm font-semibold text-gray-700">{t("settings.minOrderAmount")}</h2>
+              <h2 className="mb-1 text-sm font-semibold text-gray-700">{t("settings.minOrderAmount")}</h2>
+              <p className="mb-4 text-xs text-gray-500">{t("settings.minOrderAmountDescription")}</p>
               <div className="flex items-center gap-2">
                 <NumberInput min={0} value={minOrderAmount} onChange={(e) => setMinOrderAmount(e.target.value)} className="w-40 text-left" />
                 <span className="text-sm text-gray-500">{t("settings.minOrderAmountHint")}</span>
@@ -220,11 +221,11 @@ export function SettingsPage() {
 
             {/* Delivery days */}
             <div className="rounded-xl border border-gray-200 bg-white p-6">
-              <h2 className="mb-1 text-sm font-semibold text-gray-700">Дата доставки</h2>
-              <p className="mb-4 text-xs text-gray-500">Отображается покупателю на странице товара. Считается от даты оформления заказа.</p>
+              <h2 className="mb-1 text-sm font-semibold text-gray-700">{t("settings.deliveryDays")}</h2>
+              <p className="mb-4 text-xs text-gray-500">{t("settings.deliveryDaysHint")}</p>
               <div className="flex flex-wrap items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600 whitespace-nowrap">От</label>
+                  <label className="text-sm text-gray-600 whitespace-nowrap">{t("settings.deliveryFrom")}</label>
                   <NumberInput
                     min={0}
                     value={deliveryMinDays}
@@ -232,10 +233,10 @@ export function SettingsPage() {
                     placeholder="—"
                     className="w-24 text-left"
                   />
-                  <label className="text-sm text-gray-600">дней</label>
+                  <label className="text-sm text-gray-600">{t("settings.deliveryDaysUnit")}</label>
                 </div>
                 <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600 whitespace-nowrap">До</label>
+                  <label className="text-sm text-gray-600 whitespace-nowrap">{t("settings.deliveryTo")}</label>
                   <NumberInput
                     min={0}
                     value={deliveryMaxDays}
@@ -243,12 +244,18 @@ export function SettingsPage() {
                     placeholder="—"
                     className="w-24 text-left"
                   />
-                  <label className="text-sm text-gray-600">дней</label>
+                  <label className="text-sm text-gray-600">{t("settings.deliveryDaysUnit")}</label>
                 </div>
               </div>
               {deliveryMinDays !== "" && (
                 <p className="mt-3 text-xs text-green-600">
-                  🚚 Покупатель увидит: «Доставим за {deliveryMinDays}{deliveryMaxDays && Number(deliveryMaxDays) > Number(deliveryMinDays) ? `–${deliveryMaxDays}` : ""} {Number(deliveryMinDays) === 1 ? "день" : Number(deliveryMinDays) < 5 ? "дня" : "дней"}»
+                  🚚{" "}
+                  {t("settings.deliveryPreview", {
+                    days:
+                      deliveryMaxDays && Number(deliveryMaxDays) > Number(deliveryMinDays)
+                        ? `${deliveryMinDays}–${deliveryMaxDays}`
+                        : deliveryMinDays,
+                  })}
                 </p>
               )}
             </div>

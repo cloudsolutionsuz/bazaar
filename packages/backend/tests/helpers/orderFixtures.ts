@@ -6,3 +6,6 @@ export const DEFAULT_ADDRESS = {
   addressDistrict: "chilanzar",
   addressMahalla: "Test Mahalla",
 };
+
+// Storefront checkout requires a second contact number (createStorefrontOrderSchema).
+export const SECOND_PHONE = { additionalPhones: ["+998900000100"] };

@@ -1,4 +1,5 @@
 export type ProductStatus = "ACTIVE" | "HIDDEN" | "OUT_OF_STOCK";
+export type SaleUnit = "PIECE" | "BLOCK" | "BOX";
 
 export interface Category {
   id: string;
@@ -42,6 +43,8 @@ export interface Product {
   descriptionUz: string | null;
   price: number;
   discountPercent: number | null;
+  piecesPerBlock: number | null;
+  piecesPerBox: number | null;
   brand: string | null;
   color: string | null;
   currency: string;
@@ -66,6 +69,8 @@ export interface OrderItemResult {
   quantity: number;
   unitPrice: number;
   totalPrice: number;
+  unit: SaleUnit;
+  unitSize: number;
   variant?: { product: { name: string } };
 }
 

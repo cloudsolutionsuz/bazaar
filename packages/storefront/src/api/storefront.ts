@@ -1,6 +1,6 @@
 import { apiRequest } from "./client";
 import { getSessionId } from "../utils/session";
-import type { Banner, Category, ChatMessage, OrderResult, Paginated, Product, ProductReviewsResult, TenantMeta } from "../types/api";
+import type { Banner, Category, ChatMessage, OrderResult, Paginated, Product, ProductReviewsResult, SaleUnit, TenantMeta } from "../types/api";
 
 export function listCategories(): Promise<{ categories: Category[] }> {
   return apiRequest("/api/storefront/categories");
@@ -42,8 +42,12 @@ export interface CheckoutInput {
   paymentMethod?: string;
   promoCode?: string;
   loyaltyPointsToRedeem?: number;
-  items: { variantId: string; quantity: number }[];
+  // quantity counts whole units of `unit` (2 + BOX = two boxes).
+  // unitSize is the pack size the buyer saw; the order is refused if the shop has changed it since.
+  items: { variantId: string; quantity: number; unit: SaleUnit; unitSize: number }[];
   magicBoxIds?: string[];
+  // Referral code of the agent whose link brought the buyer in, if any.
+  agentRef?: string;
 }
 
 export interface LoyaltyBalance {

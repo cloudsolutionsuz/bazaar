@@ -7,7 +7,8 @@ const LANGUAGE_KEY = "bazaar_landing_lang";
 
 void i18n.use(initReactI18next).init({
   resources: { ru: { translation: ru }, uz: { translation: uz } },
-  lng: localStorage.getItem(LANGUAGE_KEY) ?? "ru",
+  // Uzbek first: Russian only once the visitor picks it themselves.
+  lng: localStorage.getItem(LANGUAGE_KEY) ?? "uz",
   fallbackLng: "ru",
   interpolation: { escapeValue: false },
 });

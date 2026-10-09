@@ -1,18 +1,20 @@
 import { useState, useRef, useEffect, type FormEvent, type KeyboardEvent } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import * as supportApi from "../../api/support";
 import type { SupportChatThread, SupportMessage } from "../../types/api";
 
-function formatTime(iso: string) {
+function formatTime(iso: string, yesterdayLabel: string) {
   const d = new Date(iso);
   const now = new Date();
   const diffDays = Math.floor((now.getTime() - d.getTime()) / 86_400_000);
-  if (diffDays === 0) return d.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
-  if (diffDays === 1) return "вчера";
-  return d.toLocaleDateString("ru-RU", { day: "numeric", month: "short" });
+  if (diffDays === 0) return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  if (diffDays === 1) return yesterdayLabel;
+  return d.toLocaleDateString([], { day: "numeric", month: "short" });
 }
 
 export function SupportPage() {
+  const { t } = useTranslation();
   const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
   const [text, setText] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -75,18 +77,18 @@ export function SupportPage() {
 
   return (
     <div>
-      <h1 className="mb-4 text-xl font-semibold text-gray-900 dark:text-gray-100">Чат с разработчиком</h1>
+      <h1 className="mb-4 text-xl font-semibold text-gray-900 dark:text-gray-100">{t("support.devChat")}</h1>
 
       <div className="flex h-[calc(100vh-180px)] min-h-96 overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
         {/* Thread list */}
         <div className="flex w-64 shrink-0 flex-col border-r border-gray-200 dark:border-gray-700">
           <div className="border-b border-gray-100 px-4 py-3 dark:border-gray-700">
-            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Магазины</p>
-            {chatsQuery.isLoading && <p className="text-xs text-gray-400">Загрузка…</p>}
+            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("nav.tenants")}</p>
+            {chatsQuery.isLoading && <p className="text-xs text-gray-400">{t("common.loading")}</p>}
           </div>
           <div className="flex-1 overflow-y-auto">
             {threads.length === 0 && !chatsQuery.isLoading && (
-              <p className="px-4 py-6 text-center text-xs text-gray-400">Нет обращений</p>
+              <p className="px-4 py-6 text-center text-xs text-gray-400">{t("support.noThreads")}</p>
             )}
             {threads.map((thread) => (
               <button
@@ -102,11 +104,11 @@ export function SupportPage() {
                   <span className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
                     {thread.tenantName}
                   </span>
-                  <span className="shrink-0 text-[10px] text-gray-400">{formatTime(thread.lastAt)}</span>
+                  <span className="shrink-0 text-[10px] text-gray-400">{formatTime(thread.lastAt, t("support.yesterday"))}</span>
                 </div>
                 <div className="mt-0.5 flex items-center gap-2">
                   <p className="flex-1 truncate text-xs text-gray-500 dark:text-gray-400">
-                    {thread.lastSender === "SUPER_ADMIN" ? "Вы: " : ""}{thread.lastText}
+                    {thread.lastSender === "SUPER_ADMIN" ? `${t("support.you")}: ` : ""}{thread.lastText}
                   </p>
                   {thread.unreadCount > 0 && (
                     <span className="shrink-0 rounded-full bg-indigo-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
@@ -128,24 +130,24 @@ export function SupportPage() {
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
               </div>
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Выберите магазин</p>
-              <p className="mt-1 text-xs text-gray-400">Нажмите на магазин слева для просмотра чата</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("support.chooseShop")}</p>
+              <p className="mt-1 text-xs text-gray-400">{t("support.chooseShopHint")}</p>
             </div>
           ) : (
             <>
               {/* Chat header */}
               <div className="shrink-0 border-b border-gray-100 px-4 py-3 dark:border-gray-700">
                 <p className="font-semibold text-gray-900 dark:text-gray-100">{selectedThread?.tenantName ?? "…"}</p>
-                <p className="text-xs text-gray-400">Магазин — чат с поддержкой</p>
+                <p className="text-xs text-gray-400">{t("support.shopChat")}</p>
               </div>
 
               {/* Messages */}
               <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
                 {messagesQuery.isLoading && (
-                  <p className="text-center text-xs text-gray-400 py-4">Загрузка…</p>
+                  <p className="text-center text-xs text-gray-400 py-4">{t("common.loading")}</p>
                 )}
                 {!messagesQuery.isLoading && messages.length === 0 && (
-                  <p className="text-center text-xs text-gray-400 py-8">Нет сообщений</p>
+                  <p className="text-center text-xs text-gray-400 py-8">{t("support.noMessages")}</p>
                 )}
                 {messages.map((msg) => {
                   const isMe = msg.sender === "SUPER_ADMIN";
@@ -186,7 +188,7 @@ export function SupportPage() {
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Ответить магазину…"
+                    placeholder={t("support.replyPlaceholder")}
                     rows={1}
                     maxLength={5000}
                     className="flex-1 resize-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
@@ -202,10 +204,10 @@ export function SupportPage() {
                     disabled={!text.trim() || replyMutation.isPending}
                     className="shrink-0 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-40"
                   >
-                    Отправить
+                    {t("support.send")}
                   </button>
                 </div>
-                <p className="mt-1 text-[10px] text-gray-400">Enter — отправить, Shift+Enter — новая строка</p>
+                <p className="mt-1 text-[10px] text-gray-400">{t("support.enterHint")}</p>
               </form>
             </>
           )}

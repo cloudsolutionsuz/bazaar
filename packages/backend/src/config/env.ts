@@ -21,6 +21,10 @@ export const env = {
   trialDays: Number(process.env.TRIAL_DAYS ?? 10),
   landingUrl: process.env.LANDING_URL ?? "http://localhost:5175",
   adminUrl: process.env.ADMIN_URL ?? "http://localhost:5173",
+  // Optional: where a shop's storefront lives, with "{subdomain}" as the
+  // placeholder (used to build agent referral links). Defaults to the
+  // subdomain-per-shop layout on BASE_DOMAIN.
+  storefrontUrlTemplate: process.env.STOREFRONT_URL_TEMPLATE ?? null,
 
   superadminEmail: process.env.SUPERADMIN_EMAIL ?? "superadmin@bazaar.uz",
   superadminPassword: process.env.SUPERADMIN_PASSWORD ?? "change-me-super-secret",

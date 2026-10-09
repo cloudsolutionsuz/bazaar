@@ -6,6 +6,7 @@ import { useCart } from "../cart/CartContext";
 import { CartDrawer } from "./CartDrawer";
 import { changeLanguage } from "../i18n/i18n";
 import { getMeta, trackPageView } from "../api/storefront";
+import { captureAgentRef } from "../utils/agentRef";
 
 export function Layout() {
   const { t, i18n } = useTranslation();
@@ -19,6 +20,10 @@ export function Layout() {
   useEffect(() => {
     trackPageView(location.pathname);
   }, [location.pathname]);
+
+  useEffect(() => {
+    captureAgentRef(location.search);
+  }, [location.search]);
 
   return (
     <div className="min-h-screen bg-sand-50">
@@ -46,8 +51,8 @@ export function Layout() {
               onChange={(e) => changeLanguage(e.target.value as "ru" | "uz")}
               className="rounded-md border border-clay-200 bg-white px-2 py-1 text-sm text-clay-700"
             >
-              <option value="ru">RU</option>
               <option value="uz">UZ</option>
+              <option value="ru">RU</option>
             </select>
             <button
               onClick={() => setCartOpen(true)}
@@ -59,6 +64,11 @@ export function Layout() {
             </button>
           </div>
         </div>
+        {meta && meta.minOrderAmount > 0 && (
+          <div className="border-t border-amber-200 bg-amber-50 px-4 py-1.5 text-center text-sm text-amber-800">
+            {t("minOrder.banner", { amount: meta.minOrderAmount.toLocaleString() })}
+          </div>
+        )}
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-6">

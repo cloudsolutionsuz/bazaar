@@ -28,7 +28,7 @@ describeWithDb("cash registers (integration)", () => {
     const res = await request(app).get("/api/cash-registers").set(auth());
     expect(res.status).toBe(200);
     expect(res.body.items).toHaveLength(1);
-    expect(res.body.items[0]).toMatchObject({ name: "Основная касса", isDefault: true, isActive: true });
+    expect(res.body.items[0]).toMatchObject({ name: "Asosiy kassa", isDefault: true, isActive: true });
   });
 
   it("creates a second register that is not default", async () => {

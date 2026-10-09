@@ -6,7 +6,9 @@ import { toPublicUser } from "../auth/auth.service";
 import type { InviteEmployeeInput, UpdateEmployeeInput } from "./employees.schema";
 
 export async function listEmployees(tenantId: string) {
-  const users = await prisma.user.findMany({ where: { tenantId }, orderBy: { createdAt: "asc" } });
+  // Agents also have a User row (for their login) but are managed on their
+  // own page, never as employees.
+  const users = await prisma.user.findMany({ where: { tenantId, role: { not: "AGENT" } }, orderBy: { createdAt: "asc" } });
   return users.map(toPublicUser);
 }
 
@@ -35,7 +37,7 @@ export async function inviteEmployee(tenantId: string, input: InviteEmployeeInpu
 }
 
 async function getModifiableEmployee(tenantId: string, employeeId: string) {
-  const employee = await prisma.user.findFirst({ where: { id: employeeId, tenantId } });
+  const employee = await prisma.user.findFirst({ where: { id: employeeId, tenantId, role: { not: "AGENT" } } });
   if (!employee) {
     throw new AppError(404, "NOT_FOUND", "Employee not found");
   }

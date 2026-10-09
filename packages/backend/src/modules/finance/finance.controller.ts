@@ -1,6 +1,10 @@
 import type { Request, Response } from "express";
+import { AppError } from "../../middleware/errorHandler";
 import * as financeService from "./finance.service";
+import * as paymentsImportService from "./paymentsImport.service";
 import type {
+  CommitPaymentsImportInput,
+  ValidatePaymentsImportInput,
   AnalyticsQuery,
   BalanceQuery,
   ConfirmTransactionInput,
@@ -83,6 +87,34 @@ export async function confirmTransaction(req: Request, res: Response): Promise<v
 export async function getDailySummary(req: Request, res: Response): Promise<void> {
   const result = await financeService.getDailySummary(req.authUser!.tenantId!, req.query as unknown as DailySummaryQuery);
   res.json(result);
+}
+
+export async function paymentsImportTemplate(_req: Request, res: Response): Promise<void> {
+  const buffer = await paymentsImportService.buildPaymentsTemplate();
+  res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+  res.setHeader("Content-Disposition", "attachment; filename=payments-template.xlsx");
+  res.send(buffer);
+}
+
+// Upload = parse + validate in one go, so the admin immediately sees which
+// rows matched and which need fixing.
+export async function parsePaymentsImport(req: Request, res: Response): Promise<void> {
+  if (!req.file) {
+    throw new AppError(400, "NO_FILE", "No file was uploaded");
+  }
+  const rows = await paymentsImportService.parsePaymentsFile(req.file.buffer);
+  res.json(await paymentsImportService.validatePayments(req.authUser!.tenantId!, rows));
+}
+
+export async function validatePaymentsImport(req: Request, res: Response): Promise<void> {
+  const { rows } = req.body as ValidatePaymentsImportInput;
+  res.json(await paymentsImportService.validatePayments(req.authUser!.tenantId!, rows));
+}
+
+export async function commitPaymentsImport(req: Request, res: Response): Promise<void> {
+  const { rows, cashRegisterId } = req.body as CommitPaymentsImportInput;
+  const result = await paymentsImportService.commitPayments(req.authUser!.tenantId!, req.authUser!.id, rows, cashRegisterId);
+  res.status(201).json(result);
 }
 
 export async function getProductSalesReport(req: Request, res: Response): Promise<void> {

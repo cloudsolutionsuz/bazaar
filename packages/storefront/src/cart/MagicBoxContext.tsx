@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useCart } from "./CartContext";
+import { linePieces, useCart } from "./CartContext";
 import * as storefrontApi from "../api/storefront";
 
 export interface MagicBoxRequiredItem {
@@ -62,7 +62,8 @@ export function MagicBoxProvider({ children }: { children: ReactNode }) {
   const progress = useMemo<MagicBoxProgress[]>(() => {
     const quantityByVariant = new Map<string, number>();
     for (const item of cartItems) {
-      quantityByVariant.set(item.variantId, (quantityByVariant.get(item.variantId) ?? 0) + item.quantity);
+      // Requirements are counted in pieces, however the buyer packed them.
+      quantityByVariant.set(item.variantId, (quantityByVariant.get(item.variantId) ?? 0) + linePieces(item));
     }
 
     return boxes.map((box) => {

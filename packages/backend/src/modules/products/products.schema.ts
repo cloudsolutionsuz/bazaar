@@ -10,6 +10,10 @@ export const variantInputSchema = z.object({
   supplierId: z.string().uuid().optional(),
 });
 
+// How many pieces one block / one box holds. A pack of 1 would just be a
+// piece, so the minimum is 2.
+const packSizeSchema = z.number().int().min(2).max(100_000);
+
 export const createProductSchema = z.object({
   name: z.string().min(1).max(200),
   description: z.string().max(5000).optional(),
@@ -17,6 +21,8 @@ export const createProductSchema = z.object({
   descriptionUz: z.string().max(5000).optional(),
   price: z.number().int().positive(),
   discountPercent: z.number().int().min(1).max(99).optional(),
+  piecesPerBlock: packSizeSchema.optional(),
+  piecesPerBox: packSizeSchema.optional(),
   brand: z.string().max(120).optional(),
   color: z.string().max(120).optional(),
   code: z.string().max(120).optional(),
@@ -33,6 +39,8 @@ export const updateProductSchema = z.object({
   descriptionUz: z.string().max(5000).nullable().optional(),
   price: z.number().int().positive().optional(),
   discountPercent: z.number().int().min(1).max(99).nullable().optional(),
+  piecesPerBlock: packSizeSchema.nullable().optional(),
+  piecesPerBox: packSizeSchema.nullable().optional(),
   brand: z.string().max(120).nullable().optional(),
   color: z.string().max(120).nullable().optional(),
   code: z.string().max(120).nullable().optional(),

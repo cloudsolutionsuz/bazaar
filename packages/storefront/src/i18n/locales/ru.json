@@ -41,7 +41,20 @@
     "reviewSubmit": "Отправить отзыв",
     "reviewThanks": "Спасибо! Ваш отзыв отправлен на проверку.",
     "reviewAlreadySubmitted": "Вы уже оставляли отзыв на этот товар.",
-    "reviewError": "Не удалось отправить отзыв. Попробуйте позже."
+    "reviewError": "Не удалось отправить отзыв. Попробуйте позже.",
+    "buyBy": "Единица покупки",
+    "pricePerPiece": "Цена за 1 штуку",
+    "packPrice": "1 {{unit}} = {{count}} шт. × {{price}} =",
+    "lineTotal": "Итого",
+    "addedPartial": "На складе не хватает — в корзину добавлено только {{count}}",
+    "cannotAddMore": "Этого товара на складе больше нет",
+    "bxgyDeal": "Купи {{buyQty}} — получи {{getQty}} {{name}} в подарок!",
+    "deliveryRange": "Доставим за {{min}}–{{max}} дней",
+    "deliveryIn_one": "Доставим за {{count}} день",
+    "deliveryIn_few": "Доставим за {{count}} дня",
+    "deliveryIn_many": "Доставим за {{count}} дней",
+    "deliveryIn_other": "Доставим за {{count}} дня",
+    "deliveryUntil": "до {{date}}"
   },
   "cart": {
     "title": "Корзина",
@@ -50,7 +63,8 @@
     "discount": "Скидка",
     "total": "Итого",
     "checkout": "Оформить заказ",
-    "remove": "Убрать"
+    "remove": "Убрать",
+    "piecesAtPrice": "{{count}} шт. × {{price}}"
   },
   "footer": {
     "inn": "ИНН"
@@ -59,8 +73,8 @@
     "title": "Оформление заказа",
     "name": "Ваше имя",
     "phone": "Телефон",
-    "additionalPhone": "Дополнительный номер",
-    "addPhone": "Добавить номер телефона",
+    "additionalPhone": "Дополнительный номер (необязательно)",
+    "addPhone": "Добавить ещё номер телефона",
     "region": "Регион",
     "regionPlaceholder": "Выберите регион",
     "district": "Город/Район",
@@ -92,7 +106,12 @@
     "shippingCost": "Доставка",
     "shippingFree": "Бесплатно",
     "minOrderWarning": "Минимальная сумма заказа: {{amount}} сум",
-    "errorMinOrderAmount": "Минимальная сумма заказа: {{amount}} сум"
+    "errorMinOrderAmount": "Минимальная сумма заказа: {{amount}} сум",
+    "secondPhone": "Второй номер телефона",
+    "errorPhone": "Введите оба номера телефона полностью: по 9 цифр в каждом",
+    "errorInvalidUnit": "У одного из товаров изменился размер коробки/блока, или он больше так не продаётся — удалите его из корзины и добавьте заново",
+    "errorValidation": "Данные введены неверно — проверьте поля и попробуйте снова",
+    "errorGeneric": "Не удалось отправить заказ. Попробуйте ещё раз"
   },
   "confirmation": {
     "title": "Заказ принят!",
@@ -113,7 +132,8 @@
     "statusShipped": "Отправлен",
     "statusDelivered": "Доставлен",
     "statusCancelled": "Отменён",
-    "statusRefunded": "Возврат"
+    "statusRefunded": "Возврат",
+    "statusArchived": "В архиве"
   },
   "chat": {
     "navLink": "Чат с магазином",
@@ -124,5 +144,29 @@
     "empty": "Сообщений пока нет",
     "messagePlaceholder": "Ваше сообщение...",
     "send": "Отправить"
+  },
+  "phone": {
+    "hint": "Номер телефона должен состоять из 9 цифр (например 901234567)"
+  },
+  "units": {
+    "piece": "Штука",
+    "block": "Блок",
+    "box": "Коробка",
+    "withSize": "{{unit}} ({{count}} шт.)",
+    "pieces": "{{count}} шт."
+  },
+  "minOrder": {
+    "banner": "Минимальная сумма заказа: {{amount}} сум",
+    "remaining": "Минимальная сумма заказа {{amount}} сум. Добавьте товаров ещё на {{remaining}} сум, чтобы оформить заказ."
+  },
+  "magicBox": {
+    "free": "Magic Box — бесплатно!",
+    "zeroPrice": "0 сум",
+    "unlocked": "Получен!",
+    "collect": "Собери набор",
+    "checkoutNote_one": "{{count}} Magic Box будет добавлен бесплатно",
+    "checkoutNote_few": "{{count}} Magic Box будут добавлены бесплатно",
+    "checkoutNote_many": "{{count}} Magic Box будут добавлены бесплатно",
+    "checkoutNote_other": "{{count}} Magic Box будут добавлены бесплатно"
   }
 }

@@ -41,7 +41,18 @@
     "reviewSubmit": "Sharh yuborish",
     "reviewThanks": "Rahmat! Sharhingiz tekshiruvga yuborildi.",
     "reviewAlreadySubmitted": "Siz bu mahsulotga allaqachon sharh qoldirdingiz.",
-    "reviewError": "Sharh yuborib bo'lmadi. Keyinroq urinib ko'ring."
+    "reviewError": "Sharh yuborib bo'lmadi. Keyinroq urinib ko'ring.",
+    "buyBy": "Sotib olish birligi",
+    "pricePerPiece": "Narx 1 dona uchun",
+    "packPrice": "1 {{unit}} = {{count}} dona × {{price}} =",
+    "lineTotal": "Jami",
+    "addedPartial": "Omborda yetarli emas — savatga faqat {{count}} ta qo'shildi",
+    "cannotAddMore": "Bu tovardan omborda boshqa qolmadi",
+    "bxgyDeal": "{{buyQty}} ta oling — {{getQty}} ta {{name}} sovg'a!",
+    "deliveryRange": "{{min}}–{{max}} kun ichida yetkazamiz",
+    "deliveryIn_one": "{{count}} kun ichida yetkazamiz",
+    "deliveryIn_other": "{{count}} kun ichida yetkazamiz",
+    "deliveryUntil": "{{date}} gacha"
   },
   "cart": {
     "title": "Savat",
@@ -50,7 +61,8 @@
     "discount": "Chegirma",
     "total": "Jami",
     "checkout": "Buyurtma berish",
-    "remove": "O'chirish"
+    "remove": "O'chirish",
+    "piecesAtPrice": "{{count}} dona × {{price}}"
   },
   "footer": {
     "inn": "INN"
@@ -59,8 +71,8 @@
     "title": "Buyurtmani rasmiylashtirish",
     "name": "Ismingiz",
     "phone": "Telefon",
-    "additionalPhone": "Qo'shimcha raqam",
-    "addPhone": "Telefon raqami qo'shish",
+    "additionalPhone": "Qo'shimcha raqam (ixtiyoriy)",
+    "addPhone": "Yana telefon raqami qo'shish",
     "region": "Viloyat",
     "regionPlaceholder": "Viloyatni tanlang",
     "district": "Shahar/Tuman",
@@ -92,7 +104,12 @@
     "shippingCost": "Yetkazib berish",
     "shippingFree": "Bepul",
     "minOrderWarning": "Minimal buyurtma summasi: {{amount}} so'm",
-    "errorMinOrderAmount": "Minimal buyurtma summasi: {{amount}} so'm"
+    "errorMinOrderAmount": "Minimal buyurtma summasi: {{amount}} so'm",
+    "secondPhone": "Ikkinchi telefon raqam",
+    "errorPhone": "Ikkala telefon raqamni ham to'liq kiriting: har biri 9 ta raqam",
+    "errorInvalidUnit": "Tovarlardan birining korobka/blok o'lchami o'zgargan yoki u endi shunday sotilmaydi — uni savatdan o'chirib, qaytadan qo'shing",
+    "errorValidation": "Ma'lumotlar noto'g'ri kiritilgan — maydonlarni tekshirib, qayta urinib ko'ring",
+    "errorGeneric": "Buyurtmani yuborib bo'lmadi. Qayta urinib ko'ring"
   },
   "confirmation": {
     "title": "Buyurtma qabul qilindi!",
@@ -113,7 +130,8 @@
     "statusShipped": "Yuborildi",
     "statusDelivered": "Yetkazildi",
     "statusCancelled": "Bekor qilindi",
-    "statusRefunded": "Qaytarildi"
+    "statusRefunded": "Qaytarildi",
+    "statusArchived": "Arxivda"
   },
   "chat": {
     "navLink": "Do'kon bilan chat",
@@ -124,5 +142,27 @@
     "empty": "Hozircha xabar yo'q",
     "messagePlaceholder": "Xabaringiz...",
     "send": "Yuborish"
+  },
+  "phone": {
+    "hint": "Telefon raqami 9 ta raqamdan iborat bo'lishi kerak (masalan 901234567)"
+  },
+  "units": {
+    "piece": "Dona",
+    "block": "Blok",
+    "box": "Korobka",
+    "withSize": "{{unit}} ({{count}} dona)",
+    "pieces": "{{count}} dona"
+  },
+  "minOrder": {
+    "banner": "Minimal buyurtma summasi: {{amount}} so'm",
+    "remaining": "Minimal buyurtma summasi {{amount}} so'm. Buyurtma berish uchun yana {{remaining}} so'mlik tovar qo'shing."
+  },
+  "magicBox": {
+    "free": "Magic Box — bepul!",
+    "zeroPrice": "0 so'm",
+    "unlocked": "Olindi!",
+    "collect": "To'plamni yig'ing",
+    "checkoutNote_one": "{{count}} ta Magic Box bepul qo'shiladi",
+    "checkoutNote_other": "{{count}} ta Magic Box bepul qo'shiladi"
   }
 }

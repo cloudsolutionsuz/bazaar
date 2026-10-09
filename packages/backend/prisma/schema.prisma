@@ -19,6 +19,7 @@ enum UserRole {
   OWNER
   MANAGER
   CASHIER
+  AGENT
 }
 
 enum VerificationTokenType {
@@ -74,6 +75,17 @@ enum TransactionType {
 enum TransactionStatus {
   PENDING
   CONFIRMED
+}
+
+enum SaleUnit {
+  PIECE
+  BLOCK
+  BOX
+}
+
+enum AgentBonusType {
+  PERCENT
+  FIXED
 }
 
 model Plan {
@@ -144,6 +156,8 @@ model Tenant {
   magicBoxes              MagicBox[]
   adminPushSubscriptions  AdminPushSubscription[]
   supportMessages         SupportMessage[]
+  agents                  Agent[]
+  agentPayouts            AgentPayout[]
 
   @@map("tenants")
 }
@@ -188,8 +202,12 @@ model Transaction {
   supplier        Supplier?         @relation(fields: [supplierId], references: [id])
   customerId      String?
   customer        Customer?         @relation(fields: [customerId], references: [id])
+  agentId         String?
+  agent           Agent?            @relation(fields: [agentId], references: [id])
   createdByUserId String?
   createdAt       DateTime          @default(now())
+
+  agentPayout AgentPayout?
 
   @@index([tenantId])
   @@index([tenantId, createdAt])
@@ -246,6 +264,7 @@ model User {
   verificationTokens     VerificationToken[]
   refreshTokens          RefreshToken[]
   adminPushSubscriptions AdminPushSubscription[]
+  agent                  Agent?
 
   @@index([tenantId])
   @@map("users")
@@ -304,6 +323,10 @@ model Product {
   descriptionUz   String?
   price           Int
   discountPercent Int?
+  // Packaging: how many pieces one block / one box holds. Stock and prices
+  // always stay per piece - these only let the storefront sell in multiples.
+  piecesPerBlock  Int?
+  piecesPerBox    Int?
   brand           String?
   color           String?
   code            String?
@@ -434,6 +457,15 @@ model Order {
   loyaltyPointsEarned    Int         @default(0)
   loyaltyPointsRedeemed  Int         @default(0)
   totalAmount            Int
+  // Set when the buyer arrived through an agent's referral link. agentBonus
+  // stays null until the order is ARCHIVED (that's when the bonus is earned);
+  // agentPayoutId is set once that bonus has been paid out from the Kassa.
+  agentId             String?
+  agent               Agent?       @relation(fields: [agentId], references: [id])
+  agentBonus          Int?
+  agentBonusAccruedAt DateTime?
+  agentPayoutId       String?
+  agentPayout         AgentPayout? @relation(fields: [agentPayoutId], references: [id])
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
 
@@ -445,6 +477,7 @@ model Order {
   @@index([tenantId])
   @@index([tenantId, status])
   @@index([tenantId, createdAt])
+  @@index([agentId])
   @@map("orders")
 }
 
@@ -641,9 +674,13 @@ model OrderItem {
   order      Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
   variantId  String
   variant    ProductVariant @relation(fields: [variantId], references: [id])
+  // quantity/unitPrice are always per piece; unit+unitSize only record how
+  // the buyer picked it ("2 boxes of 24" => quantity 48, unit BOX, unitSize 24).
   quantity   Int
   unitPrice  Int
   totalPrice Int
+  unit       SaleUnit       @default(PIECE)
+  unitSize   Int            @default(1)
 
   @@index([orderId])
   @@map("order_items")
@@ -720,6 +757,58 @@ model SupportMessage {
   @@index([tenantId])
   @@index([tenantId, createdAt])
   @@map("support_messages")
+}
+
+// A referral partner: gets their own login (User with role AGENT) and a
+// storefront link (?ref=refCode). Orders placed through that link are
+// attributed to the agent, who earns a bonus once the order is ARCHIVED.
+model Agent {
+  id         String         @id @default(uuid())
+  tenantId   String
+  tenant     Tenant         @relation(fields: [tenantId], references: [id])
+  userId     String         @unique
+  user       User           @relation(fields: [userId], references: [id])
+  fullName   String
+  phone      String
+  telegram   String?
+  instagram  String?
+  youtube    String?
+  tiktok     String?
+  refCode    String
+  bonusType  AgentBonusType @default(PERCENT)
+  bonusValue Int            @default(0)
+  isActive   Boolean        @default(true)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  orders       Order[]
+  payouts      AgentPayout[]
+  transactions Transaction[]
+
+  @@unique([tenantId, refCode])
+  @@index([tenantId])
+  @@map("agents")
+}
+
+// One Kassa payment to an agent, covering the bonuses of the orders linked
+// to it. Always paired with exactly one EXPENSE transaction.
+model AgentPayout {
+  id              String      @id @default(uuid())
+  tenantId        String
+  tenant          Tenant      @relation(fields: [tenantId], references: [id])
+  agentId         String
+  agent           Agent       @relation(fields: [agentId], references: [id])
+  amount          Int
+  transactionId   String      @unique
+  transaction     Transaction @relation(fields: [transactionId], references: [id])
+  createdByUserId String?
+  createdAt       DateTime    @default(now())
+
+  orders Order[]
+
+  @@index([tenantId])
+  @@index([agentId])
+  @@map("agent_payouts")
 }
 
 model MagicBoxItem {

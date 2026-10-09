@@ -1,6 +1,7 @@
 export type ProductStatus = "ACTIVE" | "HIDDEN" | "OUT_OF_STOCK";
 export type InventoryMovementType = "RECEIPT" | "SALE" | "RETURN" | "ADJUSTMENT" | "WRITE_OFF" | "STOCKTAKE" | "SUPPLIER_RETURN";
 export type OrderStatus = "NEW" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "REFUNDED" | "ARCHIVED";
+export type SaleUnit = "PIECE" | "BLOCK" | "BOX";
 
 export type TenantStatus = "TRIAL" | "ACTIVE" | "PAST_DUE" | "BLOCKED";
 
@@ -36,7 +37,7 @@ export interface User {
   id: string;
   tenantId: string | null;
   email: string;
-  role: "SUPER_ADMIN" | "OWNER" | "MANAGER" | "CASHIER";
+  role: "SUPER_ADMIN" | "OWNER" | "MANAGER" | "CASHIER" | "AGENT";
   name: string;
   phone: string | null;
   emailVerifiedAt: string | null;
@@ -82,6 +83,8 @@ export interface Product {
   descriptionUz: string | null;
   price: number;
   discountPercent: number | null;
+  piecesPerBlock: number | null;
+  piecesPerBox: number | null;
   brand: string | null;
   color: string | null;
   code: string | null;
@@ -162,9 +165,13 @@ export interface OrderItem {
   orderId: string;
   variantId: string;
   variant: ProductVariant & { product: Product };
+  // quantity and unitPrice are per piece; unit/unitSize record how it was
+  // bought ("2 boxes of 24" => quantity 48, unit BOX, unitSize 24).
   quantity: number;
   unitPrice: number;
   totalPrice: number;
+  unit: SaleUnit;
+  unitSize: number;
 }
 
 export interface OrderStatusHistoryEntry {

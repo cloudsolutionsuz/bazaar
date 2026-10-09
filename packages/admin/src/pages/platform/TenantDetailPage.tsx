@@ -52,6 +52,7 @@ const ROLE_KEYS: Record<string, string> = {
   OWNER: "employees.roleOwner",
   MANAGER: "employees.roleManager",
   CASHIER: "employees.roleCashier",
+  AGENT: "employees.roleAgent",
 };
 
 export function TenantDetailPage() {

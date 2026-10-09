@@ -14,6 +14,8 @@ export async function deleteTenantCompletely(tenantId: string): Promise<void> {
   await prisma.inventoryMovement.deleteMany({ where: { tenantId } });
   // Must come after inventoryMovement - InventoryMovement.supplierId references Supplier.
   await prisma.supplier.deleteMany({ where: { tenantId } });
+  // Must come before transaction - AgentPayout.transactionId references Transaction.
+  await prisma.agentPayout.deleteMany({ where: { tenantId } });
   await prisma.transaction.deleteMany({ where: { tenantId } });
   // Must come after transaction - Transaction.cashRegisterId references CashRegister.
   await prisma.cashRegister.deleteMany({ where: { tenantId } });
@@ -23,10 +25,13 @@ export async function deleteTenantCompletely(tenantId: string): Promise<void> {
   await prisma.chatMessage.deleteMany({ where: { tenantId } });
   await prisma.customer.deleteMany({ where: { tenantId } });
   await prisma.banner.deleteMany({ where: { tenantId } });
+  await prisma.deliveryZone.deleteMany({ where: { tenantId } });
   await prisma.productImage.deleteMany({ where: { productId: { in: productIds } } });
   await prisma.productVariant.deleteMany({ where: { tenantId } });
   await prisma.product.deleteMany({ where: { tenantId } });
   await prisma.category.deleteMany({ where: { tenantId } });
+  // Must come after orders/transactions (both reference Agent) and before users - Agent.userId references User.
+  await prisma.agent.deleteMany({ where: { tenantId } });
   await prisma.refreshToken.deleteMany({ where: { userId: { in: userIds } } });
   await prisma.verificationToken.deleteMany({ where: { userId: { in: userIds } } });
   await prisma.user.deleteMany({ where: { tenantId } });

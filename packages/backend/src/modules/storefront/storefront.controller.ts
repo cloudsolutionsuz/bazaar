@@ -4,7 +4,14 @@ import * as ordersService from "../orders/orders.service";
 import * as bannersService from "../banners/banners.service";
 import * as magicBoxesService from "../magicBoxes/magicBoxes.service";
 import type { ListStorefrontProductsQuery, MyOrdersQuery, PushSubscribeInput, SendChatMessageInput, TrackPageViewInput } from "./storefront.schema";
-import type { CreateOrderInput } from "../orders/orders.schema";
+import type { CreateStorefrontOrderInput } from "../orders/orders.schema";
+
+// What the shop pays its agents is none of the buyer's business - and on
+// the storefront "the buyer" is anyone who knows the phone number.
+function withoutAgentFields<T extends object>(order: T): Omit<T, "agentId" | "agentBonus" | "agentBonusAccruedAt" | "agentPayoutId"> {
+  const { agentId: _a, agentBonus: _b, agentBonusAccruedAt: _c, agentPayoutId: _d, ...rest } = order as T & Record<string, unknown>;
+  return rest as Omit<T, "agentId" | "agentBonus" | "agentBonusAccruedAt" | "agentPayoutId">;
+}
 
 export async function listCategories(req: Request, res: Response): Promise<void> {
   const categories = await storefrontService.listCategories(req.tenant!.id);
@@ -27,8 +34,12 @@ export async function getProduct(req: Request, res: Response): Promise<void> {
 }
 
 export async function createOrder(req: Request, res: Response): Promise<void> {
-  const order = await ordersService.createOrder(req.tenant!.id, null, req.body as CreateOrderInput, req.tenant!.minOrderAmount);
-  res.status(201).json({ order });
+  const { agentRef, ...input } = req.body as CreateStorefrontOrderInput;
+  const order = await ordersService.createOrder(req.tenant!.id, null, input, {
+    minOrderAmount: req.tenant!.minOrderAmount,
+    agentRef,
+  });
+  res.status(201).json({ order: withoutAgentFields(order) });
 }
 
 export async function trackPageView(req: Request, res: Response): Promise<void> {
@@ -39,7 +50,7 @@ export async function trackPageView(req: Request, res: Response): Promise<void> 
 export async function getMyOrders(req: Request, res: Response): Promise<void> {
   const { phone } = req.query as unknown as MyOrdersQuery;
   const orders = await storefrontService.getMyOrders(req.tenant!.id, phone);
-  res.json({ orders });
+  res.json({ orders: orders.map(withoutAgentFields) });
 }
 
 export async function getChatMessages(req: Request, res: Response): Promise<void> {

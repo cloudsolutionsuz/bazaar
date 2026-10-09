@@ -175,7 +175,7 @@ export function PromoCodesPage() {
                 <Td>
                   {promo.discountPercent != null
                     ? `${promo.discountPercent}%`
-                    : `${promo.discountFixed?.toLocaleString()} сум`}
+                    : `${promo.discountFixed?.toLocaleString()} ${t("common.sum")}`}
                 </Td>
                 <Td>
                   {promo.usedCount}

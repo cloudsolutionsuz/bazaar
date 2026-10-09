@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import * as chatApi from "../api/chat";
 
 function BellIcon({ active }: { active: boolean }) {
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function ChatNotificationBell({ unread }: Props) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [permState, setPermState] = useState<PermState>("default");
   const [subscribed, setSubscribed] = useState(false);
@@ -54,12 +56,12 @@ export function ChatNotificationBell({ unread }: Props) {
       const permission = await Notification.requestPermission();
       setPermState(permission as PermState);
       if (permission !== "granted") {
-        setStatusMsg("Разрешите уведомления в настройках браузера");
+        setStatusMsg(t("chatBell.allowInBrowser"));
         setLoading(false);
         return;
       }
       const { publicKey } = await chatApi.getPushVapidKey();
-      if (!publicKey) { setStatusMsg("Push не настроен на сервере"); setLoading(false); return; }
+      if (!publicKey) { setStatusMsg(t("chatBell.notConfigured")); setLoading(false); return; }
       const reg = await navigator.serviceWorker.ready;
       const pushSub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
@@ -68,9 +70,9 @@ export function ChatNotificationBell({ unread }: Props) {
       const json = pushSub.toJSON();
       await chatApi.subscribePush({ endpoint: json.endpoint!, p256dh: json.keys!.p256dh, auth: json.keys!.auth });
       setSubscribed(true);
-      setStatusMsg("✓ Уведомления включены");
+      setStatusMsg(`✓ ${t("chatBell.enabled")}`);
     } catch {
-      setStatusMsg("Не удалось подписаться");
+      setStatusMsg(t("chatBell.subscribeFailed"));
     }
     setLoading(false);
   }
@@ -81,9 +83,9 @@ export function ChatNotificationBell({ unread }: Props) {
       const sub = await reg.pushManager.getSubscription();
       await sub?.unsubscribe();
       setSubscribed(false);
-      setStatusMsg("Уведомления отключены");
+      setStatusMsg(t("chatBell.disabled"));
     } catch {
-      setStatusMsg("Ошибка при отключении");
+      setStatusMsg(t("chatBell.unsubscribeFailed"));
     }
   }
 
@@ -96,7 +98,7 @@ export function ChatNotificationBell({ unread }: Props) {
             ? "text-brand-600 hover:bg-brand-50 dark:text-brand-400 dark:hover:bg-brand-700/20"
             : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
         }`}
-        title="Уведомления чата"
+        title={t("chatBell.title")}
       >
         <BellIcon active={subscribed} />
         {unread > 0 && (
@@ -110,11 +112,11 @@ export function ChatNotificationBell({ unread }: Props) {
         <div className="absolute right-0 top-10 z-50 w-64 rounded-xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
           {/* Header */}
           <div className="border-b border-gray-100 px-4 py-3 dark:border-gray-700">
-            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Чат</p>
+            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t("nav.chat")}</p>
             {unread > 0 ? (
-              <p className="text-xs text-red-500 font-medium">{unread} непрочитанных</p>
+              <p className="text-xs text-red-500 font-medium">{t("chatBell.unread", { count: unread })}</p>
             ) : (
-              <p className="text-xs text-gray-400">Нет новых сообщений</p>
+              <p className="text-xs text-gray-400">{t("chatBell.noNew")}</p>
             )}
           </div>
 
@@ -128,7 +130,7 @@ export function ChatNotificationBell({ unread }: Props) {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
-              Открыть чат
+              {t("chatBell.openChat")}
               {unread > 0 && (
                 <span className="ml-auto rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">{unread}</span>
               )}
@@ -137,15 +139,15 @@ export function ChatNotificationBell({ unread }: Props) {
 
           {/* Push toggle */}
           <div className="border-t border-gray-100 px-3 py-3 dark:border-gray-700">
-            <p className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Push-уведомления</p>
+            <p className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t("chatBell.push")}</p>
             {permState === "unsupported" ? (
-              <p className="text-xs text-gray-400">Браузер не поддерживает push</p>
+              <p className="text-xs text-gray-400">{t("chatBell.unsupported")}</p>
             ) : permState === "denied" ? (
-              <p className="text-xs text-amber-600 dark:text-amber-400">Уведомления заблокированы в настройках браузера</p>
+              <p className="text-xs text-amber-600 dark:text-amber-400">{t("chatBell.blocked")}</p>
             ) : subscribed ? (
               <div className="flex items-center justify-between">
-                <span className="text-xs text-green-600 dark:text-green-400 font-medium">● Включены</span>
-                <button onClick={() => void handleUnsubscribe()} className="text-xs text-gray-400 hover:text-red-500 dark:hover:text-red-400">Отключить</button>
+                <span className="text-xs text-green-600 dark:text-green-400 font-medium">● {t("chatBell.on")}</span>
+                <button onClick={() => void handleUnsubscribe()} className="text-xs text-gray-400 hover:text-red-500 dark:hover:text-red-400">{t("chatBell.turnOff")}</button>
               </div>
             ) : (
               <button
@@ -153,7 +155,7 @@ export function ChatNotificationBell({ unread }: Props) {
                 disabled={loading}
                 className="w-full rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-700 disabled:opacity-60"
               >
-                {loading ? "Подключение..." : "Включить уведомления"}
+                {loading ? t("common.loading") : t("chatBell.turnOn")}
               </button>
             )}
             {statusMsg && <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{statusMsg}</p>}

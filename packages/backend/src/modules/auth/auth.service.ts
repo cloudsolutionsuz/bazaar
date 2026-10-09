@@ -14,6 +14,13 @@ import {
 import { isValidSubdomain } from "../tenants/constants";
 import type { LoginInput, RegisterInput } from "./auth.schema";
 
+// Everything else on the tenant (Telegram chat, plan, billing dates) is the
+// shop's own business.
+export function tenantForRole<T extends Tenant>(tenant: T | null, role: User["role"]): T | Pick<T, "id" | "name" | "subdomain" | "status"> | null {
+  if (!tenant || role !== "AGENT") return tenant;
+  return { id: tenant.id, name: tenant.name, subdomain: tenant.subdomain, status: tenant.status };
+}
+
 export function toPublicUser(user: User) {
   const { passwordHash, ...rest } = user;
   return rest;
@@ -57,7 +64,7 @@ export async function registerSeller(input: RegisterInput): Promise<{ tenant: Te
     });
 
     await tx.cashRegister.create({
-      data: { tenantId: tenant.id, name: "Основная касса", isDefault: true, isActive: true },
+      data: { tenantId: tenant.id, name: "Asosiy kassa", isDefault: true, isActive: true },
     });
 
     // No email-verification step by design (matches the buyer mini-account
@@ -116,11 +123,20 @@ async function issueTokens(user: User): Promise<AuthTokens> {
   return { accessToken, refreshToken };
 }
 
-export async function login(input: LoginInput): Promise<AuthTokens & { user: ReturnType<typeof toPublicUser>; tenant: Tenant | null }> {
-  const user = await prisma.user.findUnique({ where: { email: input.email }, include: { tenant: true } });
+export async function login(input: LoginInput): Promise<AuthTokens & { user: ReturnType<typeof toPublicUser>; tenant: ReturnType<typeof tenantForRole<Tenant>> }> {
+  // Agent logins are stored lowercased, so fall back to a lowercase lookup
+  // when the identifier wasn't typed in exactly that form.
+  const include = { tenant: true, agent: { select: { isActive: true } } };
+  const user =
+    (await prisma.user.findUnique({ where: { email: input.email }, include })) ??
+    (await prisma.user.findUnique({ where: { email: input.email.toLowerCase() }, include }));
 
   if (!user || !(await verifyPassword(input.password, user.passwordHash))) {
     throw new AppError(401, "INVALID_CREDENTIALS", "Invalid email or password");
+  }
+
+  if (user.role === "AGENT" && !user.agent?.isActive) {
+    throw new AppError(403, "AGENT_DISABLED", "This agent account is disabled");
   }
 
   if (user.role !== "SUPER_ADMIN" && !user.emailVerifiedAt) {
@@ -129,7 +145,8 @@ export async function login(input: LoginInput): Promise<AuthTokens & { user: Ret
 
   const tokens = await issueTokens(user);
 
-  return { ...tokens, user: toPublicUser(user), tenant: user.tenant };
+  const { tenant, agent: _agent, ...plainUser } = user;
+  return { ...tokens, user: toPublicUser(plainUser), tenant: tenantForRole(tenant, user.role) };
 }
 
 export async function refreshSession(refreshTokenValue: string): Promise<AuthTokens> {

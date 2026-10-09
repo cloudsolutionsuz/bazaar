@@ -13,6 +13,8 @@ import { NewVariantsTable, type VariantDraft } from "./NewVariantsTable";
 import { NumberInput } from "../../components/ui/NumberInput";
 import type { ProductStatus } from "../../types/api";
 
+const MIN_PACK_SIZE = 2;
+
 export function ProductFormPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -34,6 +36,9 @@ export function ProductFormPage() {
   const [descriptionTab, setDescriptionTab] = useState<"default" | "ru" | "uz">("default");
   const [price, setPrice] = useState("");
   const [discountPercent, setDiscountPercent] = useState("");
+  const [piecesPerBlock, setPiecesPerBlock] = useState("");
+  const [piecesPerBox, setPiecesPerBox] = useState("");
+  const [packError, setPackError] = useState(false);
   const [brand, setBrand] = useState("");
   const [color, setColor] = useState("");
   const [code, setCode] = useState("");
@@ -52,6 +57,8 @@ export function ProductFormPage() {
       setDescriptionUz(product.descriptionUz ?? "");
       setPrice(String(product.price));
       setDiscountPercent(product.discountPercent ? String(product.discountPercent) : "");
+      setPiecesPerBlock(product.piecesPerBlock ? String(product.piecesPerBlock) : "");
+      setPiecesPerBox(product.piecesPerBox ? String(product.piecesPerBox) : "");
       setBrand(product.brand ?? "");
       setColor(product.color ?? "");
       setCode(product.code ?? "");
@@ -87,6 +94,13 @@ export function ProductFormPage() {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    // A pack holds at least 2 pieces - "1" would just be a piece.
+    const packSizes = [piecesPerBlock, piecesPerBox].filter((v) => v !== "").map(Number);
+    if (packSizes.some((size) => !Number.isInteger(size) || size < MIN_PACK_SIZE)) {
+      setPackError(true);
+      return;
+    }
+    setPackError(false);
     const basePayload = {
       name,
       description: description || undefined,
@@ -114,9 +128,19 @@ export function ProductFormPage() {
           lowStockThreshold: d.lowStockThreshold ? Number(d.lowStockThreshold) : undefined,
           supplierId: d.supplierId || undefined,
         }));
-      createMutation.mutate({ ...basePayload, variants: variants.length > 0 ? variants : undefined });
+      createMutation.mutate({
+        ...basePayload,
+        piecesPerBlock: piecesPerBlock ? Number(piecesPerBlock) : undefined,
+        piecesPerBox: piecesPerBox ? Number(piecesPerBox) : undefined,
+        variants: variants.length > 0 ? variants : undefined,
+      });
     } else {
-      updateMutation.mutate(basePayload);
+      // null (not undefined) so emptying the field actually clears the pack size.
+      updateMutation.mutate({
+        ...basePayload,
+        piecesPerBlock: piecesPerBlock ? Number(piecesPerBlock) : null,
+        piecesPerBox: piecesPerBox ? Number(piecesPerBox) : null,
+      });
     }
   }
 
@@ -225,6 +249,33 @@ export function ProductFormPage() {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Packaging */}
+            <div className="rounded-xl border border-gray-200 bg-white p-6">
+              <h2 className="mb-1 text-sm font-semibold text-gray-700">{t("products.packaging")}</h2>
+              <p className="mb-4 text-xs text-gray-500">{t("products.packagingHint")}</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-xs text-gray-500">{t("products.piecesPerBlock")}</label>
+                  <NumberInput
+                    value={piecesPerBlock}
+                    onChange={(e) => setPiecesPerBlock(e.target.value)}
+                    placeholder="—"
+                    className="w-full text-left"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-gray-500">{t("products.piecesPerBox")}</label>
+                  <NumberInput
+                    value={piecesPerBox}
+                    onChange={(e) => setPiecesPerBox(e.target.value)}
+                    placeholder="—"
+                    className="w-full text-left"
+                  />
+                </div>
+              </div>
+              {packError && <p className="mt-2 text-xs text-red-600">{t("products.packSizeError")}</p>}
             </div>
 
             {/* Organization */}

@@ -8,6 +8,7 @@ import { notifyLowStock, notifyNewOrder } from "../../utils/notifications";
 import { pushToCustomer } from "../storefront/storefront.service";
 import { validatePromoCode } from "../promo-codes/promo-codes.service";
 import { getShippingCost } from "../delivery/delivery.service";
+import { accrueAgentBonus, findActiveAgentByRefCode } from "../agents/agents.bonus";
 import type { CreateOrderInput, ListOrdersQuery } from "./orders.schema";
 
 const orderInclude = {
@@ -30,6 +31,8 @@ const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
 };
 
 const RESTOCKING_STATUSES = new Set<OrderStatus>(["CANCELLED", "REFUNDED"]);
+// Leaves headroom under the INT4 ceiling (2 147 483 647) for delivery cost.
+const MAX_ORDER_AMOUNT = 2_000_000_000;
 
 export async function getOrder(tenantId: string, orderId: string) {
   const order = await prisma.order.findFirst({ where: { id: orderId, tenantId }, include: orderInclude });
@@ -75,8 +78,15 @@ export async function listOrders(tenantId: string, query: ListOrdersQuery) {
 
 // userId is null for storefront-originated orders (no staff member involved) -
 // propagated to OrderStatusHistory/InventoryMovement, both of which allow null.
-// minOrderAmount enforces a cart floor for storefront orders (0 = no limit).
-export async function createOrder(tenantId: string, userId: string | null, input: CreateOrderInput, minOrderAmount = 0) {
+// minOrderAmount enforces a cart floor for storefront orders (0 = no limit);
+// agentRef attributes the order to the agent whose referral link was used.
+interface CreateOrderOptions {
+  minOrderAmount?: number;
+  agentRef?: string;
+}
+
+export async function createOrder(tenantId: string, userId: string | null, input: CreateOrderInput, options: CreateOrderOptions = {}) {
+  const minOrderAmount = options.minOrderAmount ?? 0;
   await assertWithinPlanLimit(tenantId, "orders");
 
   const variantIds = input.items.map((i) => i.variantId);
@@ -100,10 +110,30 @@ export async function createOrder(tenantId: string, userId: string | null, input
     const unitPrice = variant.product.discountPercent
       ? Math.round(basePrice * (1 - variant.product.discountPercent / 100))
       : basePrice;
-    return { variantId: item.variantId, quantity: item.quantity, unitPrice, totalPrice: unitPrice * item.quantity };
+    // A box/block is just N pieces at the per-piece price: everything from
+    // here on (stock, inventory log, totals) works in pieces.
+    const unit = item.unit ?? "PIECE";
+    const unitSize =
+      unit === "BOX" ? variant.product.piecesPerBox : unit === "BLOCK" ? variant.product.piecesPerBlock : 1;
+    if (!unitSize) {
+      throw new AppError(400, "INVALID_UNIT", `"${variant.product.name}" is not sold by ${unit.toLowerCase()}`);
+    }
+    // The shop changed the pack size while this was sitting in a cart:
+    // "2 boxes" no longer means the number of pieces the buyer agreed to.
+    if (item.unitSize !== undefined && item.unitSize !== unitSize) {
+      throw new AppError(409, "UNIT_SIZE_CHANGED", `The pack size of "${variant.product.name}" has changed`);
+    }
+    const quantity = item.quantity * unitSize;
+    return { variantId: item.variantId, quantity, unitPrice, totalPrice: unitPrice * quantity, unit, unitSize };
   });
 
   const subtotal = orderItemsData.reduce((sum, i) => sum + i.totalPrice, 0);
+
+  // Quantities and money are 32-bit integer columns - turn an absurdly large
+  // box order into a clear refusal rather than a database error.
+  if (subtotal > MAX_ORDER_AMOUNT || orderItemsData.some((i) => i.quantity > MAX_ORDER_AMOUNT)) {
+    throw new AppError(400, "ORDER_TOO_LARGE", "This order is too large to be placed at once");
+  }
 
   if (minOrderAmount > 0 && subtotal < minOrderAmount) {
     throw new AppError(400, "MIN_ORDER_AMOUNT", `Minimum order amount is ${minOrderAmount}`);
@@ -112,7 +142,7 @@ export async function createOrder(tenantId: string, userId: string | null, input
   const validatedBoxes = await validateMagicBoxes(
     tenantId,
     input.magicBoxIds ?? [],
-    input.items,
+    orderItemsData,
   );
 
   // Load gift variants to check stock and build order items
@@ -127,6 +157,8 @@ export async function createOrder(tenantId: string, userId: string | null, input
     quantity: 1,
     unitPrice: 0,
     totalPrice: 0,
+    unit: "PIECE" as const,
+    unitSize: 1,
   }));
 
   let promoCodeId: string | undefined;
@@ -168,6 +200,8 @@ export async function createOrder(tenantId: string, userId: string | null, input
     ? Math.round(preLoyaltyTotal * (tenant.loyaltyPointsRate ?? 1) / 100)
     : 0;
   const totalAmount = preLoyaltyTotal + shippingCost - loyaltyPointsRedeemed;
+
+  const agent = options.agentRef ? await findActiveAgentByRefCode(tenantId, options.agentRef) : null;
 
   const orderId = await prisma.$transaction(async (tx) => {
     // Atomic, race-safe stock guard: only decrements if enough stock is
@@ -224,6 +258,7 @@ export async function createOrder(tenantId: string, userId: string | null, input
         loyaltyPointsEarned,
         loyaltyPointsRedeemed,
         totalAmount,
+        agentId: agent?.id,
         items: { create: [...orderItemsData, ...giftItemsData] },
       },
     });
@@ -347,27 +382,24 @@ export async function updateOrderStatus(
         });
       }
 
-      // Reverses the INCOME transaction created at order time - but only if
-      // it was actually CONFIRMED (real money the balance already counted).
-      // If the cashier never confirmed it, it was never in the balance, so
-      // reversing it would incorrectly subtract money that was never added -
-      // just delete the still-pending transaction instead.
-      const incomeTransaction = await tx.transaction.findFirst({ where: { orderId, type: "INCOME" } });
-      if (incomeTransaction?.status === "CONFIRMED") {
-        await tx.transaction.create({
-          data: {
-            tenantId,
-            type: "EXPENSE",
-            category: "Возврат",
-            amount: order.totalAmount,
-            orderId,
-            cashRegisterId: incomeTransaction.cashRegisterId,
-            createdByUserId: userId,
-          },
-        });
-      } else if (incomeTransaction) {
-        await tx.transaction.delete({ where: { id: incomeTransaction.id } });
+      // Reverses the order's INCOME - but only the part that was actually
+      // CONFIRMED (real money the balance already counted), out of the
+      // register it went into. An order can have several income rows once
+      // it's been paid in parts (see paymentsImport.service.ts). Whatever
+      // is still pending was never in the balance, so reversing it would
+      // subtract money that was never added - it's just deleted instead.
+      const incomeTransactions = await tx.transaction.findMany({ where: { orderId, type: "INCOME" } });
+      const confirmedByRegister = new Map<string | null, number>();
+      for (const income of incomeTransactions) {
+        if (income.status !== "CONFIRMED") continue;
+        confirmedByRegister.set(income.cashRegisterId, (confirmedByRegister.get(income.cashRegisterId) ?? 0) + income.amount);
       }
+      for (const [cashRegisterId, amount] of confirmedByRegister) {
+        await tx.transaction.create({
+          data: { tenantId, type: "EXPENSE", category: "Возврат", amount, orderId, cashRegisterId, createdByUserId: userId },
+        });
+      }
+      await tx.transaction.deleteMany({ where: { orderId, type: "INCOME", status: "PENDING" } });
 
       if (order.customerId && (order.loyaltyPointsEarned > 0 || order.loyaltyPointsRedeemed > 0)) {
         await tx.customer.update({
@@ -381,13 +413,21 @@ export async function updateOrderStatus(
         });
       }
     }
+
+    // An agent earns their bonus when a referred order is archived after
+    // being DELIVERED. Archiving from any other status (a cancelled or
+    // refunded order, or a never-shipped junk order tidied away) is not a
+    // completed sale and earns nothing.
+    if (nextStatus === "ARCHIVED" && order.agentId && order.status === "DELIVERED") {
+      await accrueAgentBonus(tx, order);
+    }
   });
 
   const ORDER_PUSH_MESSAGES: Partial<Record<OrderStatus, { title: string; body: string }>> = {
-    SHIPPED: { title: "Ваш заказ отправлен", body: "Заказ передан курьеру и скоро прибудет." },
-    DELIVERED: { title: "Заказ доставлен", body: "Ваш заказ успешно доставлен. Спасибо за покупку!" },
-    CANCELLED: { title: "Заказ отменён", body: "К сожалению, ваш заказ был отменён." },
-    REFUNDED: { title: "Возврат оформлен", body: "По вашему заказу оформлен возврат." },
+    SHIPPED: { title: "Buyurtmangiz yo'lga chiqdi", body: "Buyurtma kuryerga topshirildi va tez orada yetib boradi." },
+    DELIVERED: { title: "Buyurtma yetkazildi", body: "Buyurtmangiz muvaffaqiyatli yetkazildi. Xaridingiz uchun rahmat!" },
+    CANCELLED: { title: "Buyurtma bekor qilindi", body: "Afsuski, buyurtmangiz bekor qilindi." },
+    REFUNDED: { title: "Qaytarish rasmiylashtirildi", body: "Buyurtmangiz bo'yicha qaytarish rasmiylashtirildi." },
   };
 
   const pushMsg = ORDER_PUSH_MESSAGES[nextStatus];

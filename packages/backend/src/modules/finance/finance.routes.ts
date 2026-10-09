@@ -3,9 +3,11 @@ import { asyncHandler } from "../../utils/asyncHandler";
 import { requireAuth } from "../../middleware/requireAuth";
 import { requireRole } from "../../middleware/requireRole";
 import { validateBody, validateQuery } from "../../middleware/validate";
+import { uploadSpreadsheet } from "../../middleware/upload";
 import {
   analyticsQuerySchema,
   balanceQuerySchema,
+  commitPaymentsImportSchema,
   confirmTransactionSchema,
   createTransactionSchema,
   dailySummaryQuerySchema,
@@ -13,6 +15,7 @@ import {
   listPendingTransactionsQuerySchema,
   listTransactionsQuerySchema,
   reportQuerySchema,
+  validatePaymentsImportSchema,
 } from "./finance.schema";
 import * as financeController from "./finance.controller";
 
@@ -34,6 +37,18 @@ financeRouter.post(
 );
 financeRouter.get("/transactions", validateQuery(listTransactionsQuerySchema), asyncHandler(financeController.listTransactions));
 financeRouter.post("/transactions", validateBody(createTransactionSchema), asyncHandler(financeController.createTransaction));
+financeRouter.get("/payments-import/template", asyncHandler(financeController.paymentsImportTemplate));
+financeRouter.post("/payments-import/parse", uploadSpreadsheet, asyncHandler(financeController.parsePaymentsImport));
+financeRouter.post(
+  "/payments-import/validate",
+  validateBody(validatePaymentsImportSchema),
+  asyncHandler(financeController.validatePaymentsImport),
+);
+financeRouter.post(
+  "/payments-import/commit",
+  validateBody(commitPaymentsImportSchema),
+  asyncHandler(financeController.commitPaymentsImport),
+);
 financeRouter.get("/pnl", validateQuery(reportQuerySchema), asyncHandler(financeController.getPnL));
 financeRouter.get("/pnl/export", validateQuery(reportQuerySchema), asyncHandler(financeController.exportPnL));
 financeRouter.get("/analytics", validateQuery(analyticsQuerySchema), asyncHandler(financeController.getAnalytics));

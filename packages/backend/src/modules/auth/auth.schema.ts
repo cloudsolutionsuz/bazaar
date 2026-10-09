@@ -10,8 +10,10 @@ export const registerSchema = z.object({
   planCode: z.string().min(1),
 });
 
+// "email" is the login identifier: a real email for shop staff, or the plain
+// login an agent was given (agents have no email - see agents.service.ts).
 export const loginSchema = z.object({
-  email: z.string().email(),
+  email: z.string().trim().min(1).max(254),
   password: z.string().min(1),
 });
 

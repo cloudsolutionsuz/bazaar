@@ -53,5 +53,6 @@ export async function me(req: Request, res: Response): Promise<void> {
   if (!user) {
     throw new AppError(404, "NOT_FOUND", "User not found");
   }
-  res.json({ user: authService.toPublicUser(user), tenant: user.tenant });
+  const { tenant, ...plainUser } = user;
+  res.json({ user: authService.toPublicUser(plainUser), tenant: authService.tenantForRole(tenant, user.role) });
 }

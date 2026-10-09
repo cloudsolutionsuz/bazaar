@@ -51,6 +51,29 @@ export const forecastQuerySchema = z.object({
   horizonDays: z.coerce.number().int().optional(),
 });
 
+// Deliberately loose: a bad phone or amount is a per-row error the admin
+// fixes in the preview table, not a reason to reject the whole request.
+export const paymentImportRowSchema = z.object({
+  phone: z.string().max(40).optional(),
+  orderRef: z.string().max(64).optional(),
+  amount: z.number().nullable().optional(),
+  description: z.string().max(500).optional(),
+});
+
+const paymentImportRowsSchema = z.array(paymentImportRowSchema).min(1).max(1000);
+
+export const validatePaymentsImportSchema = z.object({
+  rows: paymentImportRowsSchema,
+});
+
+export const commitPaymentsImportSchema = z.object({
+  rows: paymentImportRowsSchema,
+  cashRegisterId: z.string().uuid(),
+});
+
+export type PaymentImportRowInput = z.infer<typeof paymentImportRowSchema>;
+export type ValidatePaymentsImportInput = z.infer<typeof validatePaymentsImportSchema>;
+export type CommitPaymentsImportInput = z.infer<typeof commitPaymentsImportSchema>;
 export type CreateTransactionInput = z.infer<typeof createTransactionSchema>;
 export type ListTransactionsQuery = z.infer<typeof listTransactionsQuerySchema>;
 export type ReportQuery = z.infer<typeof reportQuerySchema>;

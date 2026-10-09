@@ -12,6 +12,9 @@ import { Table, Thead, Tbody, Th, Td } from "../../components/ui/Table";
 import { todayInputValue } from "../../utils/dateInput";
 import { useActiveCashRegisters } from "../../hooks/useActiveCashRegisters";
 import { CashRegistersModal } from "./CashRegistersModal";
+import { AgentPayoutModal } from "./AgentPayoutModal";
+import { PaymentsImportModal } from "./PaymentsImportModal";
+import { shortOrderId } from "../../utils/orderId";
 import type { CashRegister, TransactionType } from "../../types/api";
 
 export function KassaPage() {
@@ -21,6 +24,8 @@ export function KassaPage() {
   const [filterType, setFilterType] = useState<TransactionType | "">("");
   const [filterRegisterId, setFilterRegisterId] = useState("");
   const [managingRegisters, setManagingRegisters] = useState(false);
+  const [payingAgent, setPayingAgent] = useState(false);
+  const [importingPayments, setImportingPayments] = useState(false);
   const [adding, setAdding] = useState(false);
   const [formType, setFormType] = useState<TransactionType>("EXPENSE");
   const [category, setCategory] = useState("");
@@ -78,9 +83,17 @@ export function KassaPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-xl font-semibold text-gray-900">{t("kassa.title")}</h1>
-        {!adding && <Button onClick={openAddForm}>{t("kassa.addTransaction")}</Button>}
+        <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" onClick={() => setImportingPayments(true)}>
+            {t("paymentsImport.open")}
+          </Button>
+          <Button variant="secondary" onClick={() => setPayingAgent(true)}>
+            {t("agentPayout.open")}
+          </Button>
+          {!adding && <Button onClick={openAddForm}>{t("kassa.addTransaction")}</Button>}
+        </div>
       </div>
 
       <div className="mb-6 flex flex-wrap items-end gap-3">
@@ -213,6 +226,18 @@ export function KassaPage() {
       </Table>
 
       <CashRegistersModal open={managingRegisters} onClose={() => setManagingRegisters(false)} />
+      <AgentPayoutModal
+        open={payingAgent}
+        onClose={() => setPayingAgent(false)}
+        activeRegisters={activeRegisters}
+        defaultRegisterId={filterRegisterId || defaultRegisterId}
+      />
+      <PaymentsImportModal
+        open={importingPayments}
+        onClose={() => setImportingPayments(false)}
+        activeRegisters={activeRegisters}
+        defaultRegisterId={filterRegisterId || defaultRegisterId}
+      />
     </div>
   );
 }
@@ -248,6 +273,7 @@ function PendingSection({ activeRegisters, defaultRegisterId }: { activeRegister
         <Thead>
           <tr>
             <Th>{t("orders.date")}</Th>
+            <Th>{t("orders.id")}</Th>
             <Th>{t("orders.customer")}</Th>
             <Th>{t("orders.phone")}</Th>
             <Th>{t("kassa.amount")}</Th>
@@ -261,6 +287,7 @@ function PendingSection({ activeRegisters, defaultRegisterId }: { activeRegister
             return (
               <tr key={tx.id}>
                 <Td>{new Date(tx.createdAt).toLocaleString()}</Td>
+                <Td className="whitespace-nowrap font-mono text-xs text-gray-500">{tx.orderId ? shortOrderId(tx.orderId) : "—"}</Td>
                 <Td>{tx.order?.customerName ?? "—"}</Td>
                 <Td>{tx.order?.customerPhone ?? "—"}</Td>
                 <Td className="text-green-600">+{tx.amount.toLocaleString()}</Td>
@@ -290,7 +317,7 @@ function PendingSection({ activeRegisters, defaultRegisterId }: { activeRegister
           })}
           {items.length === 0 && (
             <tr>
-              <Td colSpan={6} className="text-center text-gray-400">
+              <Td colSpan={7} className="text-center text-gray-400">
                 {t("common.noData")}
               </Td>
             </tr>

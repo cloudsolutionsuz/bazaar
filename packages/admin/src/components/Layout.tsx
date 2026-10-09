@@ -20,6 +20,8 @@ function navItemClass({ isActive }: { isActive: boolean }): string {
 
 const STAFF_AND_MANAGEMENT_ROLES = new Set(["OWNER", "MANAGER"]);
 const ALL_STAFF_ROLES = new Set(["OWNER", "MANAGER", "CASHIER"]);
+// An agent is an outside partner: the only page they get is their own sales.
+const AGENT_HOME = "/agent-sales";
 
 function SunIcon() {
   return (
@@ -96,8 +98,12 @@ export function Layout() {
     }
   }, [location.pathname]);
 
+  if (role === "AGENT" && location.pathname !== AGENT_HOME) {
+    return <Navigate to={AGENT_HOME} replace />;
+  }
+
   // Redirect blocked tenants to billing for any page other than /billing
-  if (isBlocked && !location.pathname.startsWith("/billing")) {
+  if (isBlocked && role !== "AGENT" && !location.pathname.startsWith("/billing")) {
     return <Navigate to="/billing" replace />;
   }
 
@@ -134,7 +140,9 @@ export function Layout() {
           <div className="mb-6 px-2 text-lg font-semibold text-brand-700 dark:text-brand-400">Bazaar</div>
           <nav className="flex-1 space-y-1 overflow-y-auto">
             {/* Blocked tenants: only billing + support chat */}
-            {isBlocked ? (
+            {role === "AGENT" ? (
+              <NavLink to={AGENT_HOME} className={navItemClass}>{t("nav.agentSales")}</NavLink>
+            ) : isBlocked ? (
               <>
                 <NavLink to="/billing" className={navItemClass}>{t("nav.billing")}</NavLink>
               </>
@@ -171,6 +179,8 @@ export function Layout() {
                 {STAFF_AND_MANAGEMENT_ROLES.has(role) && (
                   <>
                     <NavLink to="/magic-boxes" className={navItemClass}>{t("nav.magicBox")}</NavLink>
+                    <NavLink to="/agents" className={navItemClass}>{t("nav.agents")}</NavLink>
+                    <NavLink to={AGENT_HOME} className={navItemClass}>{t("nav.agentSales")}</NavLink>
                     <NavLink to="/kassa" className={navItemClass}>{t("nav.kassa")}</NavLink>
                     <NavLink to="/reports" className={navItemClass}>{t("nav.reports")}</NavLink>
                     <NavLink to="/ai-advisor" className={navItemClass}>{t("nav.aiAdvisor")}</NavLink>
@@ -211,7 +221,7 @@ export function Layout() {
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <button
               onClick={() => setSidebarOpen((v) => !v)}
-              title={sidebarOpen ? "Скрыть меню" : "Показать меню"}
+              title={sidebarOpen ? t("layout.hideMenu") : t("layout.showMenu")}
               className="shrink-0 rounded-md p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
             >
               <MenuIcon />
@@ -226,7 +236,7 @@ export function Layout() {
             {(role === "OWNER" || role === "MANAGER") && <SupportChatWidget unread={supportUnread} />}
             <button
               onClick={toggle}
-              title={theme === "dark" ? "Светлый режим" : "Тёмный режим"}
+              title={theme === "dark" ? t("layout.lightMode") : t("layout.darkMode")}
               className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
             >
               {theme === "dark" ? <SunIcon /> : <MoonIcon />}
@@ -236,8 +246,8 @@ export function Layout() {
               onChange={(e) => changeLanguage(e.target.value as "ru" | "uz")}
               className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
             >
-              <option value="ru">RU</option>
               <option value="uz">UZ</option>
+              <option value="ru">RU</option>
             </select>
             <button
               onClick={() => void logout()}

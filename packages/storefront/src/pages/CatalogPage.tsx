@@ -144,9 +144,9 @@ export function CatalogPage() {
                 <div className="mb-2 flex items-center justify-between">
                   <span className="font-semibold text-gray-900">{box.name}</span>
                   {unlocked ? (
-                    <span className="rounded-full bg-green-500 px-3 py-1 text-xs font-bold text-white">✓ Получен!</span>
+                    <span className="rounded-full bg-green-500 px-3 py-1 text-xs font-bold text-white">✓ {t("magicBox.unlocked")}</span>
                   ) : (
-                    <span className="rounded-full bg-yellow-400 px-3 py-1 text-xs font-bold text-gray-900">Собери набор</span>
+                    <span className="rounded-full bg-yellow-400 px-3 py-1 text-xs font-bold text-gray-900">{t("magicBox.collect")}</span>
                   )}
                 </div>
                 {box.description && <p className="mb-2 text-sm text-gray-500">{box.description}</p>}

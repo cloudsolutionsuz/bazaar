@@ -2,6 +2,8 @@ import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import * as storefrontApi from "../api/storefront";
 import type { OrderResult } from "../types/api";
+import { PhoneInput, isCompleteUzPhone, toFullUzPhone } from "../components/PhoneInput";
+import { UNIT_LABEL_KEYS } from "../utils/units";
 
 const STATUS_KEYS: Record<string, string> = {
   NEW: "myOrders.statusNew",
@@ -10,6 +12,7 @@ const STATUS_KEYS: Record<string, string> = {
   DELIVERED: "myOrders.statusDelivered",
   CANCELLED: "myOrders.statusCancelled",
   REFUNDED: "myOrders.statusRefunded",
+  ARCHIVED: "myOrders.statusArchived",
 };
 
 export function MyOrdersPage() {
@@ -20,10 +23,13 @@ export function MyOrdersPage() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (!isCompleteUzPhone(phone)) return;
     setLoading(true);
     try {
-      const result = await storefrontApi.getMyOrders(phone);
+      const result = await storefrontApi.getMyOrders(toFullUzPhone(phone));
       setOrders(result.orders);
+    } catch {
+      setOrders([]);
     } finally {
       setLoading(false);
     }
@@ -35,17 +41,11 @@ export function MyOrdersPage() {
       <p className="mb-4 text-sm text-gray-600">{t("myOrders.hint")}</p>
 
       <form onSubmit={handleSubmit} className="mb-6 flex gap-2">
-        <input
-          required
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder={t("checkout.phone")}
-          className="flex-1 rounded-md border border-clay-200 px-3 py-2 text-sm focus:border-clay-500 focus:outline-none"
-        />
+        <PhoneInput required value={phone} onChange={setPhone} className="flex-1" />
         <button
           type="submit"
           disabled={loading}
-          className="rounded-md bg-clay-600 px-4 py-2 text-sm font-medium text-white hover:bg-clay-700 disabled:opacity-50"
+          className="self-start rounded-md bg-clay-600 px-4 py-2 text-sm font-medium text-white hover:bg-clay-700 disabled:opacity-50"
         >
           {t("myOrders.search")}
         </button>
@@ -64,7 +64,10 @@ export function MyOrdersPage() {
             <ul className="mb-2 space-y-1 text-sm text-gray-700">
               {order.items.map((item) => (
                 <li key={item.id}>
-                  {item.variant?.product.name ?? item.variantId} × {item.quantity}
+                  {item.variant?.product.name ?? item.variantId} ×{" "}
+                  {item.unit === "PIECE" || !item.unitSize
+                    ? item.quantity
+                    : `${item.quantity / item.unitSize} ${t(UNIT_LABEL_KEYS[item.unit]).toLowerCase()} (${t("units.pieces", { count: item.quantity })})`}
                 </li>
               ))}
             </ul>

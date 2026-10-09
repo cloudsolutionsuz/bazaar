@@ -36,7 +36,7 @@ export function requireAuth(options: RequireAuthOptions = {}): RequestHandler {
 
       const user = await prisma.user.findUnique({
         where: { id: payload.sub },
-        include: { tenant: true },
+        include: { tenant: true, agent: { select: { id: true, isActive: true } } },
       });
 
       if (!user) {
@@ -47,7 +47,13 @@ export function requireAuth(options: RequireAuthOptions = {}): RequestHandler {
         throw new AppError(403, "TENANT_BLOCKED", "Shop is blocked, please contact support");
       }
 
-      req.authUser = { id: user.id, role: user.role, tenantId: user.tenantId };
+      // Same immediacy as the BLOCKED check above: a deactivated agent loses
+      // access on their very next request, not when the token expires.
+      if (user.role === "AGENT" && !user.agent?.isActive) {
+        throw new AppError(403, "AGENT_DISABLED", "This agent account is disabled");
+      }
+
+      req.authUser = { id: user.id, role: user.role, tenantId: user.tenantId, agentId: user.agent?.id ?? null };
       req.tenant = user.tenant ?? null;
       next();
     } catch (err) {

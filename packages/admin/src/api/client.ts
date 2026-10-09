@@ -1,3 +1,4 @@
+import i18n from "../i18n/i18n";
 import type { ApiErrorBody } from "../types/api";
 
 const ACCESS_TOKEN_KEY = "bazaar_access_token";
@@ -103,7 +104,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     } else {
       clearTokens();
       onUnauthorized?.();
-      throw new ApiError(401, "UNAUTHENTICATED", "Сессия истекла, войдите снова");
+      throw new ApiError(401, "UNAUTHENTICATED", i18n.t("common.sessionExpired"));
     }
   }
 

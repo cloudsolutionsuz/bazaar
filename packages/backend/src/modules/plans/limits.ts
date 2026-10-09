@@ -34,10 +34,11 @@ export async function assertWithinPlanLimit(tenantId: string, resource: LimitedR
     return;
   }
 
-  // "employees" counts every User on the tenant, including the OWNER -
-  // the Start plan's "1 employee" limit is the owner themselves.
+  // "employees" counts every staff User on the tenant, including the OWNER -
+  // the Start plan's "1 employee" limit is the owner themselves. Agents are
+  // outside partners with their own login, not employees, so they don't count.
   if (tenant.plan.maxEmployees == null) return;
-  const count = await prisma.user.count({ where: { tenantId } });
+  const count = await prisma.user.count({ where: { tenantId, role: { not: "AGENT" } } });
   if (count >= tenant.plan.maxEmployees) {
     throw new AppError(403, "PLAN_LIMIT_REACHED", `Plan limit reached: max ${tenant.plan.maxEmployees} employees`);
   }

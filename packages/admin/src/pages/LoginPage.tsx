@@ -56,10 +56,15 @@ export function LoginPage() {
     setError(null);
     setSubmitting(true);
     try {
-      await login(email, password);
+      await login(email.trim(), password);
       navigate("/", { replace: true });
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("login.error"));
+      // Only a real "wrong credentials" answer gets that message - a blocked
+      // shop or an unverified email must say so.
+      if (!(err instanceof ApiError)) setError(t("common.error"));
+      else if (err.code === "AGENT_DISABLED") setError(t("login.errorDisabled"));
+      else if (err.code === "INVALID_CREDENTIALS") setError(t("login.error"));
+      else setError(err.message);
     } finally {
       setSubmitting(false);
     }
@@ -81,7 +86,9 @@ export function LoginPage() {
           {t("login.email")}
         </label>
         <input
-          type="email"
+          type="text"
+          autoComplete="username"
+          autoCapitalize="none"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}

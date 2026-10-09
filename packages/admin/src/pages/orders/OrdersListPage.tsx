@@ -12,6 +12,7 @@ import { Table, Thead, Tbody, Th, Td } from "../../components/ui/Table";
 import { downloadBlob } from "../../utils/downloadBlob";
 import { regionName, districtName } from "../../utils/addressLabels";
 import type { OrderStatus } from "../../types/api";
+import { shortOrderId } from "../../utils/orderId";
 
 export const STATUS_COLORS: Record<OrderStatus, "blue" | "yellow" | "green" | "red" | "gray"> = {
   NEW: "blue",
@@ -230,6 +231,7 @@ export function OrdersListPage({ fixedStatus }: Props) {
                 onChange={toggleSelectAll}
               />
             </Th>
+            <Th>{t("orders.id")}</Th>
             <Th>{t("orders.customer")}</Th>
             <Th>{t("orders.phone")}</Th>
             <Th>{t("orders.additionalPhones")}</Th>
@@ -254,6 +256,7 @@ export function OrdersListPage({ fixedStatus }: Props) {
                 <Td>
                   <input type="checkbox" checked={selectedIds.includes(o.id)} onChange={() => toggleSelect(o.id)} />
                 </Td>
+                <Td className="whitespace-nowrap font-mono text-xs text-gray-500">{shortOrderId(o.id)}</Td>
                 <Td>{o.customerName}</Td>
                 <Td>{o.customerPhone}</Td>
                 <Td>{o.additionalPhones.length > 0 ? o.additionalPhones.join(", ") : "—"}</Td>
@@ -279,7 +282,7 @@ export function OrdersListPage({ fixedStatus }: Props) {
           })}
           {orders.length === 0 && (
             <tr>
-              <Td colSpan={15} className="text-center text-gray-400">
+              <Td colSpan={16} className="text-center text-gray-400">
                 {t("common.noData")}
               </Td>
             </tr>

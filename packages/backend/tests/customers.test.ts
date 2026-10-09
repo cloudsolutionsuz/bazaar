@@ -4,7 +4,7 @@ import { createApp } from "../src/app";
 import { prisma } from "../src/db/prisma";
 import { registerAndLoginSeller, type TestSeller } from "./helpers/registerTenant";
 import { deleteTenantCompletely } from "./helpers/cleanupTenant";
-import { DEFAULT_ADDRESS } from "./helpers/orderFixtures";
+import { DEFAULT_ADDRESS, SECOND_PHONE } from "./helpers/orderFixtures";
 
 const describeWithDb = process.env.SKIP_DB_TESTS ? describe.skip : describe;
 
@@ -42,6 +42,7 @@ describeWithDb("customers (mini-account by phone, integration)", () => {
       .send({
         customerName: "Aziz",
         customerPhone: "+998 90 123-45-67",
+        ...SECOND_PHONE,
         ...DEFAULT_ADDRESS,
         items: [{ variantId, quantity: 1 }],
       });
@@ -60,6 +61,7 @@ describeWithDb("customers (mini-account by phone, integration)", () => {
       .send({
         customerName: "Aziz Karimov",
         customerPhone: "998901234567",
+        ...SECOND_PHONE,
         ...DEFAULT_ADDRESS,
         items: [{ variantId, quantity: 1 }],
       });
@@ -92,6 +94,7 @@ describeWithDb("customers (mini-account by phone, integration)", () => {
       .send({
         customerName: "Bad Address Buyer",
         customerPhone: "+998900001111",
+        ...SECOND_PHONE,
         addressRegion: "tashkent_city",
         addressDistrict: "bukhara_city", // belongs to the "bukhara" region, not tashkent_city
         addressMahalla: "Test Mahalla",
@@ -122,6 +125,7 @@ describeWithDb("customers (mini-account by phone, integration)", () => {
       .send({
         customerName: "Cancels Everything",
         customerPhone: "+998900003333",
+        ...SECOND_PHONE,
         ...DEFAULT_ADDRESS,
         items: [{ variantId, quantity: 1 }],
       });

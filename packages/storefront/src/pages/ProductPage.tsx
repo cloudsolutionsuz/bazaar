@@ -5,16 +5,18 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as storefrontApi from "../api/storefront";
 import { useCart } from "../cart/CartContext";
 import { ApiError } from "../api/client";
+import { PhoneInput, isCompleteUzPhone, toFullUzPhone } from "../components/PhoneInput";
+import { UNIT_LABEL_KEYS, unitOptionsFor } from "../utils/units";
+import type { SaleUnit } from "../types/api";
 
-const PHONE_PREFIXES = ["+998", "+992", "+996", "+7"];
-
-function formatDeliveryDate(days: number): string {
+function formatDeliveryDate(days: number, language: string): string {
   const d = new Date();
   d.setDate(d.getDate() + days);
-  return d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
+  return d.toLocaleDateString(language === "uz" ? "uz-UZ" : "ru-RU", { day: "numeric", month: "long" });
 }
 
 function BxGyBadge({ deals, selectedVariantId }: { deals: import("../types/api").BxGyDeal[]; selectedVariantId: string }) {
+  const { t } = useTranslation();
   const matching = deals.filter((d) => d.buyVariantId === selectedVariantId);
   if (matching.length === 0) return null;
   return (
@@ -27,7 +29,7 @@ function BxGyBadge({ deals, selectedVariantId }: { deals: import("../types/api")
           <div key={deal.id} className="mt-3 flex items-center gap-2 rounded-lg border border-orange-100 bg-orange-50 px-3 py-2 text-sm text-orange-800">
             <span className="text-base">🎁</span>
             <span>
-              <span className="font-semibold">Купи {deal.buyQty} — получи {deal.getQty} {getLabel} в подарок!</span>
+              <span className="font-semibold">{t("product.bxgyDeal", { buyQty: deal.buyQty, getQty: deal.getQty, name: getLabel })}</span>
               <span className="ml-1 text-orange-600 opacity-75">· {deal.promotionName}</span>
             </span>
           </div>
@@ -38,15 +40,12 @@ function BxGyBadge({ deals, selectedVariantId }: { deals: import("../types/api")
 }
 
 function DeliveryBadge({ minDays, maxDays }: { minDays: number; maxDays: number | null }) {
-  const label =
-    maxDays && maxDays > minDays
-      ? `${minDays}–${maxDays} дней`
-      : `${minDays} ${minDays === 1 ? "день" : minDays < 5 ? "дня" : "дней"}`;
-
-  const dateLabel =
-    maxDays && maxDays > minDays
-      ? `до ${formatDeliveryDate(maxDays)}`
-      : formatDeliveryDate(minDays);
+  const { t, i18n } = useTranslation();
+  const isRange = !!maxDays && maxDays > minDays;
+  const label = isRange ? t("product.deliveryRange", { min: minDays, max: maxDays }) : t("product.deliveryIn", { count: minDays });
+  const dateLabel = isRange
+    ? t("product.deliveryUntil", { date: formatDeliveryDate(maxDays, i18n.language) })
+    : formatDeliveryDate(minDays, i18n.language);
 
   return (
     <div className="mt-3 flex items-center gap-2 rounded-lg border border-green-100 bg-green-50 px-3 py-2 text-sm text-green-700">
@@ -57,7 +56,7 @@ function DeliveryBadge({ minDays, maxDays }: { minDays: number; maxDays: number 
         <circle cx="18.5" cy="18.5" r="2.5" />
       </svg>
       <span>
-        <span className="font-semibold">Доставим за {label}</span>
+        <span className="font-semibold">{label}</span>
         <span className="ml-1 text-green-600 opacity-80">· {dateLabel}</span>
       </span>
     </div>
@@ -101,13 +100,13 @@ export function ProductPage() {
   });
 
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
+  const [selectedUnit, setSelectedUnit] = useState<SaleUnit>("PIECE");
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [added, setAdded] = useState(false);
+  const [cartNotice, setCartNotice] = useState<{ text: string; ok: boolean } | null>(null);
 
   const [reviewPhone, setReviewPhone] = useState("");
-  const [reviewPhonePrefix, setReviewPhonePrefix] = useState("+998");
   const [reviewName, setReviewName] = useState("");
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewText, setReviewText] = useState("");
@@ -132,8 +131,12 @@ export function ProductPage() {
   async function handleReviewSubmit(e: FormEvent) {
     e.preventDefault();
     setReviewError(null);
+    if (!isCompleteUzPhone(reviewPhone)) {
+      setReviewError(t("phone.hint"));
+      return;
+    }
     submitReviewMutation.mutate({
-      customerPhone: reviewPhonePrefix + reviewPhone.replace(/\D/g, ""),
+      customerPhone: toFullUzPhone(reviewPhone),
       customerName: reviewName,
       rating: reviewRating,
       text: reviewText || undefined,
@@ -150,13 +153,27 @@ export function ProductPage() {
     (i18n.language === "ru" ? product.descriptionRu : i18n.language === "uz" ? product.descriptionUz : null) ||
     product.description;
 
+  // Price is always shown per piece; a block/box is that price times the
+  // pieces it holds. A unit bigger than what's left in stock can't be picked.
+  const unitOptions = unitOptionsFor(product);
+  const unitOption =
+    unitOptions.find((o) => o.unit === selectedUnit && o.size <= variant.stockQuantity) ?? unitOptions[0];
+  const maxUnits = Math.floor(variant.stockQuantity / unitOption.size);
+  const packPrice = unitPrice * unitOption.size;
+  const outOfStock = variant.stockQuantity === 0;
+
   function selectVariant(variantId: string) {
     setSelectedVariantId(variantId);
     setQuantity(1);
   }
 
+  function selectUnit(unit: SaleUnit) {
+    setSelectedUnit(unit);
+    setQuantity(1);
+  }
+
   function handleAddToCart() {
-    addItem(
+    const addedUnits = addItem(
       {
         variantId: variant.id,
         productId: product!.id,
@@ -164,20 +181,35 @@ export function ProductPage() {
         variantName: variant.name,
         unitPrice,
         originalPrice: basePrice,
+        unit: unitOption.unit,
+        unitSize: unitOption.size,
         imageUrl: product!.images[0]?.url ?? null,
         maxStock: variant.stockQuantity,
       },
       quantity,
     );
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1500);
+    // The cart may already hold some of this stock, so less than asked - or
+    // nothing - can fit.
+    setCartNotice(
+      addedUnits === 0
+        ? { text: t("product.cannotAddMore"), ok: false }
+        : addedUnits < quantity
+          ? { text: t("product.addedPartial", { count: addedUnits }), ok: true }
+          : { text: t("product.added"), ok: true },
+    );
+    setTimeout(() => setCartNotice(null), 2500);
   }
 
   return (
     <div>
-      {added && (
-        <div className="fixed left-1/2 top-4 z-50 -translate-x-1/2 rounded-full bg-clay-600 px-4 py-2 text-sm font-medium text-white shadow-lg">
-          ✓ {t("product.added")}
+      {cartNotice && (
+        <div
+          className={`fixed left-1/2 top-4 z-50 -translate-x-1/2 rounded-full px-4 py-2 text-sm font-medium text-white shadow-lg ${
+            cartNotice.ok ? "bg-clay-600" : "bg-red-600"
+          }`}
+        >
+          {cartNotice.ok ? "✓ " : ""}
+          {cartNotice.text}
         </div>
       )}
       <button onClick={() => navigate(-1)} className="mb-4 text-sm text-clay-700 hover:underline">
@@ -267,6 +299,7 @@ export function ProductPage() {
               </>
             )}
           </div>
+          {unitOptions.length > 1 && <div className="mt-0.5 text-xs text-gray-500">{t("product.pricePerPiece")}</div>}
 
           {product.variants.length > 1 && (
             <div className="mt-4">
@@ -288,24 +321,74 @@ export function ProductPage() {
             </div>
           )}
 
-          <div className="mt-4 flex items-center gap-3">
+          {unitOptions.length > 1 && (
+            <div className="mt-4">
+              <div className="mb-2 text-sm font-medium text-gray-700">{t("product.buyBy")}</div>
+              <div className="flex flex-wrap gap-2">
+                {unitOptions.map((option) => (
+                  <button
+                    key={option.unit}
+                    type="button"
+                    onClick={() => selectUnit(option.unit)}
+                    disabled={option.size > variant.stockQuantity}
+                    className={`rounded-md border px-3 py-2 text-sm disabled:opacity-40 ${
+                      unitOption.unit === option.unit ? "border-clay-600 bg-clay-50 text-clay-800" : "border-clay-200 text-gray-700"
+                    }`}
+                  >
+                    {option.unit === "PIECE"
+                      ? t(UNIT_LABEL_KEYS.PIECE)
+                      : t("units.withSize", { unit: t(UNIT_LABEL_KEYS[option.unit]), count: option.size })}
+                  </button>
+                ))}
+              </div>
+              {unitOption.unit !== "PIECE" && (
+                <div className="mt-2 text-sm text-gray-700">
+                  {t("product.packPrice", {
+                    unit: t(UNIT_LABEL_KEYS[unitOption.unit]),
+                    count: unitOption.size,
+                    price: unitPrice.toLocaleString(),
+                  })}{" "}
+                  <span className="font-semibold text-clay-700">
+                    {packPrice.toLocaleString()} {product.currency}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="mt-4 flex flex-wrap items-center gap-3">
             <label className="text-sm font-medium text-gray-700">{t("product.quantity")}</label>
             <input
               type="number"
               min={1}
-              max={variant.stockQuantity}
+              max={Math.max(1, maxUnits)}
               value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, Math.min(Number(e.target.value), variant.stockQuantity)))}
+              disabled={outOfStock}
+              onChange={(e) => {
+                const wanted = Math.floor(Number(e.target.value)) || 1;
+                setQuantity(Math.max(1, Math.min(wanted, Math.max(1, maxUnits))));
+              }}
               className="w-20 rounded border border-clay-200 px-2 py-1 text-sm"
             />
+            {(quantity > 1 || unitOption.unit !== "PIECE") && !outOfStock && (
+              <span className="text-sm text-gray-700">
+                {t("product.lineTotal")}:{" "}
+                <span className="font-semibold text-gray-900">
+                  {(packPrice * quantity).toLocaleString()} {product.currency}
+                </span>
+                {unitOption.unit !== "PIECE" && (
+                  <span className="ml-1 text-gray-500">({t("units.pieces", { count: unitOption.size * quantity })})</span>
+                )}
+              </span>
+            )}
           </div>
 
           <button
             onClick={handleAddToCart}
-            disabled={variant.stockQuantity === 0}
+            disabled={outOfStock}
             className="mt-4 w-full rounded-md bg-clay-600 px-4 py-3 text-sm font-medium text-white hover:bg-clay-700 disabled:opacity-40"
           >
-            {variant.stockQuantity === 0 ? t("catalog.outOfStock") : added ? t("product.added") : t("product.addToCart")}
+            {outOfStock ? t("catalog.outOfStock") : t("product.addToCart")}
           </button>
 
           {product.bxgyDeals && product.bxgyDeals.length > 0 && (
@@ -349,7 +432,7 @@ export function ProductPage() {
               <div className="mb-1 flex items-center gap-3">
                 <StarRating value={review.rating} />
                 <span className="font-medium text-gray-900">{review.customerName}</span>
-                <span className="text-xs text-gray-400">{new Date(review.createdAt).toLocaleDateString("ru-RU")}</span>
+                <span className="text-xs text-gray-400">{new Date(review.createdAt).toLocaleDateString()}</span>
               </div>
               {review.text && <p className="text-sm text-gray-700">{review.text}</p>}
             </div>
@@ -362,7 +445,7 @@ export function ProductPage() {
             <p className="text-sm text-green-700">{t("product.reviewThanks")}</p>
           ) : (
             <form onSubmit={handleReviewSubmit} className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-gray-700">{t("product.reviewName")}</label>
                   <input
@@ -374,24 +457,7 @@ export function ProductPage() {
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-gray-700">{t("product.reviewPhone")}</label>
-                  <div className="flex gap-1">
-                    <select
-                      value={reviewPhonePrefix}
-                      onChange={(e) => setReviewPhonePrefix(e.target.value)}
-                      className="rounded-md border border-clay-200 px-1 py-2 text-xs focus:outline-none"
-                    >
-                      {PHONE_PREFIXES.map((p) => (
-                        <option key={p} value={p}>{p}</option>
-                      ))}
-                    </select>
-                    <input
-                      required
-                      value={reviewPhone}
-                      onChange={(e) => setReviewPhone(e.target.value)}
-                      placeholder="901234567"
-                      className="flex-1 rounded-md border border-clay-200 px-2 py-2 text-sm focus:border-clay-500 focus:outline-none"
-                    />
-                  </div>
+                  <PhoneInput required value={reviewPhone} onChange={setReviewPhone} />
                 </div>
               </div>
               <div>

@@ -4,17 +4,18 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as deliveryApi from "../../api/delivery";
 import type { DeliveryZone } from "../../types/api";
 import { UZBEKISTAN_REGIONS } from "../../data/uzbekistanRegions";
+import { placeName, regionName } from "../../utils/addressLabels";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { NumberInput } from "../../components/ui/NumberInput";
 import { Badge } from "../../components/ui/Badge";
 import { Table, Thead, Tbody, Th, Td } from "../../components/ui/Table";
 
-const REGION_OPTIONS = UZBEKISTAN_REGIONS.map((r) => ({ code: r.code, name: r.name }));
+const REGION_OPTIONS = UZBEKISTAN_REGIONS;
 
 function regionNames(codes: string[]): string {
   return codes
-    .map((c) => REGION_OPTIONS.find((r) => r.code === c)?.name ?? c)
+    .map((c) => regionName(c))
     .join(", ");
 }
 
@@ -200,7 +201,7 @@ export function DeliveryZonesPage() {
                     onChange={() => toggleRegion(r.code)}
                     className="rounded border-gray-300 text-indigo-600"
                   />
-                  {r.name}
+                  {placeName(r)}
                 </label>
               ))}
             </div>

@@ -3,7 +3,7 @@ import { asyncHandler } from "../../utils/asyncHandler";
 import { requireActiveTenant, requireResolvedTenant } from "../../middleware/requireTenant";
 import { validateBody, validateQuery } from "../../middleware/validate";
 import { listStorefrontProductsQuerySchema, myOrdersQuerySchema, pushSubscribeSchema, sendChatMessageSchema, trackPageViewSchema } from "./storefront.schema";
-import { createOrderSchema } from "../orders/orders.schema";
+import { createStorefrontOrderSchema } from "../orders/orders.schema";
 import { submitReviewSchema } from "../reviews/reviews.schema";
 import * as storefrontController from "./storefront.controller";
 import * as reviewsController from "../reviews/reviews.controller";
@@ -16,7 +16,7 @@ storefrontRouter.get("/categories", asyncHandler(storefrontController.listCatego
 storefrontRouter.get("/brands", asyncHandler(storefrontController.listBrands));
 storefrontRouter.get("/products", validateQuery(listStorefrontProductsQuerySchema), asyncHandler(storefrontController.listProducts));
 storefrontRouter.get("/products/:id", asyncHandler(storefrontController.getProduct));
-storefrontRouter.post("/orders", validateBody(createOrderSchema), asyncHandler(storefrontController.createOrder));
+storefrontRouter.post("/orders", validateBody(createStorefrontOrderSchema), asyncHandler(storefrontController.createOrder));
 storefrontRouter.get("/orders/by-phone", validateQuery(myOrdersQuerySchema), asyncHandler(storefrontController.getMyOrders));
 storefrontRouter.get("/chat", validateQuery(myOrdersQuerySchema), asyncHandler(storefrontController.getChatMessages));
 storefrontRouter.post("/chat", validateBody(sendChatMessageSchema), asyncHandler(storefrontController.sendChatMessage));

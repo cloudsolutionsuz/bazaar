@@ -24,7 +24,8 @@ function variantLabel(product: Product, variantId: string): string {
   return v.name ? `${product.name} — ${v.name}` : product.name;
 }
 
-function VariantPicker({ value, onChange, placeholder = "Поиск товара…" }: VariantPickerProps) {
+function VariantPicker({ value, onChange, placeholder }: VariantPickerProps) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -81,13 +82,13 @@ function VariantPicker({ value, onChange, placeholder = "Поиск товара
               autoFocus
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Поиск товара…"
+              placeholder={t("promoRules.searchProduct")}
               className="w-full"
             />
           </div>
           <div className="max-h-64 overflow-y-auto">
             {products.length === 0 && (
-              <p className="px-3 py-2 text-xs text-gray-400">Нет товаров</p>
+              <p className="px-3 py-2 text-xs text-gray-400">{t("promoRules.noProducts")}</p>
             )}
             {products.map((product) => (
               <div key={product.id}>
@@ -103,7 +104,7 @@ function VariantPicker({ value, onChange, placeholder = "Поиск товара
                 >
                   <span className="font-medium text-gray-800">{product.name}</span>
                   {product.variants.length > 1 && (
-                    <span className="text-xs text-gray-400">{product.variants.length} вариантов ▸</span>
+                    <span className="text-xs text-gray-400">{t("promoRules.variantCount", { count: product.variants.length })} ▸</span>
                   )}
                 </div>
                 {expanded === product.id && product.variants.map((v) => (
@@ -266,7 +267,7 @@ export function PromotionFormPage() {
               {t("promotions.isActive")}
             </label>
             <Button type="submit" disabled={updateMutation.isPending}>
-              {saved ? "✓ Сохранено" : updateMutation.isPending ? t("common.saving") : t("common.save")}
+              {saved ? `✓ ${t("common.saved")}` : updateMutation.isPending ? t("common.saving") : t("common.save")}
             </Button>
           </form>
         </div>
@@ -319,8 +320,8 @@ export function PromotionFormPage() {
               <div className="mb-4 flex items-center gap-2">
                 <span className="text-lg">🎁</span>
                 <div>
-                  <h2 className="font-semibold text-gray-900">Правила «Купи X — получи Y»</h2>
-                  <p className="text-xs text-gray-500">При покупке указанного количества товара — второй товар достаётся бесплатно</p>
+                  <h2 className="font-semibold text-gray-900">{t("promoRules.title")}</h2>
+                  <p className="text-xs text-gray-500">{t("promoRules.hint")}</p>
                 </div>
               </div>
 
@@ -329,10 +330,10 @@ export function PromotionFormPage() {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {/* Buy side */}
                   <div>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-orange-700">Покупает</p>
-                    <VariantPicker value={buyVariant} onChange={setBuyVariant} placeholder="Выберите товар…" />
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-orange-700">{t("promoRules.buys")}</p>
+                    <VariantPicker value={buyVariant} onChange={setBuyVariant} placeholder={t("promoRules.chooseProduct")} />
                     <div className="mt-2 flex items-center gap-2">
-                      <span className="text-sm text-gray-600">Кол-во:</span>
+                      <span className="text-sm text-gray-600">{t("promoRules.qty")}:</span>
                       <Input
                         type="number"
                         min={1}
@@ -341,16 +342,16 @@ export function PromotionFormPage() {
                         onChange={(e) => setBuyQty(e.target.value)}
                         className="w-20 text-center"
                       />
-                      <span className="text-sm text-gray-500">шт.</span>
+                      <span className="text-sm text-gray-500">{t("promoRules.pcs")}</span>
                     </div>
                   </div>
 
                   {/* Get side */}
                   <div>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-green-700">Получает бесплатно</p>
-                    <VariantPicker value={getVariant} onChange={setGetVariant} placeholder="Выберите промо-товар…" />
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-green-700">{t("promoRules.getsFree")}</p>
+                    <VariantPicker value={getVariant} onChange={setGetVariant} placeholder={t("promoRules.chooseGift")} />
                     <div className="mt-2 flex items-center gap-2">
-                      <span className="text-sm text-gray-600">Кол-во:</span>
+                      <span className="text-sm text-gray-600">{t("promoRules.qty")}:</span>
                       <Input
                         type="number"
                         min={1}
@@ -359,16 +360,16 @@ export function PromotionFormPage() {
                         onChange={(e) => setGetQty(e.target.value)}
                         className="w-20 text-center"
                       />
-                      <span className="text-sm text-gray-500">шт.</span>
+                      <span className="text-sm text-gray-500">{t("promoRules.pcs")}</span>
                     </div>
                   </div>
                 </div>
 
                 {buyVariant && getVariant && (
                   <p className="mt-3 text-sm text-gray-700">
-                    Покупает <span className="font-semibold text-orange-700">{buyQty} × {buyVariant.label}</span>
+                    {t("promoRules.buys")} <span className="font-semibold text-orange-700">{buyQty} × {buyVariant.label}</span>
                     {" → "}
-                    получает <span className="font-semibold text-green-700">{getQty} × {getVariant.label}</span> бесплатно
+                    {t("promoRules.getsFree")} <span className="font-semibold text-green-700">{getQty} × {getVariant.label}</span>
                   </p>
                 )}
 
@@ -378,7 +379,7 @@ export function PromotionFormPage() {
                   disabled={!canAddBxGy || addBxGyMutation.isPending}
                   onClick={() => addBxGyMutation.mutate()}
                 >
-                  Добавить правило
+                  {t("promoRules.addRule")}
                 </Button>
               </div>
 
@@ -388,10 +389,10 @@ export function PromotionFormPage() {
                   <Table>
                     <Thead>
                       <tr>
-                        <Th>Покупает</Th>
-                        <Th>Кол-во</Th>
-                        <Th>→ Получает</Th>
-                        <Th>Кол-во</Th>
+                        <Th>{t("promoRules.buys")}</Th>
+                        <Th>{t("promoRules.qty")}</Th>
+                        <Th>→ {t("promoRules.gets")}</Th>
+                        <Th>{t("promoRules.qty")}</Th>
                         <Th>{t("common.actions")}</Th>
                       </tr>
                     </Thead>
@@ -408,19 +409,19 @@ export function PromotionFormPage() {
                             <Td className="text-gray-800">{buyLabel}</Td>
                             <Td>
                               <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-bold text-orange-700">
-                                {rule.buyQty} шт.
+                                {rule.buyQty} {t("promoRules.pcs")}
                               </span>
                             </Td>
                             <Td className="text-gray-800">{getLabel}</Td>
                             <Td>
                               <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-bold text-green-700">
-                                {rule.getQty} шт.
+                                {rule.getQty} {t("promoRules.pcs")}
                               </span>
                             </Td>
                             <Td>
                               <button
                                 onClick={() => {
-                                  if (window.confirm("Удалить правило?")) removeBxGyMutation.mutate(rule.id);
+                                  if (window.confirm(t("promoRules.confirmDelete"))) removeBxGyMutation.mutate(rule.id);
                                 }}
                                 className="text-red-600 hover:underline"
                               >
@@ -436,7 +437,7 @@ export function PromotionFormPage() {
               )}
 
               {promotion.bxgyRules.length === 0 && (
-                <p className="mt-3 text-center text-sm text-gray-400">Правил ещё нет — добавьте выше</p>
+                <p className="mt-3 text-center text-sm text-gray-400">{t("promoRules.empty")}</p>
               )}
             </div>
           </div>

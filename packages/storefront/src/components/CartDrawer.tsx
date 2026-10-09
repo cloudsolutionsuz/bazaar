@@ -1,15 +1,22 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { useCart } from "../cart/CartContext";
+import { useQuery } from "@tanstack/react-query";
+import { cartLineKey, linePieces, lineTotal, useCart } from "../cart/CartContext";
 import { useMagicBoxes } from "../cart/MagicBoxContext";
+import { getMeta } from "../api/storefront";
+import { UNIT_LABEL_KEYS } from "../utils/units";
 
 export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { t } = useTranslation();
   const { items, updateQuantity, removeItem, total } = useCart();
   const { unlockedBoxes } = useMagicBoxes();
+  const metaQuery = useQuery({ queryKey: ["tenant-meta"], queryFn: getMeta });
+  const minOrderAmount = metaQuery.data?.minOrderAmount ?? 0;
 
-  const originalTotal = items.reduce((sum, i) => sum + i.originalPrice * i.quantity, 0);
+  const originalTotal = items.reduce((sum, i) => sum + i.originalPrice * linePieces(i), 0);
   const discountTotal = originalTotal - total;
+  const belowMinimum = items.length > 0 && total < minOrderAmount;
+  const canCheckout = items.length > 0 && !belowMinimum;
 
   if (!open) return null;
 
@@ -27,40 +34,53 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
           <p className="text-gray-500">{t("cart.empty")}</p>
         ) : (
           <div className="flex-1 space-y-4 overflow-y-auto">
-            {items.map((item) => (
-              <div key={item.variantId} className="flex gap-3 border-b border-clay-100 pb-3">
-                {item.imageUrl && <img src={item.imageUrl} alt="" className="h-16 w-16 rounded object-cover" />}
-                <div className="flex-1">
-                  <div className="text-sm font-medium text-gray-900">{item.productName}</div>
-                  {item.variantName && <div className="text-xs text-gray-500">{item.variantName}</div>}
-                  <div className="mt-1 flex items-center gap-2">
-                    <input
-                      type="number"
-                      min={1}
-                      max={item.maxStock}
-                      value={item.quantity}
-                      onChange={(e) => updateQuantity(item.variantId, Number(e.target.value))}
-                      className="w-16 rounded border border-clay-200 px-2 py-1 text-sm"
-                    />
-                    <div className="text-sm">
-                      <span className="text-gray-900">{item.unitPrice.toLocaleString()}</span>
-                      {item.originalPrice !== item.unitPrice && (
-                        <span className="ml-1 text-gray-400 line-through">{item.originalPrice.toLocaleString()}</span>
-                      )}
+            {items.map((item) => {
+              const key = cartLineKey(item);
+              const packed = item.unit !== "PIECE";
+              return (
+                <div key={key} className="flex gap-3 border-b border-clay-100 pb-3">
+                  {item.imageUrl && <img src={item.imageUrl} alt="" className="h-16 w-16 rounded object-cover" />}
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-gray-900">{item.productName}</div>
+                    {item.variantName && <div className="text-xs text-gray-500">{item.variantName}</div>}
+                    {packed && (
+                      <div className="text-xs text-clay-700">
+                        {t("units.withSize", { unit: t(UNIT_LABEL_KEYS[item.unit]), count: item.unitSize })}
+                      </div>
+                    )}
+                    <div className="mt-1 flex items-center gap-2">
+                      <input
+                        type="number"
+                        min={1}
+                        value={item.quantity}
+                        onChange={(e) => updateQuantity(key, Number(e.target.value))}
+                        className="w-16 rounded border border-clay-200 px-2 py-1 text-sm"
+                      />
+                      <div className="text-sm">
+                        <span className="text-gray-900">{lineTotal(item).toLocaleString()}</span>
+                        {item.originalPrice !== item.unitPrice && (
+                          <span className="ml-1 text-gray-400 line-through">
+                            {(item.originalPrice * linePieces(item)).toLocaleString()}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-0.5 text-xs text-gray-500">
+                      {t("cart.piecesAtPrice", { count: linePieces(item), price: item.unitPrice.toLocaleString() })}
                     </div>
                   </div>
+                  <button onClick={() => removeItem(key)} className="self-start text-xs text-red-600 hover:underline">
+                    {t("cart.remove")}
+                  </button>
                 </div>
-                <button onClick={() => removeItem(item.variantId)} className="self-start text-xs text-red-600 hover:underline">
-                  {t("cart.remove")}
-                </button>
-              </div>
-            ))}
+              );
+            })}
 
             {unlockedBoxes.length > 0 && (
               <div className="rounded-xl border-2 border-yellow-400 bg-gradient-to-br from-yellow-50 to-red-50 p-3">
                 <div className="mb-2 flex items-center gap-2">
                   <span className="text-lg">🎁</span>
-                  <span className="text-sm font-bold text-red-600">Magic Box — бесплатно!</span>
+                  <span className="text-sm font-bold text-red-600">{t("magicBox.free")}</span>
                 </div>
                 <div className="space-y-2">
                   {unlockedBoxes.map((box) => {
@@ -74,7 +94,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                           : <span className="flex h-10 w-10 items-center justify-center rounded bg-yellow-200 text-lg">🎁</span>
                         }
                         <span className="flex-1 text-sm font-medium text-gray-800">{giftName}</span>
-                        <span className="rounded-full bg-green-500 px-2 py-0.5 text-xs font-bold text-white">0 сум</span>
+                        <span className="rounded-full bg-green-500 px-2 py-0.5 text-xs font-bold text-white">{t("magicBox.zeroPrice")}</span>
                       </div>
                     );
                   })}
@@ -101,11 +121,20 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
             <span>{t("cart.total")}</span>
             <span>{total.toLocaleString()}</span>
           </div>
+          {belowMinimum && (
+            <p className="mb-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+              {t("minOrder.remaining", {
+                amount: minOrderAmount.toLocaleString(),
+                remaining: (minOrderAmount - total).toLocaleString(),
+              })}
+            </p>
+          )}
           <Link
             to="/checkout"
             onClick={onClose}
+            aria-disabled={!canCheckout}
             className={`block rounded-md px-4 py-3 text-center text-sm font-medium text-white ${
-              items.length === 0 ? "pointer-events-none bg-gray-300" : "bg-clay-600 hover:bg-clay-700"
+              canCheckout ? "bg-clay-600 hover:bg-clay-700" : "pointer-events-none bg-gray-300"
             }`}
           >
             {t("cart.checkout")}

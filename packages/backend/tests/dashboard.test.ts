@@ -4,7 +4,7 @@ import { createApp } from "../src/app";
 import { prisma } from "../src/db/prisma";
 import { registerAndLoginSeller, type TestSeller } from "./helpers/registerTenant";
 import { deleteTenantCompletely } from "./helpers/cleanupTenant";
-import { DEFAULT_ADDRESS } from "./helpers/orderFixtures";
+import { DEFAULT_ADDRESS, SECOND_PHONE } from "./helpers/orderFixtures";
 
 const describeWithDb = process.env.SKIP_DB_TESTS ? describe.skip : describe;
 
@@ -34,6 +34,7 @@ describeWithDb("dashboard summary (integration)", () => {
       .send({
         customerName: "Dashboard Buyer",
         customerPhone: "+998900004444",
+        ...SECOND_PHONE,
         ...DEFAULT_ADDRESS,
         items: [{ variantId, quantity: 1 }],
       });

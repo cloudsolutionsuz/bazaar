@@ -2,11 +2,14 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as storefrontApi from "../api/storefront";
+import { PhoneInput, isCompleteUzPhone, toFullUzPhone } from "../components/PhoneInput";
 
 export function ChatPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [phone, setPhone] = useState("");
+  // The 9 digits as typed; `phone` below is the full number the API is keyed by.
+  const [phoneDigits, setPhoneDigits] = useState("");
+  const phone = toFullUzPhone(phoneDigits);
   const [name, setName] = useState("");
   const [identified, setIdentified] = useState(false);
   const [text, setText] = useState("");
@@ -48,6 +51,7 @@ export function ChatPage() {
 
   function handleIdentify(e: FormEvent) {
     e.preventDefault();
+    if (!isCompleteUzPhone(phoneDigits)) return;
     setIdentified(true);
   }
 
@@ -78,13 +82,7 @@ export function ChatPage() {
             placeholder={t("chat.namePlaceholder")}
             className="w-full rounded-md border border-clay-200 px-3 py-2 text-sm focus:border-clay-500 focus:outline-none"
           />
-          <input
-            required
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder={t("checkout.phone")}
-            className="w-full rounded-md border border-clay-200 px-3 py-2 text-sm focus:border-clay-500 focus:outline-none"
-          />
+          <PhoneInput required value={phoneDigits} onChange={setPhoneDigits} />
           <button
             type="submit"
             className="w-full rounded-md bg-clay-600 px-4 py-2 text-sm font-medium text-white hover:bg-clay-700"

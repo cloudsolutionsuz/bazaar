@@ -10,7 +10,14 @@ import { Badge } from "../../components/ui/Badge";
 import { Table, Thead, Tbody, Th, Td } from "../../components/ui/Table";
 import { STATUS_COLORS, STATUS_LABEL_KEYS } from "./OrdersListPage";
 import { regionName, districtName } from "../../utils/addressLabels";
-import type { OrderStatus } from "../../types/api";
+import type { OrderItem, OrderStatus } from "../../types/api";
+import { shortOrderId } from "../../utils/orderId";
+
+const UNIT_LABEL_KEYS: Record<OrderItem["unit"], string> = {
+  PIECE: "units.piece",
+  BLOCK: "units.block",
+  BOX: "units.box",
+};
 
 export function OrderDetailPage() {
   const { t } = useTranslation();
@@ -44,6 +51,7 @@ export function OrderDetailPage() {
 
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-semibold text-gray-900">
+          <span className="mr-2 font-mono text-base text-gray-500">{shortOrderId(order.id)}</span>
           {order.customerName} — {order.totalAmount.toLocaleString()}
         </h1>
         <Badge color={STATUS_COLORS[order.status]}>{t(STATUS_LABEL_KEYS[order.status])}</Badge>
@@ -72,7 +80,18 @@ export function OrderDetailPage() {
                   <tr key={item.id}>
                     <Td>{item.variant.product.name}</Td>
                     <Td>{item.variant.sku}</Td>
-                    <Td>{item.quantity}</Td>
+                    <Td>
+                      {item.quantity}
+                      {item.unit !== "PIECE" && item.unitSize > 0 && (
+                        <div className="text-xs text-gray-500">
+                          {t("units.packed", {
+                            count: item.quantity / item.unitSize,
+                            unit: t(UNIT_LABEL_KEYS[item.unit]).toLowerCase(),
+                            size: item.unitSize,
+                          })}
+                        </div>
+                      )}
+                    </Td>
                     <Td>{item.unitPrice.toLocaleString()}</Td>
                     <Td>{item.totalPrice.toLocaleString()}</Td>
                   </tr>

@@ -93,20 +93,20 @@ export function VideoBannersPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Add form */}
         <div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
-          <h2 className="mb-4 text-base font-semibold text-gray-700 dark:text-gray-300">Добавить видео</h2>
+          <h2 className="mb-4 text-base font-semibold text-gray-700 dark:text-gray-300">{t("videoBanners.addVideo")}</h2>
           <div className="space-y-3">
             <div>
-              <label className="mb-1 block text-xs text-gray-500">Название</label>
+              <label className="mb-1 block text-xs text-gray-500">{t("videoBanners.name")}</label>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Обзор платформы Bazaar"
+                placeholder={t("videoBanners.namePlaceholder")}
                 className="w-full"
               />
             </div>
             <div>
               <label className="mb-1 block text-xs text-gray-500">
-                Ссылка на видео (YouTube / Vimeo / прямая)
+                {t("videoBanners.url")}
               </label>
               <Input
                 value={videoUrl}
@@ -116,7 +116,7 @@ export function VideoBannersPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-gray-500">Порядок (меньше = первее)</label>
+              <label className="mb-1 block text-xs text-gray-500">{t("videoBanners.orderHint")}</label>
               <Input
                 type="number"
                 value={position}
@@ -126,7 +126,7 @@ export function VideoBannersPage() {
             </div>
             {videoUrl && (
               <div>
-                <p className="mb-1 text-xs text-gray-500">Предпросмотр</p>
+                <p className="mb-1 text-xs text-gray-500">{t("videoBanners.preview")}</p>
                 <VideoPreview url={videoUrl} />
               </div>
             )}
@@ -135,7 +135,7 @@ export function VideoBannersPage() {
               disabled={!title || !videoUrl || createMutation.isPending}
               onClick={() => createMutation.mutate()}
             >
-              {createMutation.isPending ? "Добавление..." : "Добавить"}
+              {createMutation.isPending ? t("common.saving") : t("common.add")}
             </Button>
           </div>
         </div>
@@ -145,11 +145,11 @@ export function VideoBannersPage() {
           <Table>
             <Thead>
               <tr>
-                <Th>Предпросмотр</Th>
-                <Th>Название</Th>
-                <Th>Порядок</Th>
-                <Th>Статус</Th>
-                <Th>Действия</Th>
+                <Th>{t("videoBanners.preview")}</Th>
+                <Th>{t("videoBanners.name")}</Th>
+                <Th>{t("videoBanners.order")}</Th>
+                <Th>{t("common.status")}</Th>
+                <Th>{t("common.actions")}</Th>
               </tr>
             </Thead>
             <Tbody>
@@ -165,7 +165,7 @@ export function VideoBannersPage() {
                           value={editTitle}
                           onChange={(e) => setEditTitle(e.target.value)}
                           className="w-full"
-                          placeholder="Название"
+                          placeholder={t("videoBanners.name")}
                         />
                         <Input
                           value={editUrl}
@@ -178,7 +178,7 @@ export function VideoBannersPage() {
                           value={editPos}
                           onChange={(e) => setEditPos(Number(e.target.value))}
                           className="w-20"
-                          placeholder="Порядок"
+                          placeholder={t("videoBanners.order")}
                         />
                       </div>
                     ) : (
@@ -191,7 +191,7 @@ export function VideoBannersPage() {
                   <Td>{item.position}</Td>
                   <Td>
                     <Badge color={item.isActive ? "green" : "gray"}>
-                      {item.isActive ? "Активен" : "Скрыт"}
+                      {item.isActive ? t("common.active") : t("videoBanners.hidden")}
                     </Badge>
                   </Td>
                   <Td>
@@ -203,32 +203,32 @@ export function VideoBannersPage() {
                             onClick={() => updateMutation.mutate()}
                             disabled={updateMutation.isPending}
                           >
-                            Сохранить
+                            {t("common.save")}
                           </Button>
                           <Button variant="ghost" onClick={() => setEditId(null)}>
-                            Отмена
+                            {t("common.cancel")}
                           </Button>
                         </>
                       ) : (
                         <>
                           <Button variant="secondary" onClick={() => startEdit(item)}>
-                            Изменить
+                            {t("common.edit")}
                           </Button>
                           <Button
                             variant="secondary"
                             onClick={() => toggleMutation.mutate({ id: item.id, isActive: !item.isActive })}
                           >
-                            {item.isActive ? "Скрыть" : "Показать"}
+                            {item.isActive ? t("common.hide") : t("common.show")}
                           </Button>
                           <Button
                             variant="danger"
                             onClick={() => {
-                              if (window.confirm(`Удалить «${item.title}»?`)) {
+                              if (window.confirm(t("videoBanners.confirmDelete", { title: item.title }))) {
                                 deleteMutation.mutate(item.id);
                               }
                             }}
                           >
-                            Удалить
+                            {t("common.delete")}
                           </Button>
                         </>
                       )}
@@ -239,7 +239,7 @@ export function VideoBannersPage() {
               {items.length === 0 && (
                 <tr>
                   <Td colSpan={5} className="text-center text-gray-400">
-                    Нет видео. Добавьте первое.
+                    {t("videoBanners.empty")}
                   </Td>
                 </tr>
               )}

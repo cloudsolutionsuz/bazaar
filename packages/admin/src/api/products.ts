@@ -34,6 +34,8 @@ export interface CreateProductInput {
   descriptionUz?: string;
   price: number;
   discountPercent?: number;
+  piecesPerBlock?: number;
+  piecesPerBox?: number;
   brand?: string;
   color?: string;
   code?: string;
@@ -47,7 +49,11 @@ export function createProduct(input: CreateProductInput): Promise<{ product: Pro
   return apiRequest("/api/products", { method: "POST", body: input });
 }
 
-export type UpdateProductInput = Partial<Omit<CreateProductInput, "variants">>;
+// null clears a pack size (the product goes back to being sold by the piece only).
+export type UpdateProductInput = Partial<Omit<CreateProductInput, "variants" | "piecesPerBlock" | "piecesPerBox">> & {
+  piecesPerBlock?: number | null;
+  piecesPerBox?: number | null;
+};
 
 export function updateProduct(id: string, input: UpdateProductInput): Promise<{ product: Product }> {
   return apiRequest(`/api/products/${id}`, { method: "PATCH", body: input });

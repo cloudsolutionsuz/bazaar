@@ -101,7 +101,7 @@ function MagicBoxForm({
       <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
         <label className="mb-2 block text-sm font-semibold text-green-800 dark:text-green-300">
           🎁 {t("magicBox.giftProduct")}
-          <span className="ml-1 text-xs font-normal text-green-600">— добавляется в заказ бесплатно (0 сум)</span>
+          <span className="ml-1 text-xs font-normal text-green-600">— {t("magicBox.giftFreeNote")}</span>
         </label>
         <div className="flex gap-2">
           <select
@@ -287,7 +287,7 @@ export function MagicBoxPage() {
                         <span>🎁</span>
                         <span className="font-medium">{t("magicBox.giftProduct")}:</span>
                         <span>{box.giftVariant.product.name}{box.giftVariant.name ? ` (${box.giftVariant.name})` : ""}</span>
-                        <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700 dark:bg-green-900/40">0 сум</span>
+                        <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700 dark:bg-green-900/40">0 {t("common.sum")}</span>
                       </div>
                     )}
                     {/* Required items */}
