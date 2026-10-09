@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { AppError } from "../../middleware/errorHandler";
 import * as agentsService from "./agents.service";
 import * as reportsService from "./agents.reports.service";
+import * as excelService from "./agents.excel.service";
 import type {
   AgentPeriodQuery,
   AgentSalesQuery,
@@ -69,6 +70,30 @@ export async function createPayout(req: Request, res: Response): Promise<void> {
     req.body as CreatePayoutInput,
   );
   res.status(201).json(result);
+}
+
+const XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+export async function exportAgents(req: Request, res: Response): Promise<void> {
+  const buffer = await excelService.exportAgentsToExcel(req.authUser!.tenantId!);
+  res.setHeader("Content-Type", XLSX_MIME);
+  res.setHeader("Content-Disposition", "attachment; filename=agentlar.xlsx");
+  res.send(buffer);
+}
+
+export async function importTemplate(_req: Request, res: Response): Promise<void> {
+  const buffer = await excelService.buildAgentsImportTemplate();
+  res.setHeader("Content-Type", XLSX_MIME);
+  res.setHeader("Content-Disposition", "attachment; filename=agentlar-shablon.xlsx");
+  res.send(buffer);
+}
+
+export async function importAgents(req: Request, res: Response): Promise<void> {
+  if (!req.file) {
+    throw new AppError(400, "NO_FILE", "No file was uploaded");
+  }
+  const result = await excelService.importAgentsFromExcel(req.authUser!.tenantId!, req.file.buffer);
+  res.json(result);
 }
 
 export async function sales(req: Request, res: Response): Promise<void> {

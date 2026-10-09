@@ -67,6 +67,44 @@ export function bulkSetBonus(input: { bonusType: AgentBonusType; bonusValue: num
   return apiRequest("/api/agents/bulk-bonus", { method: "PATCH", body: input });
 }
 
+export function exportAgents(): Promise<Blob> {
+  return apiRequest("/api/agents/export", { responseType: "blob" });
+}
+
+export function downloadImportTemplate(): Promise<Blob> {
+  return apiRequest("/api/agents/import-template", { responseType: "blob" });
+}
+
+export type AgentImportField =
+  | "fullName"
+  | "phone"
+  | "telegram"
+  | "instagram"
+  | "youtube"
+  | "tiktok"
+  | "login"
+  | "password"
+  | "bonusType"
+  | "bonusValue";
+
+export interface AgentImportError {
+  // Row number as shown in Excel.
+  row: number;
+  field: AgentImportField | null;
+  code: "INVALID" | "LOGIN_TAKEN" | "DUPLICATE_LOGIN" | "FAILED";
+}
+
+export interface AgentImportResult {
+  created: number;
+  errors: AgentImportError[];
+}
+
+export function importAgents(file: File): Promise<AgentImportResult> {
+  const form = new FormData();
+  form.append("file", file);
+  return apiRequest("/api/agents/import", { method: "POST", body: form });
+}
+
 export interface UnpaidAgentOrder {
   id: string;
   customerName: string;

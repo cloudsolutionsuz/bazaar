@@ -3,6 +3,7 @@ import { asyncHandler } from "../../utils/asyncHandler";
 import { requireAuth } from "../../middleware/requireAuth";
 import { requireRole } from "../../middleware/requireRole";
 import { validateBody, validateQuery } from "../../middleware/validate";
+import { uploadSpreadsheet } from "../../middleware/upload";
 import {
   agentPeriodQuerySchema,
   agentSalesQuerySchema,
@@ -35,6 +36,9 @@ agentsRouter.get(
 agentsRouter.use(requireRole("OWNER", "MANAGER"));
 
 agentsRouter.get("/", asyncHandler(agentsController.list));
+agentsRouter.get("/export", asyncHandler(agentsController.exportAgents));
+agentsRouter.get("/import-template", asyncHandler(agentsController.importTemplate));
+agentsRouter.post("/import", uploadSpreadsheet, asyncHandler(agentsController.importAgents));
 agentsRouter.post("/", validateBody(createAgentSchema), asyncHandler(agentsController.create));
 agentsRouter.patch("/bulk-bonus", validateBody(bulkBonusSchema), asyncHandler(agentsController.bulkBonus));
 agentsRouter.patch("/:id", validateBody(updateAgentSchema), asyncHandler(agentsController.update));

@@ -8,6 +8,8 @@ import { Badge } from "../../components/ui/Badge";
 import { Table, Thead, Tbody, Th, Td } from "../../components/ui/Table";
 import { AgentFormModal } from "./AgentFormModal";
 import { BulkBonusModal } from "./BulkBonusModal";
+import { AgentsImportModal } from "./AgentsImportModal";
+import { downloadBlob } from "../../utils/downloadBlob";
 import { CopyLinkButton } from "./CopyLinkButton";
 import { formatBonus } from "./BonusFields";
 
@@ -26,6 +28,7 @@ export function AgentsPage() {
   const queryClient = useQueryClient();
   const [form, setForm] = useState<FormState>({ mode: "closed" });
   const [bulkOpen, setBulkOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
   const agentsQuery = useQuery({ queryKey: ["agents"], queryFn: agentsApi.listAgents });
@@ -49,6 +52,15 @@ export function AgentsPage() {
     },
   });
 
+  async function handleExport() {
+    setActionError(null);
+    try {
+      downloadBlob(await agentsApi.exportAgents(), "agentlar.xlsx");
+    } catch {
+      setActionError(t("common.error"));
+    }
+  }
+
   function handleDelete(agent: agentsApi.Agent) {
     setActionError(null);
     if (window.confirm(t("agents.confirmDelete", { name: agent.fullName }))) deleteMutation.mutate(agent.id);
@@ -59,6 +71,12 @@ export function AgentsPage() {
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-xl font-semibold text-gray-900">{t("agents.title")}</h1>
         <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" onClick={() => void handleExport()} disabled={agents.length === 0}>
+            {t("agents.exportExcel")}
+          </Button>
+          <Button variant="secondary" onClick={() => setImportOpen(true)}>
+            {t("agents.importExcel")}
+          </Button>
           <Button variant="secondary" onClick={() => setBulkOpen(true)} disabled={agents.length === 0}>
             {t("agents.bulkBonus")}
           </Button>
@@ -159,6 +177,7 @@ export function AgentsPage() {
           setForm({ mode: "closed" });
         }}
       />
+      <AgentsImportModal open={importOpen} onClose={() => setImportOpen(false)} onImported={invalidate} />
       <BulkBonusModal
         open={bulkOpen}
         agentCount={agents.length}

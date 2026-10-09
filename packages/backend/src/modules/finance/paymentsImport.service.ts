@@ -3,6 +3,7 @@ import type { OrderStatus, Prisma } from "@prisma/client";
 import { prisma } from "../../db/prisma";
 import { AppError } from "../../middleware/errorHandler";
 import { toUzPhone } from "../../utils/phone";
+import { cellText } from "../../utils/excelCell";
 import type { PaymentImportRowInput } from "./finance.schema";
 
 // Bulk "money in" from a spreadsheet. A row names who paid - by order ID,
@@ -337,20 +338,6 @@ export async function buildPaymentsTemplate(): Promise<Buffer> {
 
   const arrayBuffer = await workbook.xlsx.writeBuffer();
   return Buffer.from(arrayBuffer);
-}
-
-// ExcelJS hands back numbers, strings, dates, or objects (rich text,
-// formulas, hyperlinks) depending on how the cell was typed.
-function cellText(value: unknown): string {
-  if (value === null || value === undefined) return "";
-  if (typeof value === "object") {
-    const cell = value as { text?: unknown; result?: unknown; richText?: { text: string }[] };
-    if (Array.isArray(cell.richText)) return cell.richText.map((part) => part.text).join("").trim();
-    if (cell.result !== undefined) return cellText(cell.result);
-    if (cell.text !== undefined) return cellText(cell.text);
-    return "";
-  }
-  return String(value).trim();
 }
 
 // "150 000", "150,000.00" and 150000 all mean the same sum. Deliberately
