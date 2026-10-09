@@ -414,11 +414,11 @@ export async function updateOrderStatus(
       }
     }
 
-    // An agent earns their bonus when a referred order is archived after
-    // being DELIVERED. Archiving from any other status (a cancelled or
-    // refunded order, or a never-shipped junk order tidied away) is not a
-    // completed sale and earns nothing.
-    if (nextStatus === "ARCHIVED" && order.agentId && order.status === "DELIVERED") {
+    // An agent earns their bonus the moment a referred order is archived,
+    // whichever status it is archived from - staff shouldn't have to step
+    // through "delivered" first for the agent to be paid. The one exception
+    // is an order that was CANCELLED/REFUNDED: that is no sale at all.
+    if (nextStatus === "ARCHIVED" && order.agentId && !RESTOCKING_STATUSES.has(order.status)) {
       await accrueAgentBonus(tx, order);
     }
   });

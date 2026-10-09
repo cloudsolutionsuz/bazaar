@@ -205,21 +205,12 @@ describeWithDb("agents (integration)", () => {
     expect(archived.agentBonusAccruedAt).not.toBeNull();
   });
 
-  it("earns nothing for an order archived without having been delivered", async () => {
-    const cancelled = await placeStorefrontOrder("+998930000005", agentRefCode);
-    await setStatus(cancelled, "CANCELLED");
-    await setStatus(cancelled, "ARCHIVED");
-    expect((await prisma.order.findUniqueOrThrow({ where: { id: cancelled } })).agentBonus).toBeNull();
-
-    // Archived straight from NEW (tidying away a junk order): no sale, no bonus.
-    const neverShipped = await placeStorefrontOrder("+998930000008", agentRefCode);
-    await setStatus(neverShipped, "ARCHIVED");
-    expect((await prisma.order.findUniqueOrThrow({ where: { id: neverShipped } })).agentBonus).toBeNull();
-
-    const shippedOnly = await placeStorefrontOrder("+998930000009", agentRefCode);
-    await setStatus(shippedOnly, "SHIPPED");
-    await setStatus(shippedOnly, "ARCHIVED");
-    expect((await prisma.order.findUniqueOrThrow({ where: { id: shippedOnly } })).agentBonus).toBeNull();
+  it("earns nothing for an order that was cancelled before being archived", async () => {
+    const orderId = await placeStorefrontOrder("+998930000005", agentRefCode);
+    await setStatus(orderId, "CANCELLED");
+    await setStatus(orderId, "ARCHIVED");
+    const order = await prisma.order.findUniqueOrThrow({ where: { id: orderId } });
+    expect(order.agentBonus).toBeNull();
   });
 
   it("applies a bulk bonus change to every agent, keeping bonuses already earned", async () => {
@@ -240,9 +231,8 @@ describeWithDb("agents (integration)", () => {
     expect(single.body.updated).toBe(1);
 
     const secondAgent = await prisma.agent.findUniqueOrThrow({ where: { id: secondAgentId } });
+    // Archived straight from NEW: the bonus is earned on archiving, whatever the status before it.
     const orderId = await placeStorefrontOrder("+998930000006", secondAgent.refCode, 3);
-    await setStatus(orderId, "SHIPPED");
-    await setStatus(orderId, "DELIVERED");
     await setStatus(orderId, "ARCHIVED");
     const order = await prisma.order.findUniqueOrThrow({ where: { id: orderId } });
     expect(order.agentBonus).toBe(7000);
@@ -253,8 +243,8 @@ describeWithDb("agents (integration)", () => {
     expect(own.status).toBe(200);
     expect(own.body.items.length).toBeGreaterThan(0);
     expect(own.body.items.every((o: { agentId: string }) => o.agentId === agentId)).toBe(true);
-    expect(own.body.summary.totalCount).toBe(5);
-    expect(own.body.summary.archivedCount).toBe(4);
+    expect(own.body.summary.totalCount).toBe(3);
+    expect(own.body.summary.archivedCount).toBe(2);
     expect(own.body.summary.bonusAccrued).toBe(10_000);
     expect(own.body.summary.unpaidCount).toBe(1);
     expect(own.body.summary.unpaidAmount).toBe(10_000);
@@ -280,7 +270,7 @@ describeWithDb("agents (integration)", () => {
     expect(noneYet.body.summary.totalCount).toBe(0);
 
     const staffView = await request(app).get("/api/agents/sales").set(auth());
-    expect(staffView.body.summary.totalCount).toBe(6);
+    expect(staffView.body.summary.totalCount).toBe(4);
     const staffFiltered = await request(app).get("/api/agents/sales").set(auth()).query({ agentId: secondAgentId });
     expect(staffFiltered.body.summary.totalCount).toBe(1);
   });
