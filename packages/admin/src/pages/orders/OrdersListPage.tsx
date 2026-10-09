@@ -221,7 +221,7 @@ export function OrdersListPage({ fixedStatus }: Props) {
         <p className={`mb-3 text-sm ${bulkResult.isError ? "text-red-600" : "text-green-600"}`}>{bulkResult.message}</p>
       )}
 
-      <Table>
+      <Table storageKey="orders">
         <Thead>
           <tr>
             <Th>
